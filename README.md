@@ -1,6 +1,3 @@
- Here’s the updated `README.md` with the added functionality for users to explore the menu and buy food online:
-
----
 
 # Laravel Restaurant Website
 
