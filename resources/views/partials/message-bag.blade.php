@@ -4,7 +4,7 @@
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
-    <i class="far fa-check-circle"></i> {{ session('success') }}
+    <i class="fa fa-check-circle"></i> {{ session('success') }}
 </div>
 @endif
 
@@ -14,7 +14,7 @@
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
-    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+    <i class="fa fa-exclamation-circle"></i> {{ session('error') }}
 </div>
 @endif
 

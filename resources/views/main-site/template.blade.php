@@ -1,5 +1,5 @@
 
-@extends('layouts.app')
+@extends('layouts.main-site')
 
 @push('styles')
  

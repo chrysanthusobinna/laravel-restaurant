@@ -80,7 +80,7 @@
 <div class="main-panel">
     <div class="content-wrapper">
  
-      @include('partials.messag-bag')
+      @include('partials.message-bag')
 
     
       

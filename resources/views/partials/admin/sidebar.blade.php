@@ -66,8 +66,13 @@
                             <a class="nav-link " href="{{ route('admin.categories.index') }}">Category</a>
                         </li>
                         <li class="nav-item">
+                          <a class="nav-link " href="{{ route('admin.users.index') }}">Manage Users</a>
+                       </li>                          
+                        <li class="nav-item">
                             <a class="nav-link " href="{{ route('admin.general-settings') }}">General Settings</a>
                         </li>
+
+                                           
                     </ul>
                 </div>
             </li>
@@ -89,7 +94,7 @@
               </li>     
 
               <li class="nav-item">
-                <a class="nav-link" href="pages/documentation/documentation.html">
+                <a class="nav-link" href="{{ route('admin.logout') }}">
                   <i class="typcn typcn-power-outline menu-icon"></i>
                   <span class="menu-title">Logout</span>
                 </a>
