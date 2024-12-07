@@ -92,7 +92,4 @@ Visit the application at `http://127.0.0.1:8000`.
 ---
 
 Feel free to fork this repository or contribute to its development by submitting a pull request! 
-
----
-
-Let me know if you’d like any more details added or changes made.
+ 
