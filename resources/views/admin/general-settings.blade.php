@@ -507,7 +507,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="phone_number" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Example: +44 123 456 7654" required>
                         </div>
 
  

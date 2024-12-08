@@ -18,7 +18,7 @@ class MainSiteController extends Controller
 
         $firstRestaurantAddress = RestaurantAddress::first();
         $firstRestaurantPhoneNumber = RestaurantPhoneNumber::first();
-        $socialMediaHandles = SocialMediaHandle::all();
+        $socialMediaHandles = SocialMediaHandle::orderBy('id', 'desc')->get();
         
         $whatsAppNumber = RestaurantPhoneNumber::where('use_whatsapp', 1)->first();
         

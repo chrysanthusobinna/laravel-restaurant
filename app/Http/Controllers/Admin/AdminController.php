@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Password;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\ChangePasswordRequest;
 
 class AdminController extends Controller
 {
@@ -88,13 +90,8 @@ class AdminController extends Controller
     }
     
 
-    public function processApdatePassword(Request $request)
+    public function processApdatePassword(ChangePasswordRequest $request)
     {
-        $request->validate([
-            'old_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed', 
-        ]);
-
         // Retrieve the user's email from the session
         $email = session('user_email');
         $user = User::where('email', $email)->first();
@@ -119,7 +116,6 @@ class AdminController extends Controller
         session()->forget(['user_email', 'user_name']);
 
 
-        // Redirect the user to the admin dashboard with a success message
         return redirect()->route('admin.index')->with('success', 'Your new password has been updated. You have been logged in successfully.');
     }
 
@@ -189,22 +185,15 @@ class AdminController extends Controller
         return view('admin.edit-my-profile', compact('user'));
     }
 
-    public function updateMyProfile(Request $request)
+    public function updateMyProfile(UpdateProfileRequest $request)
     {
         $user = Auth::user();
+        $validated = $request->validated();
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'phone_number' => 'nullable|string|max:15',
-            'address' => 'nullable|string|max:255',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validate image file
-        ]);
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone_number = $request->phone_number;
-        $user->address = $request->address;
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone_number = $validated['phone_number'];
+        $user->address = $validated['address'];
 
         if ($request->hasFile('profile_photo')) {
             // Delete old profile photo if exists
@@ -213,14 +202,13 @@ class AdminController extends Controller
             }
 
             // Store new profile photo
-            $photoPath = $request->file('profile_photo')->store('profile-picture','public');
-
+            $photoPath = $request->file('profile_photo')->store('profile-picture', 'public');
             $user->profile_picture = basename($photoPath);
         }
 
         $user->save();
 
-        return redirect()->route('admin.view.myprofile')->with('success', 'Profile updated successfully.');
+        return back()->with('success', 'Profile updated successfully.');
     }
 
     public function showChangePasswordForm()

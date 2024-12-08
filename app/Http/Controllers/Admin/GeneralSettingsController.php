@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Models\LiveChatScript;
 use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddressRequest;
 use App\Models\RestaurantPhoneNumber;
 use App\Models\RestaurantWorkingHour;
+use App\Http\Requests\PhoneNumberRequest;
+use App\Http\Requests\WorkingHourRequest;
 use App\Http\Requests\LiveChatScriptRequest;
+use App\Http\Requests\SocialMediaHandleRequest;
 
 class GeneralSettingsController extends Controller
 {
@@ -28,13 +31,9 @@ class GeneralSettingsController extends Controller
     }
 
     // Restaurant Phone Number CRUD
-    public function storePhoneNumber(Request $request)
+    public function storePhoneNumber(PhoneNumberRequest $request)
     {
-        $request->validate([
-            'phone_number' => 'required|string',
-            'use_whatsapp' => 'nullable|integer|in:0,1',
-        ]);
-    
+
         // If 'use_whatsapp' is checked, set all others to 0 first
         if ($request->has('use_whatsapp') && $request->use_whatsapp == 1) {
             RestaurantPhoneNumber::where('use_whatsapp', 1)->update(['use_whatsapp' => 0]);
@@ -46,18 +45,14 @@ class GeneralSettingsController extends Controller
             'use_whatsapp' => $request->has('use_whatsapp') ? 1 : 0,
         ]);
     
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Phone number added successfully.');
     }
     
     
     
 
-    public function updatePhoneNumber(Request $request, $id)
+    public function updatePhoneNumber(PhoneNumberRequest $request, $id)
     {
-        $request->validate([
-            'phone_number' => 'required|string',
-            'use_whatsapp' => 'nullable|integer|in:0,1',
-        ]);
     
         $phoneNumber = RestaurantPhoneNumber::findOrFail($id);
     
@@ -72,7 +67,7 @@ class GeneralSettingsController extends Controller
             'use_whatsapp' => $request->has('use_whatsapp') ? 1 : 0,
         ]);
     
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Phone number updated successfully.');
     }
     
     
@@ -80,89 +75,79 @@ class GeneralSettingsController extends Controller
     public function deletePhoneNumber($id)
     {
         RestaurantPhoneNumber::findOrFail($id)->delete();
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Phone number deleted successfully.');
     }
+    
 
     // Restaurant Address CRUD
-    public function storeAddress(Request $request)
+    public function storeAddress(AddressRequest $request)
     {
-        $request->validate(['address' => 'required|string']);
         RestaurantAddress::create(['address' => $request->address]);
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Address added successfully.');
     }
 
-    public function updateAddress(Request $request, $id)
+    public function updateAddress(AddressRequest $request, $id)
     {
-        $request->validate(['address' => 'required|string']);
         $address = RestaurantAddress::findOrFail($id);
         $address->update(['address' => $request->address]);
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Address updated successfully.');
     }
-
     public function deleteAddress($id)
     {
         RestaurantAddress::findOrFail($id)->delete();
-        return redirect()->route('admin.general-settings');
-    }
+        return back()->with('success', 'Address deleted successfully.');
+    }    
 
 
     // social media handles CRUD
-    public function storeSocialMediaHandle(Request $request)
+    public function storeSocialMediaHandle(SocialMediaHandleRequest $request)
     {
-        $request->validate([
-            'handle' => 'required|string',
-            'social_media' => 'required|in:facebook,instagram,youtube,tiktok',
-        ]);
-
         SocialMediaHandle::create($request->all());
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Social media handle added successfully.');
     }
-
-    public function updateSocialMediaHandle(Request $request, $id)
+    
+    public function updateSocialMediaHandle(SocialMediaHandleRequest $request, $id)
     {
-        $request->validate([
-            'handle' => 'required|string',
-            'social_media' => 'required|in:facebook,instagram,youtube,tiktok',
-        ]);
-
         $socialMediaHandle = SocialMediaHandle::findOrFail($id);
         $socialMediaHandle->update($request->all());
-
-        return redirect()->route('admin.general-settings');
+    
+        return back()->with('success', 'Social media handle updated successfully.');
     }
+    
 
     public function deleteSocialMediaHandle($id)
     {
         $socialMediaHandle = SocialMediaHandle::findOrFail($id);
         $socialMediaHandle->delete();
-
-        return redirect()->route('admin.general-settings');
+    
+        return back()->with('success', 'Social media handle deleted successfully.');
     }
+    
  
 
 
 
     // Restaurant Working Hour CRUD
-    public function storeWorkingHour(Request $request)
+    public function storeWorkingHour(WorkingHourRequest $request)
     {
-        $request->validate(['working_hours' => 'required|string']);
         RestaurantWorkingHour::create(['working_hours' => $request->working_hours]);
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Working hour added successfully.');
     }
+    
 
-    public function updateWorkingHour(Request $request, $id)
+    public function updateWorkingHour(WorkingHourRequest $request, $id)
     {
-        $request->validate(['working_hours' => 'required|string']);
         $workingHour = RestaurantWorkingHour::findOrFail($id);
         $workingHour->update(['working_hours' => $request->working_hours]);
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Working hour updated successfully.');
     }
-
+    
     public function deleteWorkingHour($id)
     {
         RestaurantWorkingHour::findOrFail($id)->delete();
-        return redirect()->route('admin.general-settings');
+        return back()->with('success', 'Working hour deleted successfully.');
     }
+    
 
 
 

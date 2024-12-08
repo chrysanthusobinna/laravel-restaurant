@@ -13,9 +13,19 @@
                     </div>
                     <div class="widget">
                         <ul class="social_icons social_white social_style1 rounded_social">
-                            <li><a href="#"><i class="ion-social-facebook"></i></a></li>
-                            <li><a href="#"><i class="ion-social-googleplus"></i></a></li>
-                            <li><a href="#"><i class="ion-social-instagram-outline"></i></a></li>
+                                @foreach($socialMediaHandles as $handle)
+                                <li>
+                                    @if($handle->social_media === 'facebook')
+                                        <a href="{{ "https://www.facebook.com/" . $handle->handle }}" target="_blank"><i class="fa fa-facebook-square"></i></a>
+                                    @elseif($handle->social_media === 'instagram')
+                                        <a href="{{ "https://www.instagram.com/" . $handle->handle }}" target="_blank"><i class="fa fa-instagram"></i></a>
+                                    @elseif($handle->social_media === 'youtube')
+                                        <a href="{{ "https://www.youtube.com/" .$handle->handle }}" target="_blank"><i class="fa fa-youtube"></i></a>
+                                    @elseif($handle->social_media === 'tiktok')
+                                        <a href="{{ "https://www.tiktok.com/@" . $handle->handle }}" target="_blank"><i class="fa fa-globe"></i></a>
+                                    @endif
+                                </li>
+                                @endforeach                      
                         </ul>
                     </div>
         		</div>
@@ -23,10 +33,10 @@
                 	<div class="widget">
                         <h6 class="widget_title">Links</h6>
                         <ul class="widget_links">
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#">Our Menu</a></li>
-                            <li><a href="#">About us</a> </li>
-                            <li><a href="#">Contact us</a></li>
+                            <li><a href="{{ route('home') }}">Home</a></li>
+                            <li><a href="{{ route('menu') }}">Our Menu</a></li>
+                            <li><a href="{{ route('about') }}">About us</a> </li>
+                            <li><a href="{{ route('contact') }}">Contact us</a></li>
                             
                             @if($whatsAppNumber)
                             <li> <a href="https://wa.me/{{ $whatsAppNumber->phone_number }}" target="_blank" ><i class="fa fa-whatsapp"></i> Chat us on Whatsapp</a></li>

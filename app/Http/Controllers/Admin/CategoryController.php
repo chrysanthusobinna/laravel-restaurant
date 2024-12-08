@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryRequest;
 
 class CategoryController extends Controller
 {
@@ -15,26 +15,20 @@ class CategoryController extends Controller
         return view('admin.categories', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
         Category::create(['name' => $request->name]);
         return redirect()->back()->with('success', 'Category created successfully.');
     }
+    
 
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
         $category = Category::findOrFail($id);
         $category->update(['name' => $request->name]);
         return redirect()->back()->with('success', 'Category updated successfully.');
     }
+    
 
     public function destroy($id)
     {

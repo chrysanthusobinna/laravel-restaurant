@@ -1,10 +1,9 @@
 <?php 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\BlogRequest;
+use App\Http\Controllers\Controller;
 
 class BlogController extends Controller
 {
@@ -16,63 +15,41 @@ class BlogController extends Controller
     }
 
     // Store a new blog
-    public function store(Request $request)
+    public function store(BlogRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'content' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->route('admin.blog.create')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
+        $validated = $request->validated();
+    
+        // Handle image upload
         $imageName = time() . '.' . $request->image->extension();
-        $request->image->move(public_path('images'), $imageName);
-
-        Blog::create([
-            'name' => $request->name,
-            'content' => $request->content,
-            'image' => 'images/' . $imageName,
-        ]);
-
-        return redirect()->route('admin.blog.index')->with('success', 'Blog post created successfully.');
+        $request->image->move(public_path('blog-images'), $imageName);
+        $validated['image'] = 'blog-images/' . $imageName;
+    
+        Blog::create($validated);
+    
+        return back()->with('success', 'Blog post created successfully.');
     }
+    
 
     // Update an existing blog
-    public function update(Request $request, $id)
+    public function update(BlogRequest $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'content' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->route('admin.blog.edit', $id)
-                ->withErrors($validator)
-                ->withInput();
-        }
-
         $blog = Blog::findOrFail($id);
-        $imageName = $blog->image;
-
+        $validated = $request->validated();
+    
         if ($request->hasFile('image')) {
+            // Handle image upload
             $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
+            $request->image->move(public_path('blog-images'), $imageName);
+            $validated['image'] = 'blog-images/' . $imageName;
+        } else {
+            $validated['image'] = $blog->image;
         }
-
-        $blog->update([
-            'name' => $request->name,
-            'content' => $request->content,
-            'image' => 'images/' . $imageName,
-        ]);
-
-        return redirect()->route('admin.blog.index')->with('success', 'Blog post updated successfully.');
+    
+        $blog->update($validated);
+    
+        return back()->with('success', 'Blog post updated successfully.');
     }
+    
 
     // Delete a blog
     public function destroy($id)

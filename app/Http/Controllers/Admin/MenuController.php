@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Category;
 use App\Models\Menu;
-use Illuminate\Http\Request;
+use App\Models\Category;
+use App\Http\Requests\MenuRequest;
+use App\Http\Controllers\Controller;
 
 class MenuController extends Controller
 {
@@ -15,46 +15,35 @@ class MenuController extends Controller
         return view('admin.menus', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(MenuRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required',
-            'price' => 'required|numeric|min:0',
-            'image' => 'required|image|max:2048',
-            'category_id' => 'required|exists:categories,id',
-        ]);
-
+        $validated = $request->validated();
+    
         // Handle image upload
         $path = $request->file('image')->store('menus', 'public');
         $validated['image'] = $path;
-
+    
         Menu::create($validated);
-
-        return redirect()->route('admin.menus.index')->with('success', 'Menu created successfully!');
+    
+        return back()->with('success', 'Menu created successfully!');
     }
+    
 
-    public function update(Request $request, $id)
+    public function update(MenuRequest $request, $id)
     {
         $menu = Menu::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|max:2048',
-            'category_id' => 'required|exists:categories,id',
-        ]);
-
+        $validated = $request->validated();
+    
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('menus', 'public');
             $validated['image'] = $path;
         }
-
+    
         $menu->update($validated);
-
-        return redirect()->route('admin.menus.index')->with('success', 'Menu updated successfully!');
+    
+        return back()->with('success', 'Menu updated successfully!');
     }
+    
 
     public function destroy($id)
     {
