@@ -3,12 +3,12 @@
               <li class="nav-item">
                 <div class="d-flex sidebar-profile">
                   <div class="sidebar-profile-image">
-                    <img src="/admin_resources/images/faces/face29.png" alt="image">
+                    <img src=" {{ $loggedInUser && $loggedInUser->profile_picture ? asset('storage/profile-picture/' . $loggedInUser->profile_picture) : asset('assets/images/user-icon.png') }}" alt="image">
                     <span class="sidebar-status-indicator"></span>
                   </div>
                   <div class="sidebar-profile-name">
                     <p class="sidebar-name">
-                      Kenneth Osborne
+                      {{ $loggedInUser->first_name }}
                     </p>
                     <p class="sidebar-designation">
                       Welcome

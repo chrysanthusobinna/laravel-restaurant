@@ -26,6 +26,7 @@ class RecreateUsersTable extends Migration
             $table->string('password');
             $table->enum('role', ['admin', 'global_admin'])->default('admin');
             $table->tinyInteger('status')->default(0);
+            $table->text('notice')->nullable();
             $table->string('phone_number')->nullable();
             $table->text('address')->nullable();
             $table->string('profile_picture')->nullable();

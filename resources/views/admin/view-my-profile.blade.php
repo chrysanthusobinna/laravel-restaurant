@@ -86,8 +86,16 @@
             <table class="table table-bordered">
                 <tbody>
                     <tr>
-                        <td><b>Name:</b></td>
+                        <td><b>First Name:</b></td>
                         <td>{{ $user->first_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Middle Name:</b></td>
+                        <td>{{ $user->middle_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Last Name:</b></td>
+                        <td>{{ $user->last_name }}</td>
                     </tr>
                     <tr>
                         <td><b>Email:</b></td>
@@ -107,6 +115,7 @@
                     </tr>
                 </tbody>
             </table>
+            
         </div>
         <div class="card-footer">
             <button type="button" onclick="window.location='{{ route('admin.myprofile.edit') }}'" class="btn btn-info">Edit My Profile</button>

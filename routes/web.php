@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 //use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use App\Http\Middleware\RedirectIfNotAdmin;
 use App\Http\Controllers\MainSiteController;
 use App\Http\Controllers\Admin\BlogController;
@@ -30,20 +31,20 @@ Route::get('blog-details/', [MainSiteController::class, 'blogDetails'])->name('b
 //Resetting Password
 Route::middleware(['guest'])->group(function () {
 
-    // Admin auth routes
-    Route::get('admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('admin/process-login/', [AdminController::class, 'login'])->name('admin.login.process');
-    Route::get('admin/login/password-forgot', [AdminController::class, 'passwordForgotForm'])->name('admin.password.forgot');
+    // Admin login routes
+    Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('admin/process-login/', [AuthController::class, 'login'])->name('admin.login.process');
 
     //admin activate route
-    Route::get('admin/activate-link-request', [AdminController::class, 'requestActivationLink'])->name('admin.activate.link.request');
-    Route::get('admin/activate-account/{token}', [AdminController::class, 'activateAccount'])->name('admin.activate.account');
-    Route::post('admin/process-activate-account/', [AdminController::class, 'processApdatePassword'])->name('admin.process.activate.account');
+    Route::get('admin/activate-link-request', [AuthController::class, 'requestActivationLink'])->name('admin.activate.link.request');
+    Route::get('admin/activate-account/{token}', [AuthController::class, 'activateAccount'])->name('admin.activate.account');
+    Route::post('admin/process-activate-account/', [AuthController::class, 'processApdatePassword'])->name('admin.process.activate.account');
 
-    Route::get('admin/password/request', [AdminController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('admin/password/email', [AdminController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('admin/password/reset/{token}', [AdminController::class, 'showResetForm'])->name('password.reset');
-    Route::post('admin/password/reset', [AdminController::class, 'resetPassword'])->name('password.update');
+    //password reset routes
+    Route::get('admin/password/request', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('admin/password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('admin/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('admin/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 

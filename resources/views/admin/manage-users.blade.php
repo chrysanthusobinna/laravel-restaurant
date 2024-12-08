@@ -28,13 +28,21 @@
 
 
 <script>
-function editUser(user) {
-    $('#editUserForm').attr('action', `/admin/users/${user.id}`);
-    $('#editName').val(user.name);
-    $('#editEmail').val(user.email);
-    $('#editRole').val(user.role);
-    $('#banCheckbox').prop('checked', user.status === 0);
-}
+
+    function editUser(button) {
+        let user = $(button).data(); // Extract all data-* attributes into an object
+
+        let actionUrl = "{{ route('admin.users.update', ':id') }}".replace(':id', user.id);
+        $('#editUserForm').attr('action', actionUrl);
+
+        $('#editFirstName').val(user.firstName);  
+        $('#editMiddleName').val(user.middleName || '');  
+        $('#editLastName').val(user.lastName);
+        $('#editEmail').val(user.email);
+        $('#editRole').val(user.role);
+        $('#banCheckbox').prop('checked', user.status === 0); // Set checkbox for banning user
+    }
+
 
     // Attach event listener to the modal
     $('#viewUserModal').on('show.bs.modal', function (event) {
@@ -42,7 +50,7 @@ function editUser(user) {
         var button = $(event.relatedTarget);
 
         // Extract data from the button's data-* attributes
-        var name = button.data('name');
+        var full_name = button.data('full_name');
         var email = button.data('email');
         var role = button.data('role');
         var status = button.data('status');
@@ -53,7 +61,7 @@ function editUser(user) {
         // Update the modal content
         var modal = $(this);
         modal.find('#viewProfilePicture').attr('src', profilePicture || "{{ asset('assets/images/user-icon.png') }}");
-        modal.find('#viewName').text(name);
+        modal.find('#viewName').text(full_name);
         modal.find('#viewEmail').text(email);
         modal.find('#viewRole').text(role);
         modal.find('#viewStatus').html(status === 1 
@@ -131,14 +139,15 @@ function editUser(user) {
                     <tbody>
                         @foreach($users as $user)
                             <tr>
-                                <td><i class='fa fa-user'></i>&nbsp;{{ $user->first_name }}</td>
+                                <td><i class='fa fa-user'></i>&nbsp; {{ $user->first_name }}  {{ $user->middle_name ? $user->middle_name . ' ' : '' }}  {{ $user->last_name }}</td>
+                                
                                 <td>{{ $user->email }}</td>
                                 <td>{{ ucwords(str_replace('_', ' ', $user->role)) }}</td>
                                 <td>
                                     @if($user->status === 1)
                                         <span class="badge bg-success"><i class="fa fa-check"></i></span>
                                     @else
-                                        <span class="badge bg-danger"><i class="fa fa-warning"></i></span>
+                                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle"></i></span>
                                     @endif
                                 </td>
                                 <td>
@@ -146,7 +155,7 @@ function editUser(user) {
                                     class="btn btn-primary btn-sm" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#viewUserModal" 
-                                    data-name="{{ $user->first_name }}"
+                                    data-full_name="{{ $user->first_name }}  {{ $user->middle_name ? $user->middle_name . ' ' : '' }}  {{ $user->last_name }}"
                                     data-email="{{ $user->email }}"
                                     data-role="{{ ucwords(str_replace('_', ' ', $user->role)) }}"
                                     data-status="{{ $user->status }}"
@@ -155,8 +164,21 @@ function editUser(user) {
                                     data-profile-picture="{{ $user->profile_picture ? asset('storage/profile-picture/' . $user->profile_picture) : asset('assets/images/user-icon.png') }}"
                                     > <i class="fa fa-eye"></i>  </button>
 
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="editUser({{ $user }})"><i class='fa fa-edit'></i></button>
-                           
+                                    <button 
+                                    class="btn btn-warning btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editUserModal"
+                                    data-id="{{ $user->id }}"
+                                    data-first-name="{{ $user->first_name }}"
+                                    data-middle-name="{{ $user->middle_name }}"
+                                    data-last-name="{{ $user->last_name }}"
+                                    data-email="{{ $user->email }}"
+                                    data-role="{{ $user->role }}"
+                                    data-status="{{ $user->status }}"
+                                    onclick="editUser(this)">
+                                    <i class='fa fa-edit'></i>
+                                    </button>
+                                                           
                                 </td>
                             </tr>
                         @endforeach
@@ -220,6 +242,8 @@ function editUser(user) {
 </div>
 
 
+
+
 <!-- Edit User Modal -->
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog">
@@ -228,13 +252,21 @@ function editUser(user) {
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Admin</h5>
+                    <h5 class="modal-title">Edit User</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Name</label>
-                        <input type="text" name="name" id="editName" class="form-control" required>
+                        <label>First Name</label>
+                        <input type="text" name="first_name" id="editFirstName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Middle Name</label>
+                        <input type="text" name="middle_name" id="editMiddleName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" id="editLastName" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label>Email</label>
@@ -248,15 +280,12 @@ function editUser(user) {
                         </select>
                     </div>
                     <div class="form-check form-check-flat form-check-primary">
-
-                        <label class="form-check-label" for="use_whatsapp">
-                        <input type="checkbox" class="form-check-input" id="banCheckbox" name="ban"  >  Ban User <i class="input-helper"></i>
-                        <i class="input-helper"></i></label>
-                    
+                        <label class="form-check-label" for="banCheckbox">
+                            <input type="checkbox" class="form-check-input" id="banCheckbox" name="ban"> Ban User
+                            <i class="input-helper"></i>
+                        </label>
                     </div>
-       
                 </div>
-                
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>

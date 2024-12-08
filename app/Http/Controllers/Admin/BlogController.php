@@ -4,9 +4,18 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Blog;
 use App\Http\Requests\BlogRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class BlogController extends Controller
 {
+
+    public function __construct()
+    {
+        // Share the logged-in user with all views
+        view()->share('loggedInUser', Auth::User());
+        
+    }
+    
     // Show list of blogs
     public function index()
     {
