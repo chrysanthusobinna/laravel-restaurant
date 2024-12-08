@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class AdminController extends Controller
 {
@@ -120,6 +121,58 @@ class AdminController extends Controller
         // Redirect the user to the admin dashboard with a success message
         return redirect()->route('admin.index')->with('success', 'Your new password has been updated. You have been logged in successfully.');
     }
+
+    public function showLinkRequestForm()
+    {
+        return view('admin.request-password');
+    }
+
+    // Handle sending the password reset email
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    // Show the Reset Password form
+    public function showResetForm(Request $request)
+    {
+        $token = $request->token;
+        $email = $request->email;
+        return view('admin.password-reset', compact('token', 'email'));
+    }
+
+    
+    // Handle the password reset
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->save();
+
+                Auth::login($user); // Automatically log in after reset
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('admin.index')->with('success', 'Your password has been reset successfully.')
+            : back()->withErrors(['email' => [__($status)]]);
+    }
+ 
 
 
      // Handle logout

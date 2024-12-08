@@ -32,7 +32,7 @@
         </div>
 
         <div class="mb-2">
-            <a class="btn btn-block btn-warning auth-form-btn" href="{{ route('admin.password.forgot') }}">Forgot password?</a>
+            <a class="btn btn-block btn-warning auth-form-btn" href="{{ route('password.request') }}">Forgot password?</a>
         </div>
 
         <div class="mb-2">

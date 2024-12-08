@@ -127,11 +127,7 @@ function viewUser(user) {
                                 <td>
                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#viewUserModal" onclick="viewUser({{ $user }})"><i class="fa fa-eye"></i></button>
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="editUser({{ $user }})"><i class='fa fa-edit'></i></button>
-                                    <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display:inline-block;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm"><i class='fa fa-trash'></i></button>
-                                    </form>
+                           
                                 </td>
                             </tr>
                         @endforeach

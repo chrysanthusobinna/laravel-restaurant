@@ -20,7 +20,7 @@
             <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">SIGN IN</button>
         </div>
         <div class="mb-2">
-            <a class="btn btn-block btn-warning auth-form-btn" href="{{ route('admin.password.forgot') }}">Forgot password?</a>
+            <a class="btn btn-block btn-warning auth-form-btn" href="{{ route('password.request') }}">Forgot password?</a>
         </div>
         <div class="mb-2">
             <a class="btn btn-block btn-secondary auth-form-btn" href="{{ route('home') }}">Go to Main Website</a>
