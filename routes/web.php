@@ -50,6 +50,13 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('logout', [AdminController::class, 'logout'])->name('admin.logout');
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
 
+
+    Route::get('profile', [AdminController::class, 'viewMyProfile'])->name('admin.view.myprofile');
+    Route::get('profile/edit', [AdminController::class, 'editMyProfile'])->name('admin.myprofile.edit');
+    Route::put('profile/update', [AdminController::class, 'updateMyProfile'])->name('admin.myprofile.update');
+
+
+    //change password
     Route::get('change-password', [AdminController::class, 'showChangePasswordForm'])->name('change-password.form');
     Route::post('change-password', [AdminController::class, 'changePassword'])->name('change-password.update');
 

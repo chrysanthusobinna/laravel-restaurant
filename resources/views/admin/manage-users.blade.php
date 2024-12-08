@@ -36,15 +36,32 @@ function editUser(user) {
     $('#banCheckbox').prop('checked', user.status === 0);
 }
 
-function viewUser(user) {
-    $('#viewName').text(user.name);
-    $('#viewEmail').text(user.email);
-    $('#viewRole').text(user.role.replace('_', ' ').toUpperCase());
-    $('#viewStatus').html(user.status === 1 
-        ? '<span class="badge bg-success"><i class="fa fa-check"></i> Active</span>' 
-        : '<span class="badge bg-danger"><i class="fa fa-exclamation"></i> Banned</span>');
-    $('#viewNotice').text(user.notice || 'N/A');
-}
+    // Attach event listener to the modal
+    $('#viewUserModal').on('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = $(event.relatedTarget);
+
+        // Extract data from the button's data-* attributes
+        var name = button.data('name');
+        var email = button.data('email');
+        var role = button.data('role');
+        var status = button.data('status');
+        var phoneNumber = button.data('phone-number');
+        var address = button.data('address');
+        var profilePicture = button.data('profile-picture');
+
+        // Update the modal content
+        var modal = $(this);
+        modal.find('#viewProfilePicture').attr('src', profilePicture || "{{ asset('assets/images/user-icon.png') }}");
+        modal.find('#viewName').text(name);
+        modal.find('#viewEmail').text(email);
+        modal.find('#viewRole').text(role);
+        modal.find('#viewStatus').html(status === 1 
+            ? '<span class="badge bg-success"><i class="fa fa-check"></i> Active</span>' 
+            : '<span class="badge bg-danger"><i class="fa fa-exclamation"></i> Banned</span>');
+        modal.find('#viewPhoneNumber').text(phoneNumber || 'N/A');
+        modal.find('#viewAddress').text(address || 'N/A');
+    });
 
 </script>
  
@@ -125,7 +142,19 @@ function viewUser(user) {
                                     @endif
                                 </td>
                                 <td>
-                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#viewUserModal" onclick="viewUser({{ $user }})"><i class="fa fa-eye"></i></button>
+                                    <button 
+                                    class="btn btn-primary btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#viewUserModal" 
+                                    data-name="{{ $user->name }}"
+                                    data-email="{{ $user->email }}"
+                                    data-role="{{ ucwords(str_replace('_', ' ', $user->role)) }}"
+                                    data-status="{{ $user->status }}"
+                                    data-phone-number="{{ $user->phone_number }}"
+                                    data-address="{{ $user->address }}"
+                                    data-profile-picture="{{ $user->profile_picture ? asset('storage/profile-picture/' . $user->profile_picture) : asset('assets/images/user-icon.png') }}"
+                                    > <i class="fa fa-eye"></i>  </button>
+
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="editUser({{ $user }})"><i class='fa fa-edit'></i></button>
                            
                                 </td>
@@ -249,6 +278,13 @@ function viewUser(user) {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div class="text-center mb-3">
+                    <!-- Profile Image -->
+                    <img id="viewProfilePicture" src="{{ asset('assets/images/user-icon.png') }}" 
+                         alt="Profile Image" 
+                         class="img-thumbnail" 
+                         style="width: 100px; height: 100px;">
+                </div>
                 <table class="table table-bordered">
                     <tr>
                         <th>Name</th>
@@ -267,9 +303,14 @@ function viewUser(user) {
                         <td id="viewStatus"></td>
                     </tr>
                     <tr>
-                        <th>Notice</th>
-                        <td id="viewNotice"></td>
+                        <th>Phone Number</th>
+                        <td id="viewPhoneNumber"></td>
                     </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td id="viewAddress"></td>
+                    </tr>
+
                 </table>
             </div>
             <div class="modal-footer">
@@ -278,6 +319,7 @@ function viewUser(user) {
         </div>
     </div>
 </div>
+
 
 
 

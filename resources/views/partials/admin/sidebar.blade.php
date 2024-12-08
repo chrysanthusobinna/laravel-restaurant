@@ -80,18 +80,26 @@
 
 
               <li class="nav-item">
-                <a class="nav-link" href="pages/documentation/documentation.html">
+                <a class="nav-link" href="{{ route('admin.view.myprofile') }}">
                   <i class="typcn typcn-user-outline menu-icon"></i>
                   <span class="menu-title">My Profile</span>
                 </a>
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" href="pages/documentation/documentation.html">
+                <a class="nav-link" href="{{ route('change-password.form') }}">
                   <i class="typcn typcn-lock-closed-outline menu-icon"></i>
                   <span class="menu-title">Change Password</span>
                 </a>
               </li>     
+
+
+              <li class="nav-item">
+                <a class="nav-link" href="{{ route('home') }}">
+                  <i class="typcn icon typcn-world-outline menu-icon"></i>
+                  <span class="menu-title">Main Website</span>
+                </a>
+              </li>
 
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.logout') }}">

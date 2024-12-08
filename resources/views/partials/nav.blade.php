@@ -12,6 +12,12 @@
             <li>  <a href="{{ route('menu') }}" class="nav-link {{ Request::routeIs('menu') ? 'active' : '' }}">Menu</a> </li>
             <li>  <a href="{{ route('about') }}" class="nav-link {{ Request::routeIs('about') ? 'active' : '' }}">About {{ config('site.name') }}</a> </li>
             <li> <a href="{{ route('contact') }}" class="nav-link {{ Request::routeIs('contact') ? 'active' : '' }}">Contact Us</a> </li>
+            @if (Auth::check())
+                <li> <a href="{{ route('admin.index') }}" class="nav-link">Admin Dashboard</a> </li>
+                <li> <a href="{{ route('admin.logout') }}" class="nav-link">Logout</a> </li>
+            @endif
+
+
         </ul>
         
     </div>

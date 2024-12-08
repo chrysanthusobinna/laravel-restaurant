@@ -38,42 +38,36 @@
 @section('content')
 
 <div class="main-panel">
-    <div class="content-wrapper">
- 
-      @include('partials.message-bag')
+    <div class="content-wrapper d-flex align-items-center auth px-0">
+        <div class="row w-100 mx-0">
+          <div class="col-lg-6 mx-auto">
+            <div class="auth-form-light text-left py-5 px-4 px-sm-5">
+         
+                @include('partials.message-bag')
 
-    
-      
-      <div class="row">
-        <div class="col-sm-6">
-          <h3 class="mb-0 font-weight-bold">Logged in as Admin</h3>
-          <p>Your last login: 21h ago from newzealand.</p>
-        </div>
-        <div class="col-sm-6">
-          <div class="d-flex align-items-center justify-content-md-end">
-            <div class="mb-3 mb-xl-0 pr-1">
-                <button type="button" class="btn btn-sm bg-white btn-icon-text border" onclick="window.location='{{ route('admin.index') }}'">
-                    <i class="typcn typcn-arrow-forward-outline mr-2"></i>Dashboard
-                </button>
-            </div>
+              <form method="POST" action="{{ route('change-password.update') }}">
+                @csrf
+                <div class="mb-3">
+                    <label for="current_password" class="form-label">Current Password</label>
+                    <input type="password" name="current_password" class="form-control" id="current_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password</label>
+                    <input type="password" name="new_password" class="form-control" id="new_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new_password_confirmation" class="form-label">Confirm New Password</label>
+                    <input type="password" name="new_password_confirmation" class="form-control" id="new_password_confirmation" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
             
-            <div class="pr-1 mb-3 mr-2 mb-xl-0">
-                <button disabled type="button" class="btn btn-sm bg-white btn-icon-text border"  >
-                    <i class="typcn typcn-arrow-forward-outline mr-2"></i>Settings
-                </button>
             </div>
-            
-     
           </div>
         </div>
       </div>
-
- 
-
-
-
-   
-    </div>
     <!-- content-wrapper ends -->
     <!-- partial:partials/_footer.html -->
     <footer class="footer">

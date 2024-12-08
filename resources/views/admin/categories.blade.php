@@ -27,45 +27,31 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
- $(document).ready(function () {
-    // Attach a click event listener to all edit buttons
-    $('.edit-btn').on('click', function () {
-        // Retrieve the ID and name of the category from data attributes
-        let categoryId = $(this).data('id');
-        let categoryName = $(this).data('name');
-
-        // Set the value of the input field with the category name
-        $('#editName').val(categoryName);
-
-        // Construct the update URL dynamically using the ID
-        let actionUrl = "{{ route('admin.categories.update', ':id') }}".replace(':id', categoryId);
-
-        // Set the action attribute of the edit form
-        $('#editForm').attr('action', actionUrl);
-
-        // Optional: Log the action URL for debugging
-        console.log('Edit URL:', actionUrl);
-    });
-});
-
-
-</script>
-
-<script>
-  $(document).ready(function() {
-      // Attach click event to the delete button
-      $('.delete-btn').on('click', function() {
-          // Get the category ID from the data-id attribute
-          let id = $(this).data('id');
-
-          // Replace placeholder in route with the actual ID
-          let actionUrl = "{{ route('admin.categories.destroy', ':id') }}".replace(':id', id);
-
-          // Set the action attribute of the delete form
-          $('#deleteForm').attr('action', actionUrl);
-      });
-  });
-</script>
+    $(document).ready(function () {
+       $('.edit-btn').on('click', function () {
+           let categoryId = $(this).data('id');
+           let categoryName = $(this).data('name');
+   
+           $('#editName').val(categoryName);
+   
+           let actionUrl = "{{ route('admin.categories.update', ':id') }}".replace(':id', categoryId);
+           $('#editForm').attr('action', actionUrl);
+   
+           console.log('Edit URL:', actionUrl); // Optional: Log the action URL for debugging
+       });
+   });
+   </script>
+   
+   <script>
+     $(document).ready(function() {
+         $('.delete-btn').on('click', function() {
+             let id = $(this).data('id');
+             let actionUrl = "{{ route('admin.categories.destroy', ':id') }}".replace(':id', id);
+             $('#deleteForm').attr('action', actionUrl);
+         });
+     });
+   </script>
+   
 
 @endpush
 

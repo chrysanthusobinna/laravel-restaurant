@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Password;
 
 class AdminController extends Controller
@@ -174,6 +175,80 @@ class AdminController extends Controller
     }
  
 
+
+    public function viewMyProfile()
+    {
+        $user = Auth::user();  
+        return view('admin.view-my-profile', compact('user'));
+    }
+
+
+    public function editMyProfile()
+    {
+        $user = Auth::user();  
+        return view('admin.edit-my-profile', compact('user'));
+    }
+
+    public function updateMyProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone_number' => 'nullable|string|max:15',
+            'address' => 'nullable|string|max:255',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validate image file
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone_number = $request->phone_number;
+        $user->address = $request->address;
+
+        if ($request->hasFile('profile_photo')) {
+            // Delete old profile photo if exists
+            if ($user->profile_picture) {
+                Storage::delete('profile-picture/' . $user->profile_picture);
+            }
+
+            // Store new profile photo
+            $photoPath = $request->file('profile_photo')->store('profile-picture','public');
+
+            $user->profile_picture = basename($photoPath);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.view.myprofile')->with('success', 'Profile updated successfully.');
+    }
+
+    public function showChangePasswordForm()
+    {
+        return view('admin.change-password');
+    }
+
+    
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        // Check if the current password matches the user's password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+        }
+
+        // Update the password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->route('admin.index')->with('success', 'Your password has been successfully updated.');
+    }    
 
      // Handle logout
      public function logout()
