@@ -69,7 +69,7 @@
 
     <div class="container">
         <h1>Activate Your Account</h1>
-        <p>Hi {{ $user->name }},</p>
+        <p>Hi {{ $user->first_name }},</p>
         <p>Thank you for registering with us. To activate your account and access the admin dashboard, please click the button below:</p>
         
         <a href="{{ $activationLink }}" class="button">Activate Account</a>

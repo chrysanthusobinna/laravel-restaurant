@@ -62,7 +62,7 @@ class AdminController extends Controller
                  auth()->login($user);
                  return redirect()->route('admin.index');
              } else {
-                 session(['user_email' => $user->email, 'user_name' => $user->name]);
+                 session(['user_email' => $user->email, 'user_name' => $user->first_name]);
      
                  if ($user->notice === "change_password_to_activate_account") {
                      return redirect()->route('admin.activate.link.request');
@@ -223,27 +223,33 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $validated = $request->validated();
-
-        $user->name = $validated['name'];
+    
+        $user->first_name = $validated['first_name'];
+        $user->middle_name = $validated['middle_name']; // Optional, so it can be null
+        $user->last_name = $validated['last_name'];        
         $user->email = $validated['email'];
         $user->phone_number = $validated['phone_number'];
         $user->address = $validated['address'];
-
+    
+        // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
             // Delete old profile photo if exists
             if ($user->profile_picture) {
                 Storage::delete('profile-picture/' . $user->profile_picture);
             }
-
+    
             // Store new profile photo
             $photoPath = $request->file('profile_photo')->store('profile-picture', 'public');
             $user->profile_picture = basename($photoPath);
         }
-
+    
+        // Save the updated user data
         $user->save();
-
+    
+        // Return success message
         return back()->with('success', 'Profile updated successfully.');
     }
+    
 
     public function showChangePasswordForm()
     {

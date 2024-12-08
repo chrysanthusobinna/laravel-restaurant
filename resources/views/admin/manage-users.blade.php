@@ -131,7 +131,7 @@ function editUser(user) {
                     <tbody>
                         @foreach($users as $user)
                             <tr>
-                                <td><i class='fa fa-user'></i>&nbsp;{{ $user->name }}</td>
+                                <td><i class='fa fa-user'></i>&nbsp;{{ $user->first_name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ ucwords(str_replace('_', ' ', $user->role)) }}</td>
                                 <td>
@@ -146,7 +146,7 @@ function editUser(user) {
                                     class="btn btn-primary btn-sm" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#viewUserModal" 
-                                    data-name="{{ $user->name }}"
+                                    data-name="{{ $user->first_name }}"
                                     data-email="{{ $user->email }}"
                                     data-role="{{ ucwords(str_replace('_', ' ', $user->role)) }}"
                                     data-status="{{ $user->status }}"

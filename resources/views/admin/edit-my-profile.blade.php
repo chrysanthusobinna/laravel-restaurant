@@ -116,7 +116,7 @@
                         <!-- Name -->
                         <tr>
                             <td><label for="name">Name</label></td>
-                            <td><input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required></td>
+                            <td><input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->first_name) }}" required></td>
                         </tr>
                         <!-- Email -->
                         <tr>

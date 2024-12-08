@@ -23,11 +23,13 @@ class UserController extends Controller
     public function store(CreateUserRequest $request)
     {
         $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'role' => $request->role,
-                'password' => Hash::make($request->email),
-                'notice' => 'change_password_to_activate_account',
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'password' => Hash::make($request->email),
+            'notice' => 'change_password_to_activate_account',
             ]);
 
         // Send email notification 
@@ -48,7 +50,9 @@ class UserController extends Controller
     
         // Update the user
         $user->update([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'role' => $request->role,
             'status' => $status,

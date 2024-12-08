@@ -87,7 +87,7 @@
                 <tbody>
                     <tr>
                         <td><b>Name:</b></td>
-                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->first_name }}</td>
                     </tr>
                     <tr>
                         <td><b>Email:</b></td>

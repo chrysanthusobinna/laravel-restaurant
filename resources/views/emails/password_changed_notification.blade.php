@@ -66,7 +66,7 @@
         </div>
 
         <!-- Greeting -->
-        <h1>Hi {{ $user->name }},</h1>
+        <h1>Hi {{ $user->first_name }},</h1>
 
         <!-- Introduction -->
         <p><strong>{{ config('site.name') }} - Password Change Notification</strong></p>

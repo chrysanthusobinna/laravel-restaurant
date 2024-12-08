@@ -101,7 +101,7 @@
         </div>
 
         <!-- Greeting -->
-        <h1>Welcome, {{ $user->name }},</h1>
+        <h1>Welcome, {{ $user->first_name }},</h1>
 
         <!-- Introduction -->
         <p><strong>{{ config('site.name') }} - Your New Account</strong></p>

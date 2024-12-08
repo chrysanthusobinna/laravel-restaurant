@@ -10,17 +10,20 @@ class User extends Authenticatable implements CanResetPassword
     use Notifiable;
 
     protected $fillable = [
-        'name', 
-        'email', 
-        'password', 
-        'role', 
-        'status', 
-        'notice', 
-        'phone_number', 
-        'address', 
+        'first_name',
+        'middle_name',
+        'last_name',
+        'email',
+        'password',
+        'role',
+        'status',
+        'notice',
+        'phone_number',
+        'address',
         'profile_picture',
         'activation_token',
     ];
+    
 
     protected $hidden = [
         'password', 
