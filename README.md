@@ -1,4 +1,3 @@
-
 # Laravel Restaurant Website
 
 ## Overview
@@ -15,6 +14,11 @@ This project is a **Restaurant Management System** built using Laravel. It provi
 - **Online Food Ordering**: Users can add menu items to their cart, place orders online, and receive confirmation for their orders.
 - **Responsive Design**: The website is fully responsive, ensuring it works seamlessly on all devices.
 - **Dynamic Content**: Admins can update information like working hours, addresses, and phone numbers dynamically.
+
+---
+
+## Security
+Best practices are being employed in this project according to the latest Laravel 11 documentation. This includes proper data encryption and two-factor authentication to ensure the security and privacy of user data.
 
 ---
 
@@ -38,47 +42,52 @@ git clone https://github.com/chrysanthusobinna/restaurant.git
 cd restaurant
 ```
 
-### **Step 2: Install Dependencies**
-Install the necessary PHP and JavaScript dependencies:
-```bash
-composer install
-npm install
-```
-
-### **Step 3: Set Up the Environment**
-1. Copy the `.env.example` file to `.env`:
+### **Step 2: Set Up the Environment**
+1. Rename `.env.example` to `.env`:
    ```bash
-   cp .env.example .env
+   mv .env.example .env
    ```
-2. Generate the application key:
-   ```bash
-   php artisan key:generate
+2. Configure your `.env` file with the correct settings:
+   ```plaintext
+   DB_CONNECTION=sqlite
+   # DB_HOST=
+   # DB_PORT=
+   # DB_DATABASE=
+   # DB_USERNAME=
+   # DB_PASSWORD=
+   
+   MAIL_MAILER=log
+   MAIL_HOST=1
+   MAIL_PORT=
+   MAIL_USERNAME=
+   MAIL_PASSWORD=
+   MAIL_ENCRYPTION=
+   MAIL_FROM_ADDRESS=
+   MAIL_FROM_NAME="${APP_NAME}"
    ```
-3. Configure your `.env` file with the correct database credentials and other settings.
 
-### **Step 4: Set Up the Database**
+### **Step 3: Set Up the Database**
 1. Create a new MySQL database (e.g., `restaurant_db`).
 2. Run migrations and seeders:
    ```bash
    php artisan migrate --seed
    ```
 
-### **Step 5: Build Front-End Assets**
-Compile the front-end assets using Laravel Mix:
-```bash
-npm run dev
-```
-For production builds:
-```bash
-npm run prod
-```
-
-### **Step 6: Start the Application**
+### **Step 4: Start the Application**
 Run the development server:
 ```bash
 php artisan serve
 ```
 Visit the application at `http://127.0.0.1:8000`.
+
+### **Step 5: Create an Admin User**
+To create an admin user with global rights:
+1. Edit the `UserSeeder` file located at `database/seeders/UserSeeder.php` and set the user details as desired.
+2. Run the following command to seed the user:
+   ```bash
+   php artisan db:seed --class=UserSeeder
+   ```
+This user account will have global rights and can be used to create other user accounts.
 
 ---
 
@@ -89,4 +98,6 @@ Visit the application at `http://127.0.0.1:8000`.
 ---
 
 Feel free to fork this repository or contribute to its development by submitting a pull request! 
+
+---
  
