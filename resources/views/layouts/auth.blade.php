@@ -38,5 +38,6 @@
   <script src="/admin_resources/js/template.js"></script>
   <script src="/admin_resources/js/settings.js"></script>
   <script src="/admin_resources/js/todolist.js"></script>
+  @stack('script')
 </body>
 </html>

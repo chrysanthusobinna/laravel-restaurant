@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Mail\NewAccountNotification;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 
@@ -20,13 +22,16 @@ class UserController extends Controller
     // Store a new admin
     public function store(CreateUserRequest $request)
     {
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => Hash::make($request->email),
-            'notice' => 'change_password_to_activate_account',
-        ]);
+        $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'role' => $request->role,
+                'password' => Hash::make($request->email),
+                'notice' => 'change_password_to_activate_account',
+            ]);
+
+        // Send email notification 
+        Mail::to($user->email)->send(new NewAccountNotification($user, $user->email));
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }

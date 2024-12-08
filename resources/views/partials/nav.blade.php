@@ -14,7 +14,7 @@
             <li> <a href="{{ route('contact') }}" class="nav-link {{ Request::routeIs('contact') ? 'active' : '' }}">Contact Us</a> </li>
             @if (Auth::check())
                 <li> <a href="{{ route('admin.index') }}" class="nav-link">Admin Dashboard</a> </li>
-                <li> <a href="{{ route('admin.logout') }}" class="nav-link">Logout</a> </li>
+                <li> <a onclick="if (confirm('Are you Sure you want to Log out Now?')){return true;}else{event.stopPropagation(); event.preventDefault();};" href="{{ route('admin.logout') }}" class="nav-link">Logout</a> </li>
             @endif
 
 

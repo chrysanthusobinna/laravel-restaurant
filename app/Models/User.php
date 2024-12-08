@@ -19,6 +19,7 @@ class User extends Authenticatable implements CanResetPassword
         'phone_number', 
         'address', 
         'profile_picture',
+        'activation_token',
     ];
 
     protected $hidden = [

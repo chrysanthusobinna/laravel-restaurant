@@ -26,18 +26,20 @@ Route::get('blog/', [MainSiteController::class, 'blog'])->name('blog');
 Route::get('blog-details/', [MainSiteController::class, 'blogDetails'])->name('blog.details');
 
 
-// Admin auth routes
-Route::get('admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-Route::post('admin/process-login/', [AdminController::class, 'login'])->name('admin.login.process');
-Route::get('admin/login/password-forgot', [AdminController::class, 'passwordForgotForm'])->name('admin.password.forgot');
-
-//admin activate route
-Route::get('admin/activate-account', [AdminController::class, 'activateAccount'])->name('admin.activate.account');
-Route::post('admin/process-activate-account/', [AdminController::class, 'processApdatePassword'])->name('admin.process.activate.account');
-
 
 //Resetting Password
 Route::middleware(['guest'])->group(function () {
+
+    // Admin auth routes
+    Route::get('admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('admin/process-login/', [AdminController::class, 'login'])->name('admin.login.process');
+    Route::get('admin/login/password-forgot', [AdminController::class, 'passwordForgotForm'])->name('admin.password.forgot');
+
+    //admin activate route
+    Route::get('admin/activate-link-request', [AdminController::class, 'requestActivationLink'])->name('admin.activate.link.request');
+    Route::get('admin/activate-account/{token}', [AdminController::class, 'activateAccount'])->name('admin.activate.account');
+    Route::post('admin/process-activate-account/', [AdminController::class, 'processApdatePassword'])->name('admin.process.activate.account');
+
     Route::get('admin/password/request', [AdminController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('admin/password/email', [AdminController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('admin/password/reset/{token}', [AdminController::class, 'showResetForm'])->name('password.reset');

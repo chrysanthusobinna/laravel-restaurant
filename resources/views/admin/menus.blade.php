@@ -148,13 +148,13 @@
                                                         data-category_id="{{ $menu->category_id }}"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#editModal">
-                                                    Edit
+                                                        <i class="fa fa-edit" aria-hidden="true"></i>
                                                 </button>
                                                 <button class="m-1 btn btn-danger btn-sm delete-btn"
                                                         data-id="{{ $menu->id }}"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#deleteModal">
-                                                    Delete
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </button>
                                             </td>
                                         </tr>

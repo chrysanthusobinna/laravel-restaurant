@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Mail\ActivationLinkEmail;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Password;
+use App\Mail\PasswordChangedNotification;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\ChangePasswordRequest;
 
@@ -61,7 +65,7 @@ class AdminController extends Controller
                  session(['user_email' => $user->email, 'user_name' => $user->name]);
      
                  if ($user->notice === "change_password_to_activate_account") {
-                     return redirect()->route('admin.activate.account');
+                     return redirect()->route('admin.activate.link.request');
                  } elseif ($user->notice === "ban") {
                      return redirect()->route('admin.login')->withErrors(['account' => 'Your account has been banned. Please contact Support for assistance.']);
                  } else {
@@ -73,6 +77,31 @@ class AdminController extends Controller
          }
      }
      
+
+
+
+    // Request Activation Link
+     public function requestActivationLink(Request $request)
+     {
+        if (!session()->has('user_email') || !session()->has('user_name')) {
+            return redirect()->route('admin.login')->withErrors(['error' => 'Something went wrong, please try to login again.']);
+        }
+        $email = session('user_email');
+        $user = User::where('email', $email)->first();
+       
+ 
+         // Generate activation token
+         $token = Str::random(60);
+ 
+         // Save the token to the user (or separate table for better security)
+         $user->activation_token = $token;
+         $user->save();
+ 
+         // Send activation link email
+         Mail::to($user->email)->send(new ActivationLinkEmail($user, $token));
+ 
+         return view('admin.activation-link-sent', ['email' => $user->email]);
+     }
 
      
     // Account Activation 
@@ -92,6 +121,11 @@ class AdminController extends Controller
 
     public function processApdatePassword(ChangePasswordRequest $request)
     {
+
+        if (!session()->has('user_email') || !session()->has('user_name')) {
+            return redirect()->route('admin.login')->withErrors(['error' => 'Something went wrong, please try to login again.']);
+        }
+
         // Retrieve the user's email from the session
         $email = session('user_email');
         $user = User::where('email', $email)->first();
@@ -234,6 +268,9 @@ class AdminController extends Controller
         // Update the password
         $user->password = Hash::make($request->new_password);
         $user->save();
+
+        // Send password changed notification email
+        Mail::to($user->email)->send(new PasswordChangedNotification($user));
 
         return redirect()->route('admin.index')->with('success', 'Your password has been successfully updated.');
     }    
