@@ -22,6 +22,7 @@ class User extends Authenticatable implements CanResetPassword
         'address',
         'profile_picture',
         'activation_token',
+        'two_factor_auth',
     ];
     
 
