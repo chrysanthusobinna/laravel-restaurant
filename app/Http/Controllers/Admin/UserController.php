@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Mail\NewAccountNotification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CreateUserRequest;
@@ -12,6 +13,13 @@ use App\Http\Requests\UpdateUserRequest;
 
 class UserController extends Controller
 {
+
+    public function __construct()
+    {
+        // Share the logged-in user with all views
+        view()->share('loggedInUser', Auth::User());
+        
+    }
     // Show the admin management page
     public function index()
     {

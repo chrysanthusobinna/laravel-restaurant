@@ -130,7 +130,8 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::post('cart/remove', [POSController::class, 'removeFromCart'])->name('admin.cart.remove');
     Route::get('cart/view', [POSController::class, 'getCart'])->name('admin.cart.view');
     Route::post('cart/clear', [POSController::class, 'clearCart'])->name('admin.cart.clear');
- 
+    Route::post('cart/update', [POSController::class, 'updateCartQuantity'])->name('admin.cart.update');
+
  
     Route::post('cart/submit', [POSController::class, 'submitOrder'])->name('admin.cart.submit');
     

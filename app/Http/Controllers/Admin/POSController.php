@@ -95,7 +95,22 @@ class POSController extends Controller
     }
  
 
-     
+    public function updateCartQuantity(Request $request)
+    {
+        $cart = session()->get('cart', []);
+        $id = $request->input('id');
+        $quantity = $request->input('quantity');
+    
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity'] = $quantity;
+            session()->put('cart', $cart);
+        }
+    
+        return response()->json(['success' => true, 'cart' => $cart]);
+    }
+
+    
+
     public function submitOrder(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -156,9 +171,7 @@ class POSController extends Controller
             }
         }
         // Clear the cart
-        session()->forget('cart');
-
-        //return response()->json(['success' => true, 'message' => 'Order submitted successfully', 'order_id' => $order->id]);
+        //session()->forget('cart');
 
         return redirect()->route('admin.index')->with('success', 'Order Created successfully.');
 

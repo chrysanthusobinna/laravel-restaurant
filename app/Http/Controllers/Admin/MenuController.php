@@ -6,9 +6,16 @@ use App\Models\Menu;
 use App\Models\Category;
 use App\Http\Requests\MenuRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class MenuController extends Controller
 {
+    public function __construct()
+    {
+        // Share the logged-in user with all views
+        view()->share('loggedInUser', Auth::User());
+        
+    }
     public function index()
     {
         $categories = Category::with('menus')->get(); // Load categories with menus

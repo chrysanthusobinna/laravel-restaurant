@@ -95,7 +95,7 @@ $(document).ready(function () {
                 <tr class="cart-item">
                     <td>${item.name}</td>
                     <td>$${item.price}</td>
-                    <td>${item.quantity}</td>
+                    <td><input type="number" style="width:30%;" value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input"></td>
                     <td>$${subtotal}</td>
                     <td><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"> <i class="fa fa-times" aria-hidden="true"></i></button></td>
                 </tr>
@@ -111,11 +111,19 @@ $(document).ready(function () {
         // Display the total
         $('#cart-total').text('Total: $' + total);
 
-        // Add event listener to remove buttons
+        // listener to remove buttons
         $('.remove-btn').click(function () {
             var id = $(this).data('id');
             removeFromCart(id);
         });
+
+      // listener to quantity inputs
+      $('.quantity-input').change(function () {
+          var id = $(this).data('id');
+          var newQuantity = $(this).val();
+          updateCartQuantity(id, newQuantity);
+      });
+
     }
 
     // Attach addToCart function to buttons
@@ -126,11 +134,29 @@ $(document).ready(function () {
         addToCart(id, name, price);
     });
 
+
+      // Function to update cart quantity
+    function updateCartQuantity(id, quantity) {
+        $.post('{{ route('admin.cart.update')  }}', { 
+            _token: "{{ csrf_token() }}", 
+            id: id, 
+            quantity: quantity 
+        }, function (data) {
+            if (data.success) {
+                updateCartUI(data.cart);
+            }
+        });
+    }
+
+
+
     // Initial fetch of cart items
     $.get('{{ route('admin.cart.view') }}', function (data) {
         updateCartUI(data.cart);
     });
 });
+
+
 
 
 
@@ -313,21 +339,30 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
                                   <td><strong>Address</strong></td>
                                   <td><input type="text" class="form-control" id="address" name="address"></td>
                               </tr>
-                              <tr>
-                                  <td><strong>Payment Method</strong></td>
-                                  <td>
-                                      <select class="form-control" id="payment_method" name="payment_method" required>
-                                          <option value="">Select a payment method</option>
-                                          <option value="credit_card">Credit Card</option>
-                                          <option value="paypal">PayPal</option>
-                                          <option value="bank_transfer">Bank Transfer</option>
-                                      </select>
-                                  </td>
-                              </tr>
+             
                           </tbody>
                       </table>
                   </div>
               </div>
+
+              <hr>
+              <table class="table table-bordered">
+                <tbody>
+ 
+                    <tr>
+                        <td><strong>Payment Method</strong></td>
+                        <td>
+                            <select class="form-control" id="payment_method" name="payment_method" required>
+                                <option value="">Select a payment method</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
 
             </form>
         </div>
