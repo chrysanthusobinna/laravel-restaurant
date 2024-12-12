@@ -18,7 +18,7 @@
               </li>
 
 
-              <li class="nav-item">
+              <li class="nav-item active-nav">
                 <a class="nav-link" href="{{ route('admin.index') }}">
                     <i class="fa fa-desktop menu-icon"></i>
                     <span class="menu-title">Dashboard</span>
@@ -28,9 +28,9 @@
  
  
             <li class="nav-item">
-              <a class="nav-link" href="pages/documentation/documentation.html">
-                <i class="fa fa-plus-square menu-icon" ></i>
-                  <span class="menu-title">New Order</span>
+              <a class="nav-link" href="{{ route('admin.pos.index') }}">
+                <i class="fa fa-shopping-cart menu-icon" ></i>
+                  <span class="menu-title">Pont of Sale</span>
               </a>
           </li>
           
@@ -39,7 +39,7 @@
           <li class="nav-item">
             <a class="nav-link" href="pages/documentation/documentation.html">
                 <i class="fa fa-file menu-icon"></i>
-                <span class="menu-title">View Orders</span>
+                <span class="menu-title">Manage Orders</span>
             </a>
         </li>
         

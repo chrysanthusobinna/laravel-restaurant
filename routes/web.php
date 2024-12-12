@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\RedirectIfNotAdmin;
 use App\Http\Controllers\MainSiteController;
+use App\Http\Controllers\Admin\POSController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
@@ -119,4 +121,19 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
 
 
+    
+ 
+    // POS Dashboard
+    Route::get('pos/', [POSController::class, 'index'])->name('admin.pos.index');
+
+    Route::post('cart/add', [POSController::class, 'addToCart'])->name('admin.cart.add');
+    Route::post('cart/remove', [POSController::class, 'removeFromCart'])->name('admin.cart.remove');
+    Route::get('cart/view', [POSController::class, 'getCart'])->name('admin.cart.view');
+    Route::post('cart/clear', [POSController::class, 'clearCart'])->name('admin.cart.clear');
+ 
+ 
+    Route::post('cart/submit', [POSController::class, 'submitOrder'])->name('admin.cart.submit');
+    
+
 });
+

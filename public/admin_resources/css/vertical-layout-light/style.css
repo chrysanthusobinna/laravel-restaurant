@@ -23326,19 +23326,7 @@ body.avgrund-active {
   transform: rotate(360deg);
 }
 
-.sidebar .nav .nav-item.active > .nav-link {
-  background: #414147;
-  position: relative;
-}
-
-.sidebar .nav .nav-item.active > .nav-link .menu-title,
-.sidebar .nav .nav-item.active > .nav-link .menu-arrow {
-  color: #fff;
-}
-
-.sidebar .nav .nav-item.active > .nav-link i {
-  color: #2b80ff;
-}
+ 
 
 .sidebar .nav:not(.sub-menu) {
   margin-top: 0rem;
@@ -23496,16 +23484,8 @@ body.avgrund-active {
   color: inherit;
 }
 
-.sidebar-light .sidebar .nav .nav-item.active > .nav-link {
-  background: initial;
-}
-
-.sidebar-light .sidebar .nav .nav-item.active > .nav-link .menu-title {
-  color: #f2125e;
-}
-
-.sidebar-light .sidebar .nav .nav-item.active > .nav-link i {
-  color: #2b80ff;
+.active-nav {
+  background: #414147;
 }
 
 .sidebar-light .sidebar .nav:not(.sub-menu) > .nav-item:hover > .nav-link {

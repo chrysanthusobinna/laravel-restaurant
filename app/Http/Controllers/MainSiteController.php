@@ -8,6 +8,7 @@ use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
 use App\Models\RestaurantPhoneNumber;
 use App\Models\RestaurantWorkingHour;
+use GetCountryCurrency\CountryCurrencyAPI;
 
 class MainSiteController extends Controller
 {
@@ -34,6 +35,11 @@ class MainSiteController extends Controller
 
     public function home()
     {
+
+        //$country 	=	"United Kingdom"; 
+       // $currencyData = (new CountryCurrencyAPI())->fetchCurrencyData($country);
+        
+ 
         return view('main-site.index');
     }
 

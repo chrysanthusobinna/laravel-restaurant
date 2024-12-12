@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements CanResetPassword
 {
-    use Notifiable;
-
+    use HasFactory, Notifiable;
+    
     protected $fillable = [
         'first_name',
         'middle_name',
@@ -34,4 +35,17 @@ class User extends Authenticatable implements CanResetPassword
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // Get the orders created by the user. 
+    public function createdOrders()
+    {
+        return $this->hasMany(Order::class, 'created_by_user_id');
+    }
+
+    // Get the orders updated by the user. 
+    public function updatedOrders()
+    {
+        return $this->hasMany(Order::class, 'updated_by_user_id');
+    }
+
 }
