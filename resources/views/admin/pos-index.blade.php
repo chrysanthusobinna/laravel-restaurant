@@ -271,14 +271,14 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
         <div class="col-lg-6 d-flex grid-margin stretch-card">
           <div class="card">
             <div class="card-body">
-              <div style="margin-top:40px;" class="d-flex flex-wrap justify-content-between">
+              <div style="" class="d-flex flex-wrap justify-content-between">
                 <h4 class="card-title mb-3">Cart</h4>
               </div>
  
 
 
-              <table class="table table-striped" id="cart-container">
-                <thead>
+              <table class="table" >
+                <thead >
                     <tr>
                         <th>Item</th>
                         <th>Price</th>
@@ -287,7 +287,7 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="cart-container">
                     <!-- Cart items will be inserted here -->
                 </tbody>
             </table>
