@@ -18,7 +18,7 @@
               </li>
 
 
-              <li class="nav-item active-nav">
+              <li class="nav-item {{ request()->route()->named('admin.index') ? 'active-nav' : '' }} ">
                 <a class="nav-link" href="{{ route('admin.index') }}">
                     <i class="fa fa-desktop menu-icon"></i>
                     <span class="menu-title">Dashboard</span>
@@ -27,30 +27,30 @@
             
  
  
-            <li class="nav-item">
+            <li class="nav-item {{ request()->route()->named('admin.pos.index') ? 'active-nav' : '' }}">
               <a class="nav-link" href="{{ route('admin.pos.index') }}">
                 <i class="fa fa-shopping-cart menu-icon" ></i>
                   <span class="menu-title">Pont of Sale</span>
               </a>
           </li>
           
-   
+          
       
-          <li class="nav-item">
-            <a class="nav-link" href="pages/documentation/documentation.html">
+          <li class="nav-item {{ Request::is('admin/orders*') ? 'active-nav' : '' }}">
+            <a class="nav-link" href="{{ route('admin.orders.index') }}">
                 <i class="fa fa-file menu-icon"></i>
                 <span class="menu-title">Manage Orders</span>
             </a>
         </li>
         
-        <li class="nav-item">
+        <li class="nav-item {{ request()->route()->named('admin.blog.index') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.blog.index') }}">
                 <i class="far fa-newspaper menu-icon"></i>
                 <span class="menu-title">Manage Blog</span>
             </a>
         </li>
         
-        <li class="nav-item">
+        <li class="nav-item {{ request()->route()->named('admin.users.index') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.users.index') }}">
                 <i class="fa fa-users menu-icon"></i>
                 <span class="menu-title">Manage Users</span>
@@ -59,7 +59,7 @@
         
 
 
-              <li class="nav-item ">
+              <li class="nav-item">
                 <a class="nav-link collapsed" data-toggle="collapse" href="#site-settings" aria-expanded="false" aria-controls="site-settings">
                   <i class="fa fa-cog menu-icon"></i>
                     <span class="menu-title">Site Settings</span>
@@ -84,15 +84,15 @@
             
 
 
-              <li class="nav-item">
+              <li class="nav-item {{ request()->route()->named('admin.view.myprofile') ? 'active-nav' : '' }}">
                 <a class="nav-link" href="{{ route('admin.view.myprofile') }}">
                   <i class="fa fa-user menu-icon"></i>
                   <span class="menu-title">My Profile</span>
                 </a>
               </li>
 
-              <li class="nav-item">
-                <a class="nav-link" href="{{ route('change-password.form') }}">
+              <li class="nav-item {{ request()->route()->named('change.password.form') ? 'active-nav' : '' }}">
+                <a class="nav-link" href="{{ route('change.password.form') }}">
                   <i class="fa fa-lock menu-icon"></i>
                   <span class="menu-title">Change Password</span>
                 </a>

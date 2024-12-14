@@ -95,22 +95,25 @@ $(document).ready(function () {
                 <tr class="cart-item">
                     <td>${item.name}</td>
                     <td>$${item.price}</td>
-                    <td><input type="number" style="width:30%;" value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input"></td>
-                    <td>$${subtotal}</td>
+                    <td><input type="number"   value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input"></td>
+                    <td>$${subtotal.toFixed(2)}</td>
                     <td><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"> <i class="fa fa-times" aria-hidden="true"></i></button></td>
                 </tr>
             `);
         });
 
         if(total > 0){
-        $('#clear-cart').show(); // Show Clear Cart button
+            $('#clear-cart').show();  
+            if ($('#payment_method').val() !== "") { $('#checkout-btn').show();  } else { $('#checkout-btn').hide();  }
         } else {
-            $('#clear-cart').hide(); // Hide Clear Cart button
+          $('#clear-cart').hide();  
+          $('#checkout-btn').hide();         
         }
 
         // Display the total
-        $('#cart-total').text('Total: $' + total);
-
+        $('#cart-total').text('Total: $' + total.toFixed(2));
+        $('#total').val(total.toFixed(2))
+        
         // listener to remove buttons
         $('.remove-btn').click(function () {
             var id = $(this).data('id');
@@ -156,11 +159,7 @@ $(document).ready(function () {
     });
 });
 
-
-
-
-
-
+ 
 document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
     const icon = this.querySelector('.toggle-icon');
     if (icon.classList.contains('fa-plus')) {
@@ -172,10 +171,26 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
     }
 });
 
+$('#payment_method').on('change', function() {
+    if ($(this).val() !== "" && $('#total').val() > 0) {
+        $('#checkout-btn').show();   
+    } else {
+        $('#checkout-btn').hide();   
+    }
+});
+
+
+     $('#checkout-btn').click(function(event) {
+        event.preventDefault();
+        $('#confirmationModal').modal('show');
+    });
+
+     $('#confirmSubmit').click(function() {
+        $('#checkout-form').submit();
+    });
 
 </script>
  
-
 @endpush
 
 
@@ -282,7 +297,7 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
                     <tr>
                         <th>Item</th>
                         <th>Price</th>
-                        <th>Quantity</th>
+                        <th style="width:20%;">Quantity</th>
                         <th>Subtotal</th>
                         <th>Actions</th>
                     </tr>
@@ -310,7 +325,8 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
 
       <div class="card mb-4">
         <div class="card-body">
-          <form id="checkout-form" method="POST" action="{{ route('admin.cart.submit') }}">
+          <form id="checkout-form" method="POST" action="{{ route('admin.order.store') }}">
+            <input type="hidden"   id="total" value="0">
             @csrf
               <div class="mt-4">
                   <!-- Toggle Button -->
@@ -354,9 +370,8 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
                         <td>
                             <select class="form-control" id="payment_method" name="payment_method" required>
                                 <option value="">Select a payment method</option>
-                                <option value="credit_card">Credit Card</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="bank_transfer">Bank Transfer</option>
+                                <option>Credit / Debit Card</option>
+                                <option>Bank Transfer</option>
                             </select>
                         </td>
                     </tr>
@@ -367,24 +382,43 @@ document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', 
             </form>
         </div>
         <div class="card-footer text-right">
-            <button type="submit" form="checkout-form" class="btn btn-primary">Checkout</button>
-            <button type="reset" form="checkout-form" class="btn btn-secondary">Cancel</button>
+            <button type="button" style="display:none;" id="checkout-btn" form="checkout-form" class="btn btn-primary">Checkout</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.index') }}'">Cancel</button>
+
         </div>
     </div>
     
  
 
 
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="confirmationModalLabel">Confirm Order</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                  <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
+          </div>
+          <div class="modal-body">
+              Are you sure you want to submit this order?
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="confirmSubmit">Confirm</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+
+
     </div>
     <!-- content-wrapper ends -->
-    <!-- partial:partials/_footer.html -->
-    <footer class="footer">
-      <div class="d-sm-flex justify-content-center justify-content-sm-between">
-        <span class="text-center text-sm-left d-block d-sm-inline-block">Copyright © <a href="https://www.bootstrapdash.com/" target="_blank">bootstrapdash.com</a> 2020</span>
-        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Free <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap dashboard </a>templates from Bootstrapdash.com</span>
-      </div>
-    </footer>
-    <!-- partial -->
+    @include('partials.admin.footer')
   </div>
   <!-- main-panel ends -->
 @endsection

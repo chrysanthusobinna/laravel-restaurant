@@ -140,158 +140,53 @@
         </div>
       </div>
       <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Recent Orders</h5>
+          @if($orders->count() > 0)
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='{{ route('admin.orders.index') }}'">View More Orders</button>
+          @endif
+
+      </div>
         <div class="card-body">
-          <div class="d-flex flex-wrap justify-content-between">
-            <h4 class="card-title mb-3">Recent Sales</h4>
-          </div>
+ 
           <div class="table-responsive">
+            @if($orders->isEmpty())
+            <p class="text-center">No orders available.</p>
+        @else
             <table class="table">
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="d-flex">
-                      <img class="img-sm rounded-circle mb-md-0 mr-2" src="/admin_resources/images/faces/face30.png" alt="profile image">
-                      <div>
-                        <div> Company</div>
-                        <div class="font-weight-bold mt-1">volkswagen</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Budget
-                    <div class="font-weight-bold  mt-1">$2322 </div>
-                  </td>
-                  <td>
-                    Status
-                    <div class="font-weight-bold text-success  mt-1">88% </div>
-                  </td>
-                  <td>
-                    Deadline
-                    <div class="font-weight-bold  mt-1">07 Nov 2019</div>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-secondary">edit actions</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="d-flex">
-                      <img class="img-sm rounded-circle mb-md-0 mr-2" src="/admin_resources/images/faces/face31.png" alt="profile image">
-                      <div>
-                        <div> Company</div>
-                        <div class="font-weight-bold  mt-1">Land Rover</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Budget
-                    <div class="font-weight-bold  mt-1">$12022  </div>
-                  </td>
-                  <td>
-                    Status
-                    <div class="font-weight-bold text-success  mt-1">70% </div>
-                  </td>
-                  <td>
-                    Deadline
-                    <div class="font-weight-bold  mt-1">08 Nov 2019</div>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-secondary">edit actions</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="d-flex">
-                      <img class="img-sm rounded-circle mb-md-0 mr-2" src="/admin_resources/images/faces/face32.png" alt="profile image">
-                      <div>
-                        <div> Company</div>
-                        <div class="font-weight-bold  mt-1">Bentley </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Budget
-                    <div class="font-weight-bold  mt-1">$8,725</div>
-                  </td>
-                  <td>
-                    Status
-                    <div class="font-weight-bold text-success  mt-1">87% </div>
-                  </td>
-                  <td>
-                    Deadline
-                    <div class="font-weight-bold  mt-1">11 Jun 2019</div>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-secondary">edit actions</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="d-flex">
-                      <img class="img-sm rounded-circle mb-md-0 mr-2" src="/admin_resources/images/faces/face33.png" alt="profile image">
-                      <div>
-                        <div> Company</div>
-                        <div class="font-weight-bold  mt-1">Morgan </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Budget
-                    <div class="font-weight-bold  mt-1">$5,220 </div>
-                  </td>
-                  <td>
-                    Status
-                    <div class="font-weight-bold text-success  mt-1">65% </div>
-                  </td>
-                  <td>
-                    Deadline
-                    <div class="font-weight-bold  mt-1">26 Oct 2019</div>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-secondary">edit actions</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="d-flex">
-                      <img class="img-sm rounded-circle mb-md-0 mr-2" src="/admin_resources/images/faces/face34.png" alt="profile image">
-                      <div>
-                        <div> Company</div>
-                        <div class="font-weight-bold  mt-1">volkswagen</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Budget
-                    <div class="font-weight-bold  mt-1">$2322 </div>
-                  </td>
-                  <td>
-                    Status
-                    <div class="font-weight-bold text-success mt-1">88% </div>
-                  </td>
-                  <td>
-                    Deadline
-                    <div class="font-weight-bold  mt-1">07 Nov 2019</div>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-secondary">edit actions</button>
-                  </td>
-                </tr>
-              </tbody>
+                <thead>
+                    <tr>
+                        <th>Order No.</th>
+                        <th>Date</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Order Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($orders as $order)
+                        <tr>
+                            <td><i class="fa fa-file"></i> &nbsp; # {{ $order->order_no }} </td>
+                            <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
+                            <td>${{ number_format($order->total_price, 2) }}</td>
+                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>{{ ucfirst($order->order_type) }}</td>
+                            <td>
+                                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
             </table>
+        @endif
+        
           </div>
         </div>
       </div>
     </div>
     <!-- content-wrapper ends -->
-    <!-- partial:partials/_footer.html -->
-    <footer class="footer">
-      <div class="d-sm-flex justify-content-center justify-content-sm-between">
-        <span class="text-center text-sm-left d-block d-sm-inline-block">Copyright © <a href="https://www.bootstrapdash.com/" target="_blank">bootstrapdash.com</a> 2020</span>
-        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Free <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap dashboard </a>templates from Bootstrapdash.com</span>
-      </div>
-    </footer>
-    <!-- partial -->
+    @include('partials.admin.footer')
   </div>
   <!-- main-panel ends -->
 @endsection

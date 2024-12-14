@@ -216,8 +216,16 @@
                         <i class="fa fa-exclamation-triangle"></i> The password will be the user's email address. The user should log in with this credential and change their password to gain access to the admin panel.
                     </div>
                     <div class="mb-3">
-                        <label>Name</label>
-                        <input type="text" name="name" class="form-control" required>
+                        <label>First Name</label>
+                        <input type="text" name="first_name" id="editFirstName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Middle Name</label>
+                        <input type="text" name="middle_name" id="editMiddleName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" id="editLastName" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label>Email</label>
@@ -357,14 +365,7 @@
    
     </div>
     <!-- content-wrapper ends -->
-    <!-- partial:partials/_footer.html -->
-    <footer class="footer">
-      <div class="d-sm-flex justify-content-center justify-content-sm-between">
-        <span class="text-center text-sm-left d-block d-sm-inline-block">Copyright © <a href="https://www.bootstrapdash.com/" target="_blank">bootstrapdash.com</a> 2020</span>
-        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Free <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap dashboard </a>templates from Bootstrapdash.com</span>
-      </div>
-    </footer>
-    <!-- partial -->
+    @include('partials.admin.footer')
   </div>
   <!-- main-panel ends -->
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +43,10 @@ class AdminController extends Controller
             'December' => rand(100, 1000),
         ];
 
-        return view('admin.index', compact('salesData'));
+        $orders = Order::select('id', 'order_no', 'created_at', 'total_price', 'status', 'order_type')->orderBy('created_at', 'desc')->limit(10)->get();
+
+
+        return view('admin.index', compact('salesData','orders'));
     }
 
 

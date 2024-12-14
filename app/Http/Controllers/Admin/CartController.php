@@ -3,17 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Menu;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\Customer;
-use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class POSController extends Controller
+class CartController extends Controller
 {
-
+    
     public function __construct()
     {
         // Share the logged-in user with all views
@@ -21,7 +17,7 @@ class POSController extends Controller
         
     }
     
-    // Display POS dashboard
+ 
     public function index()
     {
         $menus = Menu::all();
@@ -110,71 +106,4 @@ class POSController extends Controller
     }
 
     
-
-    public function submitOrder(Request $request)
-    {
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return response()->json(['success' => false, 'message' => 'Cart is empty']);
-        }
-
-        $totalPrice = array_reduce($cart, function ($carry, $item) {
-            return $carry + ($item['price'] * $item['quantity']);
-        }, 0);
-
-        
-        // Check if at least one of the fields is provided then Create a new customer
-        if ($request->filled(['name', 'email', 'phone_number', 'address'])) {
-            // Validate only the fields that are provided
-            $validatedData = $request->validate([
-                'name' => 'nullable|string|max:255',
-                'email' => 'nullable|email|max:255|unique:customers,email',
-                'phone_number' => 'nullable|string|max:15',
-                'address' => 'nullable|string|max:500',
-            ]);
-
-            // Create the customer
-            $customer = Customer::create([
-                'name' => $validatedData['name'] ?? null,
-                'email' => $validatedData['email'] ?? null,
-                'phone_number' => $validatedData['phone_number'] ?? null,
-                'address' => $validatedData['address'] ?? null,
-            ]);
-
-            $customer_id = $customer->id;
-
-        }
-        else
-        {
-            $customer_id = null;
-        }
-
-
-        // Create a new order
-        $order = Order::create([
-            'customer_id' => $customer_id,
-            'order_type' => 'instore',
-            'created_by_user_id' => Auth::id(),
-            'updated_by_user_id' => Auth::id(),
-            'total_price' => $totalPrice,
-            'status' => 'completed'
-        ]);
- 
-        if ($order) {
-            // Create order items using the relationship
-            foreach ($cart as $item) {
-                $order->orderItems()->create([
-                    'menu_id' => $item['id'],   
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $item['price'] * $item['quantity'],
-                ]);
-            }
-        }
-        // Clear the cart
-        //session()->forget('cart');
-
-        return redirect()->route('admin.index')->with('success', 'Order Created successfully.');
-
-    }
- 
 }

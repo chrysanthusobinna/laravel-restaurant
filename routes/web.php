@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\RedirectIfNotAdmin;
 use App\Http\Controllers\MainSiteController;
-use App\Http\Controllers\Admin\POSController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
 
@@ -62,7 +62,7 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
 
     //change password
-    Route::get('change-password', [AdminController::class, 'showChangePasswordForm'])->name('change-password.form');
+    Route::get('change-password', [AdminController::class, 'showChangePasswordForm'])->name('change.password.form');
     Route::post('change-password', [AdminController::class, 'changePassword'])->name('change-password.update');
 
     Route::prefix('settings')->group(function () {
@@ -123,18 +123,21 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
     
  
-    // POS Dashboard
-    Route::get('pos/', [POSController::class, 'index'])->name('admin.pos.index');
-
-    Route::post('cart/add', [POSController::class, 'addToCart'])->name('admin.cart.add');
-    Route::post('cart/remove', [POSController::class, 'removeFromCart'])->name('admin.cart.remove');
-    Route::get('cart/view', [POSController::class, 'getCart'])->name('admin.cart.view');
-    Route::post('cart/clear', [POSController::class, 'clearCart'])->name('admin.cart.clear');
-    Route::post('cart/update', [POSController::class, 'updateCartQuantity'])->name('admin.cart.update');
+    // Admin Cart / POS routes
+    Route::get('pos/', [CartController::class, 'index'])->name('admin.pos.index');
+    Route::post('cart/add', [CartController::class, 'addToCart'])->name('admin.cart.add');
+    Route::post('cart/remove', [CartController::class, 'removeFromCart'])->name('admin.cart.remove');
+    Route::get('cart/view', [CartController::class, 'getCart'])->name('admin.cart.view');
+    Route::post('cart/clear', [CartController::class, 'clearCart'])->name('admin.cart.clear');
+    Route::post('cart/update', [CartController::class, 'updateCartQuantity'])->name('admin.cart.update');
 
  
-    Route::post('cart/submit', [POSController::class, 'submitOrder'])->name('admin.cart.submit');
-    
+    //Admin Order routes
+    Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('orders/{id}', [OrderController::class, 'show'])->name('admin.orders.show');
+    Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
+    Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
 
+    
 });
 

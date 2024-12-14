@@ -28,48 +28,35 @@
  
 <script>
 
-    // Set the image source dynamically for the Lightbox modal
     $('#imageModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var imageUrl = button.data('image'); // Extract the image URL from data-* attribute
-        
-        // Set the image source in the modal
+        var button = $(event.relatedTarget);
+        var imageUrl = button.data('image');
         $('#modalImage').attr('src', imageUrl);
     });
 
-
-
-    // Set the action URL for the delete form dynamically when the delete button is clicked
     $('#deleteModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var blogId = button.data('id'); // Extract info from data-* attributes
+        var button = $(event.relatedTarget);
+        var blogId = button.data('id');
         var blogName = button.data('name');
-        
-        var actionUrl = '/admin/blog/' + blogId; // Construct the delete URL
-        $('#deleteForm').attr('action', actionUrl); // Set the action attribute of the form
-        $('#deleteCategoryName').text(blogName); // Set the blog name in the modal body
+        var actionUrl = '/admin/blog/' + blogId;
+        $('#deleteForm').attr('action', actionUrl);
+        $('#deleteCategoryName').text(blogName);
     });
 
-    // Set the values for the edit form dynamically when the edit button is clicked
     $('.edit-btn').on('click', function () {
         var id = $(this).data('id');
         var name = $(this).data('name');
         var content = $(this).data('content');
         var image = $(this).data('image');
-        
-        // Construct the update URL dynamically using the ID
         var actionUrl = "{{ route('admin.blog.update', ':id') }}".replace(':id', id);
-        
-        // Set the action attribute of the edit form
         $('#editForm').attr('action', actionUrl);
-
-        // Set the values of the form fields
         $('#editName').val(name);
         $('#editContent').val(content);
         if (image) {
-            $('#editImage').val(image); // Only set image if it's available (you may want to handle this differently)
+            $('#editImage').val(image);
         }
     });
+
 </script>
 
 @endpush
@@ -134,8 +121,8 @@
                             <td><img src="{{ asset($blog->image) }}" alt="{{ $blog->name }}" width="100" class="img-thumbnail trigger-lightbox" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="{{ asset($blog->image) }}"> {{ $blog->name }}</td>
                             <td>{{ Str::limit($blog->content, 100) }}</td>
                             <td>
-                                <button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ $blog->id }}" data-name="{{ $blog->name }}" data-content="{{ $blog->content }}" data-image="{{ $blog->image }}">Edit</button>
-                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ $blog->id }}" data-name="{{ $blog->name }}">Delete</button>
+                                <button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ $blog->id }}" data-name="{{ $blog->name }}" data-content="{{ $blog->content }}" data-image="{{ $blog->image }}"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ $blog->id }}" data-name="{{ $blog->name }}"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
                         @empty
@@ -264,14 +251,8 @@
    
     </div>
     <!-- content-wrapper ends -->
-    <!-- partial:partials/_footer.html -->
-    <footer class="footer">
-      <div class="d-sm-flex justify-content-center justify-content-sm-between">
-        <span class="text-center text-sm-left d-block d-sm-inline-block">Copyright © <a href="https://www.bootstrapdash.com/" target="_blank">bootstrapdash.com</a> 2020</span>
-        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Free <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap dashboard </a>templates from Bootstrapdash.com</span>
-      </div>
-    </footer>
-    <!-- partial -->
+    @include('partials.admin.footer')
+
   </div>
   <!-- main-panel ends -->
 @endsection

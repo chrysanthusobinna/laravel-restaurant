@@ -11,12 +11,14 @@ class Order extends Model
 
 
     protected $fillable = [
+        'order_no',
         'customer_id',
         'order_type',
         'created_by_user_id',
         'updated_by_user_id',
         'total_price',
         'status',
+        'payment_method',
     ];
 
     // Get the customer associated with the order.
