@@ -91,4 +91,17 @@ class MainSiteController extends Controller
     {
         return view('main-site.login');
     }
+
+
+    public function privacyPolicy()
+    {
+        return view('main-site.privacy-policy');
+    }
+    public function termsConditions()
+    {
+        return view('main-site.terms-conditions');
+    }
+
+    
+    
 }

@@ -65,10 +65,16 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-            	<div class="bottom_footer border-top-tran">
-                	<div class="row">
-                        <div class="col-md-12">
+                <div class="bottom_footer border-top-tran">
+                    <div class="row">
+                        <div class="col-md-6">
                             <p class="mb-0 text-center"><script>document.write(new Date().getFullYear());</script> &copy;   All Rights Reserved | <span class="text_default">{{ config('site.name') }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list_none footer_link text-center text-md-right">
+                                <li><a href="{{ route('privacy.policy') }}">Privacy Policy</a></li>
+                                <li><a href="{{ route('terms.conditions') }}">Terms &amp; Conditions</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -77,4 +83,3 @@
     </div>
 </footer>
 <!-- END FOOTER -->
-

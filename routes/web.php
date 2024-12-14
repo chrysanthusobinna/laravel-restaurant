@@ -28,6 +28,8 @@ Route::get('contact/', [MainSiteController::class, 'contact'])->name('contact');
 Route::get('blog/', [MainSiteController::class, 'blog'])->name('blog');
 Route::get('blog-details/', [MainSiteController::class, 'blogDetails'])->name('blog.details');
 
+Route::get('privacy-policy/', [MainSiteController::class, 'privacyPolicy'])->name('privacy.policy');
+Route::get('terms-conditions/', [MainSiteController::class, 'termsConditions'])->name('terms.conditions');
 
 
 //Resetting Password
