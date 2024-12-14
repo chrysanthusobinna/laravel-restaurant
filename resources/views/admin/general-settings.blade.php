@@ -147,6 +147,25 @@
     };
 	
 
+
+
+        // JavaScript for dynamic updates
+        document.getElementById('country').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const timezone = selectedOption.getAttribute('data-timezone');
+        const currencySymbol = selectedOption.getAttribute('data-currency-symbol');
+        const currencyCode = selectedOption.getAttribute('data-currency-code');
+
+        // Update timezone select
+        const timezoneSelect = document.getElementById('timezone');
+        timezoneSelect.innerHTML = `<option value="${timezone}" selected>${timezone}</option>`;
+        timezoneSelect.disabled = false;
+
+        // Update currency symbol and code
+        document.getElementById('currencySymbol').value = currencySymbol || '';
+        document.getElementById('currencyCode').value = currencyCode || '';
+    });
+
 });
 
 
@@ -329,15 +348,17 @@
                                 <tr>
                                     <td>
                                         @if($handle->social_media === 'facebook')
-                                            <i class="fa fa-facebook-square"></i>
+                                            <i class="fab fa-facebook-square"></i>
                                         @elseif($handle->social_media === 'instagram')
-                                            <i class="fa fa-instagram"></i>
+                                            <i class="fab fa-instagram"></i>
                                         @elseif($handle->social_media === 'youtube')
-                                            <i class="fa fa-youtube"></i>                     
+                                            <i class="fab fa-youtube-square"></i>         
+                                        @elseif($handle->social_media === 'tiktok')
+                                            <i class="fab fa-tiktok"></i>                                        
                                         @else
-                                        <i class="fa fa-globe"></i> 
+                                            <i class="fa fa-globe"></i> 
                                         @endif
-                                    {{ $handle->handle }}</td>
+                                        {{ $handle->handle }}</td>
                                     <td>{{ ucfirst($handle->social_media) }}</td>
                                     <td>
                                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#socialMediaModal" onclick="editSocialMediaHandle({{ $handle->id }}, '{{ $handle->handle }}', '{{ $handle->social_media }}')">
@@ -406,6 +427,12 @@
 
 
 
+
+
+    
+    <div class="row">
+        <div class="col-lg-6 d-flex grid-margin stretch-card">
+     
  
     <form method="POST" action="{{ $script ? route('admin.livechat.update', $script->id) : route('admin.livechat.store') }}">
         <div class="card">
@@ -435,7 +462,7 @@
                     <button type="submit" class="btn btn-primary">Update</button>
                     <button type="button" class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete this script?')) { document.getElementById('form-delete-livechat').submit(); }">Remove Live Chat</button>
                 @else
-                    <button type="submit" class="btn btn-success">Add Live Chat</button>
+                    <button type="submit" class="btn btn-primary">Add Live Chat</button>
                 @endif
             </div>
         </div>
@@ -446,6 +473,65 @@
             @method('DELETE')
         </form>
     @endif
+        </div>
+        <div class="col-lg-6 d-flex grid-margin stretch-card">
+ 
+ 
+            <div class="card">
+                <div class="card-header">
+                    Select Country / Time Zone 
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <!-- Country Selection -->
+                            <tr>
+                                <td><strong>Country</strong></td>
+                                <td>
+                                    <select class="form-control" id="country">
+                                        <option value="" selected disabled>Select a country</option>
+                                        <option value="US" data-timezone="America/New_York" data-currency-symbol="$" data-currency-code="USD">United States</option>
+                                        <option value="IN" data-timezone="Asia/Kolkata" data-currency-symbol="?" data-currency-code="INR">India</option>
+                                        <option value="GB" data-timezone="Europe/London" data-currency-symbol="£" data-currency-code="GBP">United Kingdom</option>
+                                        <option value="JP" data-timezone="Asia/Tokyo" data-currency-symbol="¥" data-currency-code="JPY">Japan</option>
+                                        <option value="AU" data-timezone="Australia/Sydney" data-currency-symbol="A$" data-currency-code="AUD">Australia</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            
+                            <!-- Timezone Selection -->
+                            <tr>
+                                <td><strong>Timezone</strong></td>
+                                <td>
+                                    <select class="form-control" id="timezone" readonly>
+                                        <option value="" selected >Select a country first</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            
+                            <!-- Currency Details -->
+                            <tr>
+                                <td><strong>Currency Symbol</strong></td>
+                                <td>
+                                    <input type="text" id="currencySymbol" class="form-control" placeholder="Currency Symbol" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Currency Code</strong></td>
+                                <td>
+                                    <input type="text" id="currencyCode" class="form-control" placeholder="Currency Code" readonly>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div> 
+        </div>
+      </div>
+
     
 
 
