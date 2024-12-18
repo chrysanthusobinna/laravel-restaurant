@@ -55,7 +55,7 @@
 $(document).ready(function () {
     // Function to add item to cart
     function addToCart(id, name, price) {
-        $.post('{{ route('admin.cart.add') }}', {  _token: "{{ csrf_token() }}", id: id, name: name, price: price }, function (data) {
+        $.post('{{ route('admin.cart.add') }}', {  _token: "{{ csrf_token() }}", cartkey: 'admin', id: id, name: name, price: price }, function (data) {
             if (data.success) {
                 updateCartUI(data.cart);
  
@@ -65,7 +65,7 @@ $(document).ready(function () {
 
     // Function to remove item from cart
     function removeFromCart(id) {
-        $.post('{{ route('admin.cart.remove') }}', {  _token: "{{ csrf_token() }}", id: id }, function (data) {
+        $.post('{{ route('admin.cart.remove') }}', {  _token: "{{ csrf_token() }}", cartkey: 'admin', id: id }, function (data) {
             if (data.success) {
                 updateCartUI(data.cart);
             }
@@ -74,7 +74,7 @@ $(document).ready(function () {
 
     // Function to clear cart
     $('#clear-cart').click(function () {
-        $.post('{{ route('admin.cart.clear') }}', { _token: "{{ csrf_token() }}", }, function (data) {
+        $.post('{{ route('admin.cart.clear') }}', { _token: "{{ csrf_token() }}", cartkey: 'admin' }, function (data) {
             if (data.success) {
                 updateCartUI([]);
             }
@@ -95,10 +95,11 @@ $(document).ready(function () {
                 <tr class="cart-item">
                     <td>${item.name}</td>
                     <td>$${item.price}</td>
-                    <td><input type="number"   value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input"></td>
+                    <td><input type="number" value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input" style="width: 4.5em;"></td>
                     <td>$${subtotal.toFixed(2)}</td>
                     <td><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"> <i class="fa fa-times" aria-hidden="true"></i></button></td>
-                </tr>
+                </tr> 
+
             `);
         });
 
@@ -140,11 +141,7 @@ $(document).ready(function () {
 
       // Function to update cart quantity
     function updateCartQuantity(id, quantity) {
-        $.post('{{ route('admin.cart.update')  }}', { 
-            _token: "{{ csrf_token() }}", 
-            id: id, 
-            quantity: quantity 
-        }, function (data) {
+        $.post('{{ route('admin.cart.update')  }}', {   _token: "{{ csrf_token() }}",   cartkey: 'admin', id: id, quantity: quantity }, function (data) {
             if (data.success) {
                 updateCartUI(data.cart);
             }
@@ -152,9 +149,8 @@ $(document).ready(function () {
     }
 
 
-
     // Initial fetch of cart items
-    $.get('{{ route('admin.cart.view') }}', function (data) {
+    $.get('{{ route('admin.cart.view') }}', { cartkey: 'admin' }, function (data) {
         updateCartUI(data.cart);
     });
 });
@@ -291,7 +287,7 @@ $('#payment_method').on('change', function() {
               </div>
  
 
-
+              <div style="overflow-x: auto;">
               <table class="table" >
                 <thead >
                     <tr>
@@ -306,6 +302,8 @@ $('#payment_method').on('change', function() {
                     <!-- Cart items will be inserted here -->
                 </tbody>
             </table>
+            </div>
+
             <hr/>
             <div id="cart-total" class="mt-3"></div>
             <hr/>

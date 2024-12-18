@@ -182,28 +182,25 @@
 
                         <div class="col-lg-3 col-sm-6">
                             <div class="single_product">
+                                <a href="{{ route('menu.item',$menu->id) }}">
                                 <div class="menu_product_img">
                                     <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }} img" >
-                                    <div class="action_btn"><a href="#" class="btn btn-white rounded-0">Add To Cart</a></div>
                                 </div>
+                                </a>
                                 <div class="menu_product_info">
                                     <div class="title">
                                         <h5><a href="{{ route('menu.item',$menu->id) }}"> {{ $menu->name }}</a></h5>
                                     </div>
-                                    <p>{{ $menu->description  }}</p>
+                                    <p>${{ number_format($menu->price, 2) }}</p>
                                 </div>
                                 <div class="menu_footer">
-                                    <div class="rating">
-                                        <div class="product_rate" style="width:100%"></div>
-                                    </div>
-                                    <div class="price">
-                                        <span>${{ number_format($menu->price, 2) }}</span>
-                                    </div>
+                            
+                                    <hr/>
+                                    <button type="button"  class="btn btn-block btn-default rounded-0" name="submit" value="Submit">Add To Cart</button>
+
                                 </div>
                             </div>
                         </div>
-
-						 
                         
                         @empty
                         <b> No Menu available. </b>
