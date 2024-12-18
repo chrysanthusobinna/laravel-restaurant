@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use App\Models\LiveChatScript;
 use App\Models\RestaurantAddress;
@@ -38,9 +39,9 @@ class MainSiteController extends Controller
 
         //$country 	=	"United Kingdom"; 
        // $currencyData = (new CountryCurrencyAPI())->fetchCurrencyData($country);
-        
- 
-        return view('main-site.index');
+       $menus = Menu::all();
+
+        return view('main-site.index', compact('menus'));
     }
 
     public function about()
@@ -62,10 +63,16 @@ class MainSiteController extends Controller
         return view('main-site.menu');
     }
 
-    public function menuItem()
+    public function menuItem($id)
     {
-        return view('main-site.menu-item');
+        $menu = Menu::with(['category'])->findOrFail($id);
+    
+        // Fetch 5 random related menus (same category as the current menu)
+        $relatedMenus = Menu::where('id', '!=', $id)->inRandomOrder()->limit(5)->get();
+    
+        return view('main-site.menu-item', compact('menu', 'relatedMenus'));
     }
+    
 
     public function cart()
     {

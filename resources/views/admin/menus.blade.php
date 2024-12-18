@@ -215,6 +215,10 @@
                         <label for="price" class="form-label">Price</label>
                         <input type="number" step="0.01" name="price" class="form-control" id="price" required>
                     </div>
+                    <div class="alert alert-danger" role="alert">
+                        Recommended image size is <strong>500 x 400</strong>. Uploaded images will be cropped to Recommended size.
+                    </div>
+
                     <div class="mb-3">
                         <label for="image" class="form-label">Image</label>
                         <input type="file" name="image" class="form-control" id="image" required>
@@ -260,6 +264,9 @@
                     <div class="mb-3">
                         <label for="editPrice" class="form-label">Price</label>
                         <input type="number" step="0.01" name="price" class="form-control" id="editPrice" required>
+                    </div>
+                    <div class="alert alert-danger" role="alert">
+                        Recommended image size is <strong>500 x 400</strong>. Uploaded images will be cropped to Recommended size.
                     </div>
                     <div class="mb-3">
                         <label for="editImage" class="form-label">Image</label>

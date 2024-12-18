@@ -18,7 +18,7 @@ use App\Http\Controllers\Admin\GeneralSettingsController;
 
 Route::get('/', [MainSiteController::class, 'home'])->name('home');
 Route::get('menu/', [MainSiteController::class, 'menu'])->name('menu');
-Route::get('menu-item/', [MainSiteController::class, 'menuItem'])->name('menu.item');
+Route::get('menu-item/{id}', [MainSiteController::class, 'menuItem'])->name('menu.item');
 Route::get('cart/', [MainSiteController::class, 'cart'])->name('cart');
 Route::get('checkout/', [MainSiteController::class, 'checkout'])->name('checkout');
 
