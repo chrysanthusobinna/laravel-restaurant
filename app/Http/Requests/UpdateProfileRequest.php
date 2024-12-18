@@ -56,4 +56,14 @@ class UpdateProfileRequest extends FormRequest
             'profile_photo.max' => 'The profile photo may not be greater than 2048 kilobytes.',
         ];
     }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'first_name' => ucwords($this->first_name),
+            'middle_name' => ucwords($this->middle_name),
+            'last_name' => ucwords($this->last_name),
+            'email' => strtolower($this->email),
+
+        ]);
+    }
 }

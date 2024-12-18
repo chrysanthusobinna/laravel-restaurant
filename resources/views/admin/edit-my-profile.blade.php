@@ -115,9 +115,18 @@
                     <tbody>
                         <!-- Name -->
                         <tr>
-                            <td><label for="name">Name</label></td>
-                            <td><input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->first_name) }}" required></td>
+                            <td><label for="first_name">First Name</label></td>
+                            <td><input type="text" class="form-control" id="first_name" name="first_name" value="{{ old('first_name', $user->first_name) }}" required></td>
                         </tr>
+                        <tr>
+                            <td><label for="middle_name">Middle Name</label></td>
+                            <td><input type="text" class="form-control" id="middle_name" name="middle_name" value="{{ old('middle_name', $user->middle_name) }}"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="last_name">Last Name</label></td>
+                            <td><input type="text" class="form-control" id="last_name" name="last_name" value="{{ old('last_name', $user->last_name) }}" required></td>
+                        </tr>
+                        
                         <!-- Email -->
                         <tr>
                             <td><label for="email">Email</label></td>

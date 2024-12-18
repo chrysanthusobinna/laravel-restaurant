@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class UserController extends Controller
 {
@@ -23,7 +24,8 @@ class UserController extends Controller
     // Show the admin management page
     public function index()
     {
-        $users = User::all();
+        // Get all users except the logged-in user
+        $users = User::where('id', '!=', Auth::id())->get();
         return view('admin.manage-users', compact('users'));
     }
 
@@ -38,24 +40,42 @@ class UserController extends Controller
             'role' => $request->role,
             'password' => Hash::make($request->email),
             'notice' => 'change_password_to_activate_account',
-            ]);
-
-        // Send email notification 
-        Mail::to($user->email)->send(new NewAccountNotification($user, $user->email));
-
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+        ]);
+    
+        try {
+            // Send email notification 
+            Mail::to($user->email)->send(new NewAccountNotification($user, $user->email));
+            $message = ['success' => 'User created successfully. Login details sent to user email.'];
+        } catch (TransportExceptionInterface $e) {
+  
+            $message = [
+                'success' => 'User created successfully.',
+                'error' => 'Failed to send email: ' . $e->getMessage()
+            ];
+        }
+    
+        return redirect()->route('admin.users.index')->with($message);
     }
+    
 
     // Update an admin
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
     
+        if($user->notice !="change_password_to_activate_account"){
+
         // Determine ban status and set fields accordingly
         $isBanned = $request->has('ban') && $request->ban === 'on';
         $status = $isBanned ? 0 : 1;
         $notice = $isBanned ? "banned" : null;
-    
+        }
+        else
+        {
+            $status = $user->status;
+            $notice = $user->notice;
+        }
+        
         // Update the user
         $user->update([
             'first_name' => $request->first_name,

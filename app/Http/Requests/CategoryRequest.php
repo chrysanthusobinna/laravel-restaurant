@@ -26,4 +26,10 @@ class CategoryRequest extends FormRequest
             'name.max' => 'The name may not be greater than 255 characters.',
         ];
     }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'name' => ucwords($this->name),
+        ]);
+    }
 }

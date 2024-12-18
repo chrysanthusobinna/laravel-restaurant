@@ -1,13 +1,21 @@
 <?php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateUserRequest extends FormRequest
 {
     public function authorize()
     {
+        // Get the user ID from the route
+        $userId = $this->route('id');
+        
+        // Prevent the logged-in user from updating their own account
+        if ($userId == Auth::id()) {
+            return false; // Deny access
+        }
+        
         return true;  
     }
 
@@ -45,5 +53,16 @@ class UpdateUserRequest extends FormRequest
             'role.required' => 'The role field is required.',
             'role.in' => 'The role must be either admin or global_admin.',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        // Capitalize the first, middle, and last names, and lowercase the email
+        $this->merge([
+            'first_name' => ucwords($this->first_name),
+            'middle_name' => ucwords($this->middle_name),
+            'last_name' => ucwords($this->last_name),
+            'email' => strtolower($this->email),
+        ]);
     }
 }

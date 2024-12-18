@@ -30,6 +30,7 @@
 <script>
 
     function editUser(button) {
+
         let user = $(button).data(); // Extract all data-* attributes into an object
 
         let actionUrl = "{{ route('admin.users.update', ':id') }}".replace(':id', user.id);
@@ -40,7 +41,14 @@
         $('#editLastName').val(user.lastName);
         $('#editEmail').val(user.email);
         $('#editRole').val(user.role);
-        $('#banCheckbox').prop('checked', user.status === 0); // Set checkbox for banning user
+
+        if (user.notice === 'change_password_to_activate_account') {
+            $('#banCheckboxDiv').hide();
+        } else {
+         
+            $('#banCheckboxDiv').show();
+            $('#banCheckbox').prop('checked', user.status === 0); 
+        }
     }
 
 
@@ -50,7 +58,9 @@
         var button = $(event.relatedTarget);
 
         // Extract data from the button's data-* attributes
-        var full_name = button.data('full_name');
+        var first_name = button.data('first_name');
+        var middle_name = button.data('middle_name');
+        var last_name = button.data('last_name');
         var email = button.data('email');
         var role = button.data('role');
         var status = button.data('status');
@@ -61,7 +71,9 @@
         // Update the modal content
         var modal = $(this);
         modal.find('#viewProfilePicture').attr('src', profilePicture || "{{ asset('assets/images/user-icon.png') }}");
-        modal.find('#viewName').text(full_name);
+        modal.find('#viewFirstName').text(first_name);
+        modal.find('#viewMiddleName').text(middle_name);
+        modal.find('#viewLastName').text(last_name);
         modal.find('#viewEmail').text(email);
         modal.find('#viewRole').text(role);
         modal.find('#viewStatus').html(status === 1 
@@ -155,7 +167,9 @@
                                     class="btn btn-primary btn-sm" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#viewUserModal" 
-                                    data-full_name="{{ $user->first_name }}  {{ $user->middle_name ? $user->middle_name . ' ' : '' }}  {{ $user->last_name }}"
+                                    data-first_name="{{ $user->first_name }}" 
+                                    data-middle_name="{{ $user->middle_name }}" 
+                                    data-last_name="{{ $user->last_name }}"
                                     data-email="{{ $user->email }}"
                                     data-role="{{ ucwords(str_replace('_', ' ', $user->role)) }}"
                                     data-status="{{ $user->status }}"
@@ -175,6 +189,7 @@
                                     data-email="{{ $user->email }}"
                                     data-role="{{ $user->role }}"
                                     data-status="{{ $user->status }}"
+                                    data-notice="{{ $user->notice }}"
                                     onclick="editUser(this)">
                                     <i class='fa fa-edit'></i>
                                     </button>
@@ -217,15 +232,15 @@
                     </div>
                     <div class="mb-3">
                         <label>First Name</label>
-                        <input type="text" name="first_name" id="editFirstName" class="form-control" required>
+                        <input type="text" name="first_name" id="FirstName" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label>Middle Name</label>
-                        <input type="text" name="middle_name" id="editMiddleName" class="form-control">
+                        <input type="text" name="middle_name" id="MiddleName" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label>Last Name</label>
-                        <input type="text" name="last_name" id="editLastName" class="form-control" required>
+                        <input type="text" name="last_name" id="LastName" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label>Email</label>
@@ -287,7 +302,7 @@
                             <option value="global_admin">Global Admin</option>
                         </select>
                     </div>
-                    <div class="form-check form-check-flat form-check-primary">
+                    <div class="form-check form-check-flat form-check-primary" id="banCheckboxDiv">
                         <label class="form-check-label" for="banCheckbox">
                             <input type="checkbox" class="form-check-input" id="banCheckbox" name="ban"> Ban User
                             <i class="input-helper"></i>
@@ -324,9 +339,17 @@
                 </div>
                 <table class="table table-bordered">
                     <tr>
-                        <th>Name</th>
-                        <td id="viewName"></td>
+                        <th>First Name</th>
+                        <td id="viewFirstName"></td>
                     </tr>
+                    <tr>
+                        <th>Middle Name</th>
+                        <td id="viewMiddleName"></td>
+                    </tr>
+                    <tr>
+                        <th>Last Name</th>
+                        <td id="viewLastName"></td>
+                    </tr>                    
                     <tr>
                         <th>Email</th>
                         <td id="viewEmail"></td>

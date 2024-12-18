@@ -42,24 +42,15 @@ class MenuController extends Controller
     {
         $validated = $request->validated();
         
-        $image = Image::read($validated['image']);
-
-        // Main Image Upload on Folder Code
-        $imageName = time().'-'.$validated['image']->getClientOriginalName();
-        $path = storage_path('app/public/menus/');
-        $image->save($path.$imageName); 
-        
-         // Generate cropped image
-         $image->cover(500, 400);
-         $image->save($path.$imageName);
-     
-        
-        $validated['image'] = "/menus/".$imageName;
+        if ($request->hasFile('image')) {
+            $validated['image'] = $this->handleImageUpload($validated['image']);
+        }
     
         Menu::create($validated);
     
         return back()->with('success', 'Menu created successfully!');
     }
+    
 
     public function update(MenuRequest $request, $id)
     {
@@ -67,28 +58,14 @@ class MenuController extends Controller
         $validated = $request->validated();
     
         if ($request->hasFile('image')) {
-
-            $image = Image::read($validated['image']);
-
-            // Main Image Upload on Folder Code
-            $imageName = time().'-'.$validated['image']->getClientOriginalName();
-            $path = storage_path('app/public/menus/');
-            $image->save($path.$imageName); 
-            
-             // Generate cropped image
-             $image->cover(500, 400);
-             $image->save($path.$imageName);
-         
-            
-            $validated['image'] = "/menus/".$imageName;
-            //delete old image
-
+            // Delete old image
             $imagePath = storage_path('app/public/' . ltrim($menu->image, '/'));
-
             if (file_exists($imagePath)) {
-                unlink($imagePath); // Delete the image file
+                unlink($imagePath);
             }
-
+    
+            // Handle new image upload
+            $validated['image'] = $this->handleImageUpload($validated['image']);
         }
     
         $menu->update($validated);
@@ -113,6 +90,22 @@ class MenuController extends Controller
         $menu->delete();
 
         return redirect()->route('admin.menus.index')->with('success', 'Menu deleted successfully!');
+    }
+
+    private function handleImageUpload($imageFile)
+    {
+        $image = Image::read($imageFile);
+        $imageName = time() . '-' . $imageFile->getClientOriginalName();
+        $path = storage_path('app/public/menus/');
+
+        // Save Main Image
+        $image->save($path . $imageName);
+
+        // Generate cropped image
+        $image->cover(500, 400);
+        $image->save($path . $imageName);
+
+        return 'menus/' . $imageName;
     }
 
 }

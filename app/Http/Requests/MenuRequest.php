@@ -30,4 +30,10 @@ class MenuRequest extends FormRequest
 
         return $rules;
     }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'name' => ucwords($this->name),
+        ]);
+    }
 }
