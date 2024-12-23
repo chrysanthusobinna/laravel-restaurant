@@ -325,6 +325,7 @@ $('#payment_method').on('change', function() {
         <div class="card-body">
           <form id="checkout-form" method="POST" action="{{ route('admin.order.store') }}">
             <input type="hidden"   id="total" value="0">
+            <input type="hidden"   name="cartkey" value="admin">
             @csrf
               <div class="mt-4">
                   <!-- Toggle Button -->

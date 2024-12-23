@@ -71,6 +71,126 @@
     <script src="assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="assets/js/scripts.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Update cart UI
+            function updateCartUI(cart) {
+                var cartContainer = $('#cart-container');
+                cartContainer.empty(); // Clear existing cart
+    
+                var total = 0;
+                $.each(cart, function (index, item) {
+                    var subtotal = item.quantity * item.price;
+                    total += subtotal;
+    
+                    cartContainer.append(`
+                        <tr>
+                            <td class="product-thumbnail"><a href="${item.id}"><img src="${item.img_src}" alt="product1"></a></td>
+                            <td class="product-name" data-title="Product"><a href="${item.id}">${item.name}</a></td>
+                            <td class="product-price" data-title="Price">$${item.price}</td>
+                            <td class="product-quantity" data-title="Quantity"><div class="quantity">
+                                <input type="number" min="1" name="quantity" value="${item.quantity}" title="Qty" class="qty quantity-input" size="4" data-id="${item.id}">
+                            </div></td>
+                            <td class="product-subtotal" data-title="Total">$${subtotal.toFixed(2)}</td>
+                            <td class="product-remove" data-title="Remove"><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"  > <i class="ti-close"></i></button></td>
+                        </tr>
+                    `);
+                });
+    
+                if (total > 0) {
+                    $('#customer-cart').show();
+                    $('#checkout').show();
+                    $('#empty-cart').hide();
+                    
+                  
+                } else {
+                    $('#customer-cart').hide();
+                    $('#checkout').hide();
+                    $('#empty-cart').show();
+
+                }
+    
+                // Display the total
+                $('#cart-subtotal').text(total.toFixed(2));
+                $('#total').val(total.toFixed(2));
+    
+                // Listener to remove buttons
+                $('.remove-btn').click(function () {
+                    var id          = $(this).data('id');
+                    
+                    removeFromCart(id);
+                });
+    
+                // Listener to quantity inputs
+                $('.quantity-input').change(function () {
+                    var id = $(this).data('id');
+                    var newQuantity = $(this).val();
+                    updateCartQuantity(id, newQuantity);
+                });
+            }
+    
+            // Function to remove item from cart
+            function removeFromCart(id) {
+                var currentCount = parseInt($('#cart_count').text());
+                
+                $.post('{{ route('customer.cart.remove') }}', { _token: "{{ csrf_token() }}", cartkey: 'customer', id: id }, function (data) {
+                    if (data.success) {
+                        updateCartUI(data.cart);
+                        if (currentCount > 0) {
+                            updateCartCount();
+                        }
+                    }
+                });
+            }
+    
+
+            // Function to clear cart
+            $('#clear-cart').click(function () {
+                $.post('{{ route('customer.cart.clear') }}', { _token: "{{ csrf_token() }}", cartkey: 'customer' }, function (data) {
+                    if (data.success) {
+                        updateCartUI([]);
+                        $('#cart_count').text(0);
+
+                    }
+                });
+            });
+
+
+            // Function to update cart quantity
+            function updateCartQuantity(id, quantity) {
+                $.post('{{ route('customer.cart.update')  }}', {   _token: "{{ csrf_token() }}",   cartkey: 'customer', id: id, quantity: quantity }, function (data) {
+                    if (data.success) {
+                        updateCartUI(data.cart);
+                        updateCartCount();
+
+                    }
+                });
+            }
+
+            // Function to update the cart count
+            function updateCartCount() {
+                var totalItems = 0;
+                $('.quantity-input').each(function () {
+                    totalItems += parseInt($(this).val());
+                });
+                $('#cart_count').text(totalItems);
+            }           
+
+    
+            // Listener to remove buttons
+            $('.remove-btn').click(function () {
+                var id = $(this).data('id');
+                removeFromCart(id);
+            });
+    
+            // Initial fetch of cart items
+            $.get('{{ route('customer.cart.view') }}', { cartkey: 'customer' }, function (data) {
+                updateCartUI(data.cart);
+            });
+        });
+    </script>
+    
 @endpush
 
 
@@ -111,7 +231,8 @@
 <!-- START SECTION SHOP -->
 <div class="section">
 	<div class="container">
-        <div class="row">
+        <div class="row" id="customer-cart">
+         
             <div class="col-12">
                 <div class="table-responsive shop_cart_table">
                 	<table class="table">
@@ -125,43 +246,11 @@
                                 <th class="product-remove">Remove</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        	<tr>
-                            	<td class="product-thumbnail"><a href="#"><img src="assets/images/cart_thamb1.jpg" alt="product1"></a></td>
-                                <td class="product-name" data-title="Product"><a href="#">Berry Salad</a></td>
-                                <td class="product-price" data-title="Price">$45.00</td>
-                                <td class="product-quantity" data-title="Quantity"><div class="quantity">
-                                <input type="button" value="-" class="minus">
-                                <input type="text" name="quantity" value="2" title="Qty" class="qty" size="4">
-                                <input type="button" value="+" class="plus">
-                              </div></td>
-                              	<td class="product-subtotal" data-title="Total">$90.00</td>
-                                <td class="product-remove" data-title="Remove"><a href="#"><i class="ti-close"></i></a></td>
-                            </tr>
-                            <tr>
-                            	<td class="product-thumbnail"><a href="#"><img src="assets/images/cart_thamb2.jpg" alt="product2"></a></td>
-                                <td class="product-name" data-title="Product"><a href="#">Milky Fruit</a></td>
-                                <td class="product-price" data-title="Price">$55.00</td>
-                                <td class="product-quantity" data-title="Quantity"><div class="quantity">
-                                <input type="button" value="-" class="minus">
-                                <input type="text" name="quantity" value="1" title="Qty" class="qty" size="4">
-                                <input type="button" value="+" class="plus">
-                              </div></td>
-                              	<td class="product-subtotal" data-title="Total">$55.00</td>
-                                <td class="product-remove" data-title="Remove"><a href="#"><i class="ti-close"></i></a></td>
-                            </tr>
-                            <tr>
-                            	<td class="product-thumbnail"><a href="#"><img src="assets/images/cart_thamb3.jpg" alt="product3"></a></td>
-                                <td class="product-name" data-title="Product"><a href="#">Egg Bread</a></td>
-                                <td class="product-price" data-title="Price">$68.00</td>
-                                <td class="product-quantity" data-title="Quantity"><div class="quantity">
-                                <input type="button" value="-" class="minus">
-                                <input type="text" name="quantity" value="3" title="Qty" class="qty" size="4">
-                                <input type="button" value="+" class="plus">
-                              </div></td>
-                              	<td class="product-subtotal" data-title="Total">$204.00</td>
-                                <td class="product-remove" data-title="Remove"><a href="#"><i class="ti-close"></i></a></td>
-                            </tr>
+                        <tbody id="cart-container">
+
+                            <!-- Cart items will be inserted here -->
+
+
                         </tbody>
                         <tfoot>
                         	<tr>
@@ -169,54 +258,63 @@
                                 	<div class="row no-gutters align-items-center">
 
                                     	<div class="col-lg-4 col-md-6 mb-3 mb-md-0">
-                                            <div class="coupon field_form input-group">
-                                                <input type="text" value="" class="form-control form-control-sm" placeholder="Enter Coupon Code..">
-                                                <div class="input-group-append">
-                                                	<button class="btn btn-default btn-sm" type="submit">Apply Coupon</button>
-                                                </div>
-                                            </div>
+                                  
                                     	</div>
                                         <div class="col-lg-8 col-md-6 text-left text-md-right">
-                                            <button class="btn btn-dark btn-sm" type="submit">Update Cart</button>
+                                            <button id="clear-cart"  class="btn btn-dark btn-sm" type="submit">Clear Cart</button>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                        </tfoot>
+                        </tfoot> 
                     </table>
                 </div>
             </div>
+ 
         </div>
         <div class="row">
             <div class="col-12">
             	<div class="medium_divider"></div>
+
+ 
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-6">
+        <div class="row" id="checkout">
+            <div class="col-lg-8">
+
             	<div class="cart_totals">
-                    <div class="heading_s1 mb-3">
-                        <h6>Cart Totals</h6>
-                    </div>
+             
                     <div class="table-responsive">
+
                         <table class="table">
                             <tbody>
                                 <tr>
                                     <td class="cart_total_label">Cart Subtotal</td>
-                                    <td class="cart_total_amount">$349.00</td>
+                                    <td class="cart_total_amount" id="cart-subtotal">0.00</td>
                                 </tr>
                                 <tr>
-                                    <td class="cart_total_label">Shipping</td>
+                                    <td class="cart_total_label">Delivery Fee</td>
                                     <td class="cart_total_amount">Free Shipping</td>
                                 </tr>
                                 <tr>
                                     <td class="cart_total_label">Total</td>
-                                    <td class="cart_total_amount"><strong>$349.00</strong></td>
+                                    <td class="cart_total_amount"><strong id="cart-total">0</strong></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <a href="#" class="btn btn-default">Proceed To CheckOut</a>
+                    <a href="{{ route('customer.checkout') }}" class="btn btn-default">Proceed To CheckOut</a>
+
+                </div>
+            </div>
+        </div>
+        <div class="row" id="empty-cart">
+            <div class="col-12">
+                <div class="alert alert-secondary text-center" role="alert">
+                    <h4 class="alert-heading">Your Cart is Empty!</h4>
+                    <p>Looks like you haven't added any items to your cart yet. No worries, we've got plenty of delicious options waiting for you.</p>
+                    <hr>
+                    <p class="mb-0">Head over to our <a href="{{ route('menu') }}" class="alert-link">menu</a> and start exploring!</p>
                 </div>
             </div>
         </div>

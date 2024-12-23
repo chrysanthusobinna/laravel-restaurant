@@ -72,6 +72,33 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script>
+            $(document).ready(function () {
+                // Function to add item to cart
+                function addToCart(id, name, price,img_src) {
+                    var currentCount = parseInt($('#cart_count').text());
+
+                    $.post('{{ route('customer.cart.add') }}', {  _token: "{{ csrf_token() }}", cartkey: 'customer', id: id, name: name, price: price, img_src: img_src }, function (data) {
+                        if (data.success) {
+                            $('#cart_count').text(currentCount + 1);
+                         }
+                    });
+                }
+
+            // Attach addToCart function to buttons
+            $('.add-to-cart').click(function () {
+                    var id = $(this).data('id');
+                    var name = $(this).data('name');
+                    var price = $(this).data('price');
+                    var img_src = $(this).data('img_src');
+                    addToCart(id, name, price,img_src);
+                });
+            });
+            
+            
+
+    </script>
 @endpush
 
 
@@ -155,6 +182,15 @@
 </div>
 <!-- END SECTION BANNER -->
 
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
  
  
@@ -196,7 +232,11 @@
                                 <div class="menu_footer">
                             
                                     <hr/>
-                                    <button type="button"  class="btn btn-block btn-default rounded-0" name="submit" value="Submit">Add To Cart</button>
+                                    <button data-id="{{ $menu->id }}"
+                                            data-name="{{ $menu->name }}"
+                                            data-price="{{ $menu->price }}" 
+                                            data-img_src="{{ asset('storage/' . $menu->image) }}"                                            
+                                            type="button"  class="btn btn-block btn-default rounded-0 add-to-cart"  >Add To Cart</button>
 
                                 </div>
                             </div>

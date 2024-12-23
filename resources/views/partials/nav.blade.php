@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg"> 
-    <a class="navbar-brand" href="{{ route('admin.index') }}">
+    <a class="navbar-brand" href="{{ route('home') }}">
         <img class="logo_light" src="/assets/images/logo_light.png" alt="logo">
         <img class="logo_dark" src="/assets/images/logo_dark.png" alt="logo">
     </a>
@@ -23,9 +23,10 @@
     </div>
     <ul class="navbar-nav attr-nav align-items-center">
         <li><a href="javascript:void(0);" class="nav-link search_trigger"><i class="linearicons-magnifier"></i></a> @include('partials.search') </li>
-        <li><a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('cart') }}" ><i class="linearicons-cart"></i><span class="cart_count">2</span></a></li>
+        <li><a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}" ><i class="linearicons-cart"></i><span class="cart_count" id="cart_count">{{ $customer_total_cart_items }}</span></a></li>
     </ul>
     <div class="header_btn d-sm-block d-none">
         <a href="book-table.html" class="btn btn-default rounded-0 ml-2 btn-sm">Order Online</a>
     </div>
 </nav>
+

@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 //use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\RedirectIfNotAdmin;
+use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\MainSiteController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CartController;
@@ -19,8 +21,31 @@ use App\Http\Controllers\Admin\GeneralSettingsController;
 Route::get('/', [MainSiteController::class, 'home'])->name('home');
 Route::get('menu/', [MainSiteController::class, 'menu'])->name('menu');
 Route::get('menu-item/{id}', [MainSiteController::class, 'menuItem'])->name('menu.item');
-Route::get('cart/', [MainSiteController::class, 'cart'])->name('cart');
-Route::get('checkout/', [MainSiteController::class, 'checkout'])->name('checkout');
+
+// Customer Cart 
+Route::get('cart/', [MainSiteController::class, 'cart'])->name('customer.cart');
+Route::post('cart/add', [MainSiteController::class, 'addToCart'])->name('customer.cart.add');
+Route::post('cart/remove', [MainSiteController::class, 'removeFromCart'])->name('customer.cart.remove');
+Route::get('cart/view', [MainSiteController::class, 'getCart'])->name('customer.cart.view');
+Route::post('cart/clear', [MainSiteController::class, 'clearCart'])->name('customer.cart.clear');
+Route::post('cart/update', [MainSiteController::class, 'updateCartQuantity'])->name('customer.cart.update');
+Route::get('checkout/', [MainSiteController::class, 'checkout'])->name('customer.checkout');
+
+Route::post('proccess-checkout/', [MainSiteController::class, 'proccessCheckout'])->name('customer.proccess.checkout');
+
+Route::get('getcart-totalitems/', [MainSiteController::class, 'getTotalItems'])->name('customer.getcart.totalitems');
+
+ 
+Route::get('payment/', [PaymentController::class, 'payment'])->name('payment');
+Route::get('payment-success/', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+Route::get('payment-cancel/', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+
+ Route::get('payment-success', [PaymentController::class, 'paymentSuccess'])->name('payment-success');
+
+
+ Route::get('calculate-distance/', [DistanceController::class, 'getDistance']);
+
+
 
 Route::get('about/', [MainSiteController::class, 'about'])->name('about');
 Route::get('contact/', [MainSiteController::class, 'contact'])->name('contact');

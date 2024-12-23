@@ -20,8 +20,10 @@ class OrderController extends Controller
 
     public function index()
     {
-        $orders = Order::orderBy('created_at', 'desc')->paginate(3);  
-    
+        //$orders = Order::orderBy('id', 'desc')->paginate(3);  
+
+        $orders = Order::orderBy('id', 'desc')->get();;  
+
         return view('admin.orders-index', compact('orders'));
     }
     
@@ -38,7 +40,7 @@ class OrderController extends Controller
 
     public function createOrder(Request $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = session()->get($request->cartkey, []);
         if (empty($cart)) {
             return back()->with('error', 'Cart is empty!');
 
@@ -100,7 +102,7 @@ class OrderController extends Controller
         }
 
         // Clear the cart
-        session()->forget('cart');
+        session()->forget($request->cartkey);
 
         return redirect()->route('admin.index')->with('success', 'Order Created successfully.');
     }

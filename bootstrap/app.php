@@ -15,20 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
+    })->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'getcart-totalitems/',
+            'cart/remove',
+            'cart/',
+            'cart/clear',
+        ]);
     })->create();
 
-
-  /*
-
-  ->withMiddleware(function (Middleware $middleware) {
-        $middleware->validateCsrfTokens(except: [
-            'admin/cart/add',
-            'admin/cart/remove',
-            'admin/cart/',
-            'admin/cart/clear',
-        ]);
-    })
-
-    */
+     
 
     
