@@ -132,6 +132,11 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::put('livechat/{id}', [GeneralSettingsController::class, 'updateLiveChatScript'])->name('admin.livechat.update');
     Route::delete('livechat/{id}', [GeneralSettingsController::class, 'destroyLiveChatScript'])->name('admin.livechat.destroy');
 
+    //Admin Settings Orders
+    Route::post('order-settings', [GeneralSettingsController::class, 'updateOrderSettings'])->name('admin.order-settings.update');
+
+
+
     //Admin Users routes
     Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
     Route::post('users', [UserController::class, 'store'])->name('admin.users.store');

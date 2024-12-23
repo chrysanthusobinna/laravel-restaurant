@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Http\Request;
+use App\Models\OrderSettings;
 use App\Models\LiveChatScript;
 use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
@@ -32,11 +34,10 @@ class GeneralSettingsController extends Controller
         $workingHours = RestaurantWorkingHour::all();
         $socialMediaHandles = SocialMediaHandle::all();
         $script = LiveChatScript::latest()->first();
+        $order_settings = OrderSettings::firstOrNew();
 
 
-
-
-        return view('admin.general-settings', compact('addresses', 'phoneNumbers', 'workingHours','socialMediaHandles','script'));
+        return view('admin.general-settings', compact('addresses', 'phoneNumbers', 'workingHours','socialMediaHandles','script','order_settings'));
     }
 
     // Restaurant Phone Number CRUD
@@ -187,4 +188,19 @@ class GeneralSettingsController extends Controller
 
     }
 
+    public function updateOrderSettings(Request $request)
+    {
+        $request->validate([
+            'price_per_mile' => 'required|numeric',
+            'distance_limit_in_miles' => 'required|integer',
+        ]);
+
+        $settings = OrderSettings::firstOrNew();
+        $settings->price_per_mile = $request->input('price_per_mile');
+        $settings->distance_limit_in_miles = $request->input('distance_limit_in_miles');
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Order Settings updated successfully!');
+
+    }
 }

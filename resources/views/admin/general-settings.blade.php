@@ -534,7 +534,28 @@
 
     
 
-
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Customer Order Settings</span>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.order-settings.update') }}" method="POST">
+                @csrf
+    
+                <div class="form-group">
+                    <label for="price_per_mile">Price per Mile ($)</label>
+                    <input type="number" name="price_per_mile" id="price_per_mile" class="form-control" value="{{ $order_settings->price_per_mile ?? '' }}" step="0.01" required>
+                </div>
+    
+                <div class="form-group">
+                    <label for="distance_limit_in_miles">Distance Limit in Miles</label>
+                    <input type="number" name="distance_limit_in_miles" id="distance_limit_in_miles" class="form-control" value="{{ $order_settings->distance_limit_in_miles ?? '' }}" required>
+                </div>
+    
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
 
 
 
