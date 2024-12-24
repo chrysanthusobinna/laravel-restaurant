@@ -46,6 +46,11 @@ class PaymentController extends Controller
         // Retrieve order no. from session
         $order_no = session('order_no');
 
+ 
+        if (Order::where('order_no', $order_no)->exists()) {
+            return redirect() ->route('menu')->withErrors('The order number already exists. Please try again.');
+        }
+
 
 
         // Initialize the line_items array
