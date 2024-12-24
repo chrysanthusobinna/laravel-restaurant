@@ -41,7 +41,7 @@
       var table = $('.data-table').DataTable({
           processing: true,
           serverSide: true,
-          ajax: "{{ route('admin.orders.index') }}",
+          ajax: "{{ route('admin.orders.index', ['filter' => $filter]) }}",
           columns: [
             { data: 'order_no', name: 'order_no' },
             { data: 'created_at', name: 'created_at' },
@@ -99,7 +99,7 @@
 
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Orders</h5>
+            <h5 class="card-title mb-0">{{ $filter }} Orders</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">

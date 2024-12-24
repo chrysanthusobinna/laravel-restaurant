@@ -10,7 +10,7 @@
         <div class="icon">
           <i class="ion ion-help-circled"></i>
         </div>
-        <a href="#" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('admin.orders.index', ['filter' => 'pending']) }}" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -25,7 +25,7 @@
         <div class="icon">
           <i class="ion ion-android-globe"></i>
         </div>
-        <a href="#" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('admin.orders.index', ['filter' => 'online']) }}" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -40,7 +40,7 @@
         <div class="icon">
           <i class="ion ion-bag"></i>
         </div>
-        <a href="#" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('admin.orders.index', ['filter' => 'instore']) }}" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -55,9 +55,9 @@
         <div class="icon">
           <i class="ion ion-pie-graph"></i>
         </div>
-        <a href="#" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('admin.orders.index') }}" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
   </div>
-
+ 

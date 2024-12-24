@@ -20,29 +20,42 @@ class OrderController extends Controller
     {
         // Share the logged-in user with all views
         view()->share('loggedInUser', Auth::User());
-        
+
         $this->shareOrderStatistics();
         
     }
 
 
-    public function index(Request $request)
+    public function index(Request $request, $filter = null)
     {
-        //$orders = Order::orderBy('id', 'desc')->paginate(3);  
 
-       // $orders = Order::orderBy('id', 'desc')->get();;  
+        // Define allowed filters
+        $allowedFilters = ['pending', 'online', 'instore'];
 
-        //return view('admin.orders-index', compact('orders'));
+        if ($filter && !in_array($filter, $allowedFilters)) {
+            return redirect()->route('admin.orders.index')->with('error', 'Invalid filter value.');
+        }
 
         if ($request->ajax()) {
-
-            //$order = Order::query();
+ 
             $orders = Order::select(['id', 'order_no', 'created_at', 'total_price', 'status', 'order_type'])->orderBy('id', 'desc');
+
+
+            // Apply filters based on the user's selection
+            if ($filter) {
+                if ($filter == 'pending') {
+                    $orders = $orders->where('status', 'pending');
+                } elseif ($filter == 'online') {
+                    $orders = $orders->where('order_type', 'online');
+                } elseif ($filter == 'instore') {
+                    $orders = $orders->where('order_type', 'instore');
+                }
+            }
 
             return Datatables::of($orders)
                     ->addIndexColumn()
                     ->addColumn('action', function ($order) {
-                        return '<a href="'.route('admin.orders.show', $order->id).'" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>';
+                        return '<a href="'.route('admin.order.show', $order->id).'" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>';
                     })
                     ->editColumn('order_no', function ($order) {
                         return "#".$order->order_no;
@@ -56,7 +69,7 @@ class OrderController extends Controller
                     })
                     ->editColumn('status', function ($order) {
                         return $order->status == 'pending' 
-                            ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i>'.ucfirst($order->status).'</span>' 
+                            ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> '.ucfirst($order->status).'</span>' 
                             : ucfirst($order->status);
                     })
                     
@@ -67,7 +80,7 @@ class OrderController extends Controller
                     ->make(true);
         }
           
-        return view('admin.orders-index');
+        return view('admin.orders-index', compact('filter'));
     }
     
     public function show($id)
@@ -147,7 +160,7 @@ class OrderController extends Controller
         // Clear the cart
         session()->forget($request->cartkey);
 
-        return redirect()->route('admin.index')->with('success', 'Order Created successfully.');
+        return redirect()->route('admin.orders.index')->with('success', 'Order Created successfully.');
     }
     public function update(Request $request, $id)
     {

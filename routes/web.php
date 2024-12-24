@@ -160,8 +160,8 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
  
     //Admin Order routes
-    Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');
-    Route::get('orders/{id}', [OrderController::class, 'show'])->name('admin.orders.show');
+    Route::get('orders/{filter?}', [OrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('order/{id}', [OrderController::class, 'show'])->name('admin.order.show');
     Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
     Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
 
