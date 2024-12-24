@@ -19,12 +19,15 @@ use App\Http\Controllers\Traits\CartTrait;
 use GetCountryCurrency\CountryCurrencyAPI;
 use App\Http\Requests\CustomerDetailsRequest;
 use App\Http\Controllers\Traits\ViewSharedDataTrait;
+use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 
 
 class MainSiteController extends Controller
 {
     use CartTrait;
     use ViewSharedDataTrait;
+    use OrderNumberGeneratorTrait;
+
 
     public function __construct()
     {
@@ -180,16 +183,7 @@ class MainSiteController extends Controller
     {
         return view('main-site.terms-conditions');
     }
-
-    protected function generateOrderNumber()
-    {
-        do {
-            $order_no = random_int(1000000, 9999999);   
-        } while (Order::where('order_no', $order_no)->exists());
-
-        return $order_no;
-    }
-
+ 
 
     
 }

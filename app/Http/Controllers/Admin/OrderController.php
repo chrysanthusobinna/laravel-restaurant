@@ -7,9 +7,12 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 
 class OrderController extends Controller
 {
+    use OrderNumberGeneratorTrait;
+
     public function __construct()
     {
         // Share the logged-in user with all views
@@ -119,15 +122,6 @@ class OrderController extends Controller
         return back()->with('success', 'Order status updated successfully');
     }
 
-    
-    // Function to generate a unique 7-digit order number
-    protected function generateOrderNumber()
-    {
-        do {
-            $order_no = random_int(1000000, 9999999);   
-        } while (Order::where('order_no', $order_no)->exists());
-
-        return $order_no;
-    }
+ 
  
 }
