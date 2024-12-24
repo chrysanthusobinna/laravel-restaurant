@@ -19,24 +19,9 @@ class MenuController extends Controller
     }
     public function index()
     {
-        $categories = Category::with('menus')->get(); // Load categories with menus
+        $categories = Category::with('menus')->get();  
         return view('admin.menus', compact('categories'));
     }
-/*
-    public function store(MenuRequest $request)
-    {
-        $validated = $request->validated();
-    
-        // Handle image upload
-        $path = $request->file('image')->store('menus', 'public');
-        $validated['image'] = $path;
-    
-        Menu::create($validated);
-    
-        return back()->with('success', 'Menu created successfully!');
-    }
-    */
-
 
     public function store(MenuRequest $request)
     {

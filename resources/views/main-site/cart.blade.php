@@ -112,7 +112,7 @@
                 }
     
                 // Display the total
-                $('#cart-subtotal').text(total.toFixed(2));
+                $('#cart-subtotal').text("$" + total.toFixed(2));
                 $('#total').val(total.toFixed(2));
     
                 // Listener to remove buttons
@@ -290,15 +290,7 @@
                             <tbody>
                                 <tr>
                                     <td class="cart_total_label">Cart Subtotal</td>
-                                    <td class="cart_total_amount" id="cart-subtotal">0.00</td>
-                                </tr>
-                                <tr>
-                                    <td class="cart_total_label">Delivery Fee</td>
-                                    <td class="cart_total_amount">Free Shipping</td>
-                                </tr>
-                                <tr>
-                                    <td class="cart_total_label">Total</td>
-                                    <td class="cart_total_amount"><strong id="cart-total">0</strong></td>
+                                    <td class="cart_total_amount" id="cart-subtotal">$0.00</td>
                                 </tr>
                             </tbody>
                         </table>

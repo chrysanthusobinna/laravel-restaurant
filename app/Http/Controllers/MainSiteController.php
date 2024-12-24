@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use App\Models\Order;
+use App\Models\Category;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Models\OrderSettings;
 use App\Models\LiveChatScript;
+use App\Helpers\DistanceHelper;
 use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
 use App\Models\RestaurantPhoneNumber;
@@ -14,35 +17,19 @@ use App\Models\RestaurantWorkingHour;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
 use GetCountryCurrency\CountryCurrencyAPI;
+use App\Http\Requests\CustomerDetailsRequest;
+use App\Http\Controllers\Traits\ViewSharedDataTrait;
 
 
 class MainSiteController extends Controller
 {
-    // Share live chat script with all views
+    use CartTrait;
+    use ViewSharedDataTrait;
+
     public function __construct()
     {
-        $liveChatScript = LiveChatScript::latest()->first();
-
-        $firstRestaurantAddress = RestaurantAddress::first();
-        $firstRestaurantPhoneNumber = RestaurantPhoneNumber::first();
-        $socialMediaHandles = SocialMediaHandle::orderBy('id', 'desc')->get();
-        
-        $whatsAppNumber = RestaurantPhoneNumber::where('use_whatsapp', 1)->first();
-
-        $customer_total_cart_items = $this->getTotalItems('customer');
-        
-        view()->share([
-            'liveChatScript' => $liveChatScript,
-            'whatsAppNumber' => $whatsAppNumber,
-            'socialMediaHandles' => $socialMediaHandles,
-            'firstRestaurantAddress' => $firstRestaurantAddress,
-            'firstRestaurantPhoneNumber' => $firstRestaurantPhoneNumber,           
-            'customer_total_cart_items' => $customer_total_cart_items,           
-        ]);
+        $this->initializeSharedLogic();
     }
-
-    use CartTrait;
-
 
     public function home()
     {
@@ -70,7 +57,8 @@ class MainSiteController extends Controller
 
     public function menu()
     {
-        return view('main-site.menu');
+        $categories = Category::with('menus')->get();  
+        return view('main-site.menu',compact('categories'));
     }
 
     public function menuItem($id)
@@ -90,19 +78,19 @@ class MainSiteController extends Controller
     }
 
 
-    public function checkout($cartkey = 'customer')
+    public function checkout()
     {
         // Check if the session contains the cart key
-        if (!session()->has($cartkey)) {
-            return redirect()->route('home')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
+        if (!session()->has($this->cartkey)) {
+            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
     
         // Fetch the cart from the session
-        $cart = session()->get($cartkey, []);
+        $cart = session()->get($this->cartkey, []);
     
         // Check if the cart is empty
         if (empty($cart)) {
-            return redirect()->route('home')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
+            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
     
         // Calculate the subtotal
@@ -113,32 +101,50 @@ class MainSiteController extends Controller
         return view('main-site.checkout', compact('cart', 'subtotal'));
     }
     
-    public function proccessCheckout(Request $request, $cartkey = 'customer')
+    public function proccessCheckout(CustomerDetailsRequest $request)
     {
         // Check if the session contains the cart key
-        if (!session()->has($cartkey)) {
-            return redirect()->route('home')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
+        if (!session()->has($this->cartkey)) {
+            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
 
-            
-        // Validate the input
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'county' => 'nullable|string|max:100',
-            'postcode' => 'required|string|max:20',
-            'additional_info' => 'nullable|string|max:500',
-        ]);
+        $order_settings = OrderSettings::firstOrNew();
+
+        if (!$order_settings->exists) {
+            // OrderSettings has no data
+            return redirect()->route('home')->withErrors('No order settings found.');
+        }
+        $price_per_mile =   $order_settings->price_per_mile;
+        $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
+
+        $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
+        $delivery_address   = $request->address . ' ' . $request->city . ' ' . $request->state . ' ' . $request->postcode;
+
+        // Call the DistanceHelper to get the distance
+        $distanceData = DistanceHelper::getDistance($restaurant_address, $delivery_address);
+
+        // Check if there's an error
+        if (isset($distanceData['error'])) {
+            return back()->withErrors($distanceData['error']);
+        }
+
+        $distance_in_miles= $distanceData['value_in_miles'];
+
+        if ($distance_in_miles > $distance_limit_in_miles) {
+            $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
+            return back()->withErrors($error_message)->withInput();
+        }
+        
+        $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
+
+        // Store delivery_fee , price_per_mile and distance_in_miles in  session 
+        session()->put('delivery_details', [ 'delivery_fee' => $delivery_fee, 'distance_in_miles' => $distance_in_miles,  'price_per_mile' => $price_per_mile, ]);
 
         // Store the validated data in the session
-        Session::put('customer_details', $validatedData);
+        Session::put('customer_details', $request->validated());
 
-        // Generate a unique 7-digit order number
+        // Generate a unique 7-digit order number and store in session
         $order_no = $this->generateOrderNumber();
         session(['order_no' => $order_no]);
 

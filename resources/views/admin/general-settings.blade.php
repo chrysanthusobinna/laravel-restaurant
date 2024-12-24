@@ -254,7 +254,7 @@
                                         <i class="fa fa-phone" aria-hidden="true"></i> 
                                         {{ $phoneNumber->phone_number }}
                                         @if($phoneNumber->use_whatsapp == 1)
-                                            <span class="badge bg-success"><i class="fa fa-whatsapp"></i></span>
+                                            <span class="badge bg-success"><i class="fab fa-whatsapp"></i></span>
                                         @endif
                                     </td>
                                     <td class="text-end">

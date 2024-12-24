@@ -7,7 +7,7 @@
                 <div class="col-xl-6 col-md-6 col-sm-12">
                 	<div class="widget">
                         <div class="footer_logo">
-                            <a href="index-6.html"><img src="assets/images/logo_light.png" alt="logo"></a>
+                            <a href="index-6.html"><img src="/assets/images/logo_light.png" alt="logo"></a>
                         </div>
                         <p>At {{ config('site.name') }}, we pride ourselves on bringing you the authentic flavors of West Africa. Our expertly crafted dishes and warm hospitality create a dining experience you won't forget.</p>
                     </div>
@@ -52,7 +52,7 @@
 
                             <li> <i class="ti-email"></i>  <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a> </li>
                         
-                            @if($firstRestaurantAddress) <li> <i class="ti-mobile"></i> <p>{{ $firstRestaurantAddress->address }}</p> </li> @endif
+                            @if($firstRestaurantPhoneNumber) <li> <i class="ti-mobile"></i> <p>{{ $firstRestaurantPhoneNumber->phone_number }}</p> </li> @endif
 
 
                         </ul>

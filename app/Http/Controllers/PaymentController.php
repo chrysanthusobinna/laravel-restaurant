@@ -9,21 +9,28 @@ use App\Models\Customer;
 use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Traits\CartTrait;
+use App\Http\Controllers\Traits\ViewSharedDataTrait;
 
 class PaymentController extends Controller
 {
-     public function payment($cartkey="customer")
+    use CartTrait;
+    use ViewSharedDataTrait;
+
+    public function __construct()
+    {
+        $this->initializeSharedLogic();
+
+    }
+
+    
+
+
+     public function payment()
     {
 
-        // Check if the session contains the cart key
-        if (!session()->has($cartkey)) {
-            return redirect()->route('home')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
-        }
-
-        // Check if the session contains the customer details
-        if (!session()->has('customer_details')) {
-            return redirect()->route('home')->withErrors('Error Occusred');
-        }
+        //run all required session checks
+        $this->runAllChecks();
 
         // Retrieve customer details from the session
         $customerDetails = Session::get('customer_details', []);
@@ -31,6 +38,11 @@ class PaymentController extends Controller
         // Retrieve cart items from session
         $cart_items = session()->get('customer', []);
 
+        // Retrieve Delivery Details
+        $deliveryDetails = session('delivery_details');
+        $delivery_fee = $deliveryDetails['delivery_fee'];
+    
+        
         // Retrieve order no. from session
         $order_no = session('order_no');
 
@@ -52,7 +64,22 @@ class PaymentController extends Controller
                 'quantity' => $cart_item['quantity'],
             ];
         }
-        
+ 
+
+        // Add delivery fee in the line_items
+        if (isset($delivery_fee)) {
+            $line_items[] = [
+                'price_data' => [
+                    'currency' => 'gbp',
+                    'product_data' => [
+                        'name' => 'Delivery Fee',
+                    ],
+                    'unit_amount' => $delivery_fee * 100, // Convert to cents
+                ],
+                'quantity' => 1, // Delivery fee is a one-time charge
+            ];
+        }
+
         // Set Stripe secret key
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -83,7 +110,7 @@ class PaymentController extends Controller
             return redirect($checkout_session->url);
         } catch (\Exception $e) {
             $error_msg  =  $e->getMessage();
-            return redirect()->route('home')->withErrors($error_msg);            
+            return redirect()->route('menu')->withErrors($error_msg);            
         }
     }
 
@@ -95,20 +122,30 @@ class PaymentController extends Controller
  
     public function paymentSuccess(Request $request)
     {
-                   
+        //run all required session checks
+        $this->runAllChecks();
+
+        $customerDetails = Session::get('customer_details', []);
+
         // Set Stripe secret key
         Stripe::setApiKey(config('services.stripe.secret'));
     
         // Retrieve the session ID from the request
         $session_id = $request->query('session_id');
 
-        $cartkey = "customer";
-
         // Retrieve the order number from the session
         $order_no = session('order_no');
+
+        // Retrieve Delivery Details from the session
+        $deliveryDetails = session('delivery_details');
+        $delivery_fee = $deliveryDetails['delivery_fee'];
+        $delivery_distance = $deliveryDetails['distance_in_miles'];
+        $price_per_mile= $deliveryDetails['price_per_mile'];
     
         if ($session_id) {
             try {
+                    $cart = session()->get($this->cartkey, []);
+
                     // Retrieve the checkout session
                     $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
 
@@ -116,19 +153,12 @@ class PaymentController extends Controller
 
                     // Verify the order number
                     if ($order_no == $orderNoFromStripe) {
-                        // Process order confirmation
 
                     // Retrieve the customer and payment details
                     $customer_email = $checkout_session->customer_email;
                     $metadata = $checkout_session->metadata;
         
-                    //  confirm the user and payment details
-            
-                    $cart = session()->get($cartkey, []);
-                    if (empty($cart)) {
-                        return back()->with('error', 'Cart is empty!');
 
-                    }
 
                     $totalPrice = array_reduce($cart, function ($carry, $item) {
                         return $carry + ($item['price'] * $item['quantity']);
@@ -155,6 +185,11 @@ class PaymentController extends Controller
                         'total_price' => $totalPrice,
                         'status' => 'pending',
                         'payment_method' => "STRIPE",
+                        'additional_info' => $customerDetails['additional_info'],
+                        'delivery_fee' => $delivery_fee,
+                        'delivery_distance' => $delivery_distance,
+                        'price_per_mile' => $price_per_mile,
+                        
                     ]);
 
                     if ($order) {
@@ -169,52 +204,67 @@ class PaymentController extends Controller
                     }
 
                     // Clear the cart
-                    session()->forget($request->cartkey);
+                    session()->forget($this->cartkey);
     
                     return view('main-site.payment-success', ['customer_email' => $customer_email,  'metadata' => $metadata, ]);
-/*
-                    return response()->json([
-      
-                        'order_no' => $order_no ?? null, // Ensure the variable exists
-                        'orderNoFromStripe' => $orderNoFromStripe ?? null, // Ensure the variable exists
-                    ]);
-                    */
+
 
                 } else {
-                    return redirect()->route('home')->withErrors('Order verification failed');
+                    return redirect()->route('menu')->withErrors('Order verification failed');
                 }
 
             } catch (\Exception $e) {
                 $error_msg  =  $e->getMessage();
-                return redirect()->route('home')->withErrors($error_msg);
+                return redirect()->route('menu')->withErrors($error_msg);
             }
         } else {
-            return redirect()->route('home')->withErrors('Session ID not found. Please contact support.');
+            return redirect()->route('menu')->withErrors('Session ID not found. Please contact support.');
         }
     }
     
 
-    public function processPayment(Request $request)
+
+    
+    // Check if a session key exists and the cart is not empty, otherwise redirect with an error message
+    protected function checkCart()
     {
-        try {
-            // Set Stripe secret key
-            Stripe::setApiKey(config('services.stripe.secret'));
+ 
+        if (!session()->has($this->cartkey) || empty(session()->get($this->cartkey))) {
+            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.')->send();
+        }
+    }
 
-            // Create a payment intent
-            $paymentIntent = PaymentIntent::create([
-                'amount' => $request->amount * 100, // Amount in cents
-                'currency' => 'usd',
-                'payment_method_types' => ['card'],
-            ]);
+    // Check if a session customer_details exists, otherwise redirect with an error message
+    protected function checkCustomerDetails()
+    {
+        if (!session()->has('customer_details')) {
+            return redirect()->route('menu')->withErrors('We could not retrieve your customer details. Please try again or contact support if the issue persists.')->send();
+        }
+    }
 
-            return response()->json([
-                'clientSecret' => $paymentIntent->client_secret,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+    // Check if a session delivery_details exists, otherwise redirect with an error message
+    protected function checkDeliveryDetails()
+    {
+        if (!session()->has('delivery_details')) {
+            return redirect()->route('menu')->withErrors('We could not retrieve your delivery details. Please try again or contact support if the issue persists.')->send();
+        }
+    }
+
+    // Check if a session order_no exists, otherwise redirect with an error message
+    protected function checkOrderNo()
+    {
+        if (!session()->has('order_no')) {
+            return redirect()->route('menu')->withErrors('We could not retrieve your order number. Please try again or contact support if the issue persists.')->send();
         }
     }
 
 
-
+    // Call all checks at once
+    protected function runAllChecks()
+    {
+        $this->checkCart();
+        $this->checkCustomerDetails();
+        $this->checkDeliveryDetails();
+        $this->checkOrderNo();
+    }
 }

@@ -74,31 +74,10 @@
     <script src="/assets/js/scripts.js"></script>
 
     <script>
-            $(document).ready(function () {
-                // Function to add item to cart
-                function addToCart(id, name, price,img_src) {
-                    var currentCount = parseInt($('#cart_count').text());
-
-                    $.post('{{ route('customer.cart.add') }}', {  _token: "{{ csrf_token() }}", cartkey: 'customer', id: id, name: name, price: price, img_src: img_src }, function (data) {
-                        if (data.success) {
-                            $('#cart_count').text(currentCount + 1);
-                         }
-                    });
-                }
-
-            // Attach addToCart function to buttons
-            $('.add-to-cart').click(function () {
-                    var id = $(this).data('id');
-                    var name = $(this).data('name');
-                    var price = $(this).data('price');
-                    var img_src = $(this).data('img_src');
-                    addToCart(id, name, price,img_src);
-                });
-            });
-            
-            
-
+        const csrfToken = "{{ csrf_token() }}";
+        const addToCartUrl = "{{ route('customer.cart.add') }}";
     </script>
+    <script src="{{ asset('/assets/js/add-to-cart.js') }}"></script>
 @endpush
 
 

@@ -19,7 +19,12 @@ class Order extends Model
         'total_price',
         'status',
         'payment_method',
+        'additional_info',
+        'delivery_fee',
+        'delivery_distance',
+        'price_per_mile',
     ];
+    
 
     // Get the customer associated with the order.
     public function customer()

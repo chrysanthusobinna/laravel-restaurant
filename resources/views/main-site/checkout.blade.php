@@ -117,62 +117,62 @@
 <!-- START SECTION SHOP -->
 <div class="section">
 	<div class="container">
-   
+        @include('partials.message-bag')
+
     
         <div class="row">
         	<div class="col-lg-6">
-                    <div  class="row">
+                <div  class="row">
 
-                
                     <!-- Name -->
                     <div class="form-group col-md-12">
-                        <input class="form-control" required type="text" name="name" placeholder="Name *">
+                        <input class="form-control" required type="text" name="name" value="{{ old('name') }}" placeholder="Name *">
                     </div>
-                
+
                     <!-- Email -->
                     <div class="form-group col-md-12">
-                        <input class="form-control" required type="email" name="email" placeholder="Email Address *">
+                        <input class="form-control" required type="email" name="email" value="{{ old('email') }}" placeholder="Email Address *">
                     </div>
-                
+
                     <!-- Phone Number -->
                     <div class="form-group col-md-12">
-                        <input class="form-control" required type="tel" name="phone_number" placeholder="Phone Number *">
+                        <input class="form-control" required type="tel" name="phone_number" value="{{ old('phone_number') }}" placeholder="Phone Number *">
                     </div>
-                
+
                     <!-- Address -->
                     <div class="form-group col-md-12">
-                        <input class="form-control" required type="text" name="address" placeholder="Address *">
+                        <input class="form-control" required type="text" name="address" value="{{ old('address') }}" placeholder="Address *">
                     </div>
-                
+
                     <!-- City -->
                     <div class="form-group col-md-6">
-                        <input class="form-control" required type="text" name="city" placeholder="City / Town *">
+                        <input class="form-control" required type="text" name="city" value="{{ old('city') }}" placeholder="City / Town *">
                     </div>
-                
+
                     <!-- State -->
                     <div class="form-group col-md-6">
-                        <input class="form-control" required type="text" name="state" placeholder="State *">
+                        <input class="form-control" required type="text" name="state" value="{{ old('state') }}" placeholder="State *">
                     </div>
-                
+
                     <!-- County (Optional) -->
                     <div class="form-group col-md-6">
-                        <input class="form-control" type="text" name="county" placeholder="County (Optional)">
+                        <input class="form-control" type="text" name="county" value="{{ old('county') }}" placeholder="County (Optional)">
                     </div>
-                
+
                     <!-- Postcode -->
                     <div class="form-group col-md-6">
-                        <input class="form-control" required type="text" name="postcode" placeholder="Postcode / ZIP *">
+                        <input class="form-control" required type="text" name="postcode" value="{{ old('postcode') }}" placeholder="Postcode / ZIP *">
                     </div>
-                
+
                     <!-- Additional Information -->
                     <div class="form-group mb-0 mt-2 col-md-12">
                         <div class="heading_s1">
                             <h4>Additional Information</h4>
                         </div>
-                        <textarea rows="4" class="form-control" name="additional_info" placeholder="e.g., allergies or any other information you want to provide"></textarea>
-                    </div>
+                        <textarea rows="4" class="form-control" name="additional_info" placeholder="e.g., allergies or any other information you want to provide">{{ old('additional_info') }}</textarea>
+                    </div> 
                 </div>
-                
+            
             </div>
             <div class="col-lg-6">
                 <div class="order_review">
@@ -197,15 +197,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>SubTotal</th>
-                                    <td class="product-subtotal">${{ number_format($subtotal, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Shipping</th>
-                                    <td>Free Shipping</td>
-                                </tr>
-                                <tr>
-                                    <th>Total</th>
+                                    <th>Cart Subtotal</th>
                                     <td class="product-subtotal">${{ number_format($subtotal, 2) }}</td>
                                 </tr>
                             </tfoot>

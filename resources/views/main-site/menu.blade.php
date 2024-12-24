@@ -70,6 +70,13 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script>
+        const csrfToken = "{{ csrf_token() }}";
+        const addToCartUrl = "{{ route('customer.cart.add') }}";
+    </script>
+    <script src="{{ asset('/assets/js/add-to-cart.js') }}"></script>
+    
 @endpush
 
 
@@ -111,152 +118,62 @@
     <!-- START SECTION OUR MENU -->
 <div class="section pb_70">
     <div class="container">
+        @include('partials.message-bag')
+
+
+        @forelse ($categories as $category)
+
         <div class="row align-items-center">
             <div class="col-md-12">
                 <div class="heading_tab_header animation" data-animation="fadeInUp" data-animation-delay="0.02s">
-                    <div class="heading_s1">
-                        <h2>from Our Menu</h2>
-                    </div>
-                    <div class="tab-style1">
-                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#tabmenubar" aria-expanded="false">
-                            <span class="ion-android-menu"></span>
-                        </button>
-                        <ul id="tabmenubar" class="nav nav-tabs" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="Breakfast-tab" data-toggle="tab" href="#Breakfast" role="tab" aria-controls="Breakfast" aria-selected="true">Breakfast</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="Lunch-tab" data-toggle="tab" href="#Lunch" role="tab" aria-controls="Lunch" aria-selected="false">Lunch</a>
-                            </li>
-                        </ul>
-                    </div>
+                    <div class="heading_s1">  <h2>{{ $category->name }}</h2> </div>
                 </div>
             </div>
         </div>
         <div class="row">
-            <div class="col-12">
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="Breakfast" role="tabpanel" aria-labelledby="Breakfast-tab">
-                        <div class="row">
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="single_product">
-                                    <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item1.jpg" alt="menu_item1">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
-                                    </div>
-                                    <div class="menu_product_info">
-                                        <div class="title">
-                                            <h5><a href="#">Nam neque pellentesque</a></h5>
-                                        </div>
-                                        <p>Lorem Ipsum is simply dummy text of the printing and industry.</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:68%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>$39</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="single_product">
-                                    <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item2.jpg" alt="menu_item2">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
-                                    </div>
-                                    <div class="menu_product_info">
-                                        <div class="title">
-                                            <h5><a href="#">Nam neque pellentesque</a></h5>
-                                        </div>
-                                        <p>Lorem Ipsum is simply dummy text of the printing and industry.</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:68%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>$39</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="single_product">
-                                    <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item3.jpg" alt="menu_item3">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
-                                    </div>
-                                    <div class="menu_product_info">
-                                        <div class="title">
-                                            <h5><a href="#">Nam neque pellentesque</a></h5>
-                                        </div>
-                                        <p>Lorem Ipsum is simply dummy text of the printing and industry.</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:68%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>$39</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+           
+
+               
+            @forelse ($category->menus as $menu)
+
+
+            <div class="col-lg-3 col-sm-6">
+                <div class="single_product">
+                    <a href="{{ route('menu.item',$menu->id) }}">
+                    <div class="menu_product_img">
+                        <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }} img" >
                     </div>
-                    <div class="tab-pane fade" id="Lunch" role="tabpanel" aria-labelledby="Lunch-tab">
-                        <div class="row">
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="single_product">
-                                    <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item5.jpg" alt="menu_item5">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
-                                    </div>
-                                    <div class="menu_product_info">
-                                        <div class="title">
-                                            <h5><a href="#">Nam neque pellentesque</a></h5>
-                                        </div>
-                                        <p>Lorem Ipsum is simply dummy text of the printing and industry.</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:68%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>$39</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="single_product">
-                                    <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item7.jpg" alt="menu_item7">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
-                                    </div>
-                                    <div class="menu_product_info">
-                                        <div class="title">
-                                            <h5><a href="#">Nam neque pellentesque</a></h5>
-                                        </div>
-                                        <p>Lorem Ipsum is simply dummy text of the printing and industry.</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:68%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>$39</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </a>
+                    <div class="menu_product_info">
+                        <div class="title">
+                            <h5><a href="{{ route('menu.item',$menu->id) }}"> {{ $menu->name }}</a></h5>
                         </div>
+                        <p>${{ number_format($menu->price, 2) }}</p>
+                    </div>
+                    <div class="menu_footer">
+                
+                        <hr/>
+                        <button data-id="{{ $menu->id }}"
+                                data-name="{{ $menu->name }}"
+                                data-price="{{ $menu->price }}" 
+                                data-img_src="{{ asset('storage/' . $menu->image) }}"                                            
+                                type="button"  class="btn btn-block btn-default rounded-0 add-to-cart"  >Add To Cart</button>
+
                     </div>
                 </div>
             </div>
+                                                                                             
+            @empty
+                No menus available
+            @endforelse
+
         </div>
+
+
+        @empty
+        <p>No categories available.</p>
+    @endforelse
+
     </div>
 </div>
 <!-- END SECTION OUR MENU -->

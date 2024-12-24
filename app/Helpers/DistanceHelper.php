@@ -1,19 +1,13 @@
 <?php
+namespace App\Helpers;
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 
-class DistanceController extends Controller
+class DistanceHelper
 {
-    //
-    public function getDistance($origin = "47 Schuster Rd, Manchester M14 5LX", $destination = "17 jethro street, Bolton, BL11QD")
+    public static function getDistance($origin, $destination)
     {
         $apiKey = config('services.google_maps.api_key'); // Retrieve API key from configuration
-        //$apiKey = "AIzaSyCDC0tAy9sV41Wwa9Ou-Kch95GJIQ51JKw";       
 
         $response = Http::get('https://maps.googleapis.com/maps/api/distancematrix/json', [
             'origins' => $origin,
@@ -43,9 +37,5 @@ class DistanceController extends Controller
         return [
             'error' => 'Failed to connect to Google API. Status: ' . $response->status(),
         ];
-    }
+    }   
 }
-
-
-
- 

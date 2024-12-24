@@ -40,12 +40,7 @@ Route::get('payment/', [PaymentController::class, 'payment'])->name('payment');
 Route::get('payment-success/', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('payment-cancel/', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
 
- Route::get('payment-success', [PaymentController::class, 'paymentSuccess'])->name('payment-success');
-
-
- Route::get('calculate-distance/', [DistanceController::class, 'getDistance']);
-
-
+  
 
 Route::get('about/', [MainSiteController::class, 'about'])->name('about');
 Route::get('contact/', [MainSiteController::class, 'contact'])->name('contact');
@@ -173,3 +168,4 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     
 });
 
+  
