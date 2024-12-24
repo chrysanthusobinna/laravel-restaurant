@@ -201,38 +201,7 @@ $('#payment_method').on('change', function() {
     <div class="content-wrapper">
  
       @include('partials.message-bag')
-
-    
-      
-      <div class="row">
-        <div class="col-sm-6">
-          <h3 class="mb-0 font-weight-bold">Logged in as Admin</h3>
-          <p>Your last login: 21h ago from newzealand.</p>
-        </div>
-        <div class="col-sm-6">
-          <div class="d-flex align-items-center justify-content-md-end">
-            <div class="mb-3 mb-xl-0 pr-1">
-                <button type="button" class="btn btn-sm bg-white btn-icon-text border" onclick="window.location='{{ route('admin.index') }}'">
-                    <i class="typcn typcn-arrow-forward-outline mr-2"></i>Dashboard
-                </button>
-            </div>
-            
-            <div class="pr-1 mb-3 mr-2 mb-xl-0">
-                <button disabled type="button" class="btn btn-sm bg-white btn-icon-text border"  >
-                    <i class="typcn typcn-arrow-forward-outline mr-2"></i>POS
-                </button>
-            </div>
-            
-     
-          </div>
-        </div>
-      </div>
-
-    
-
-   
-
-
+ 
 
       <div class="row">
         <div class="col-lg-6 d-flex grid-margin stretch-card">

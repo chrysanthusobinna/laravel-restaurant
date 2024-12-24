@@ -13,8 +13,9 @@
 <!-- SITE TITLE -->
 <title>@yield('title')</title>
 <!-- Favicon Icon -->
-<link rel="shortcut icon" type="image/x-icon" href="/assets/images/favicon.png">
- @stack('styles')
+<link rel="shortcut icon" type="image/x-icon" href="/favicon_io/favicon.ico" />
+
+@stack('styles')
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
  
 </head>

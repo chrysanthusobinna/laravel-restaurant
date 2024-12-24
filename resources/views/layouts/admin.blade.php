@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
 
     <!-- endinject -->
-    <link rel="shortcut icon" href="/admin_resources/images/favicon.png" />
+    <link rel="shortcut icon" href="/favicon_io/favicon.ico" />
   </head>
   <body>
  
