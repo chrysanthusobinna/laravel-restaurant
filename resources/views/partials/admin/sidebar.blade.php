@@ -36,7 +36,7 @@
           
           
       
-          <li class="nav-item {{ Request::is('admin/orders*') ? 'active-nav' : '' }}">
+          <li class="nav-item {{ Request::is('admin/order*') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.orders.index') }}">
                 <i class="fa fa-file menu-icon"></i>
                 <span class="menu-title">Manage Orders</span>

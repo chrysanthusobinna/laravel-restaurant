@@ -26,7 +26,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
  
-
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="/admin_resources/css/small-box.css">
 @endpush
 
 
@@ -68,51 +69,72 @@
         </div>
       </div>
 
+      @include('partials.order-stats')
+
 
         <div class="card">
-
-            
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Order Details </span>
+                <span>Order Details - #{{ $order->order_no }} </span>
+
+                @if ($order->status != 'completed' && $order->status != 'cancelled')
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal">Update Order</button>
-          
+                @endif
+        
             </div>
             <div class="card-body">
-  
-                <table class="table table-bordered">
-
-                    <tr>
-                        <th>Order No.</th>
-                        <td>#{{ $order->order_no }}</td>
-                    </tr>                   
-                    <tr>
-                        <th>Created at</th>
-                        <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Updated at</th>
-                        <td>{{ $order->updated_at->format('g:i A -  j M, Y') }}</td>
-                    </tr>                    
-                    <tr>
-                        <th>Total Price</th>
-                        <td>${{ number_format($order->total_price, 2) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Status</th>
-                        <td>{{ ucfirst($order->status) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Payment Method</th>
-                        <td>{{ $order->payment_method }}</td>
-                    </tr>                   
-                    <tr>
-                        <th>Order Type</th>
-                        <td>{{ ucfirst($order->order_type) }}</td>
-                    </tr>
-
-                </table>
- 
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-bordered">    
+                            <tr>
+                                <th>Created At</th>
+                                <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Updated At</th>
+                                <td>{{ $order->updated_at->format('g:i A -  j M, Y') }}</td>
+                            </tr>                    
+                            <tr>
+                                <th>Total Price</th>
+                                <td>${{ number_format($order->total_price, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Delivery Fee</th>
+                                <td>{{ $order->delivery_fee === null ? 'N/A' : '$' . number_format($order->delivery_fee, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Delivery Distance</th>
+                                <td> {{ $order->delivery_distance === null ? 'N/A' : $order->delivery_distance . ' miles' }}</td>                              
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-bordered">     
+                            <tr>
+                                <th>Order No.</th>
+                                <td>#{{ $order->order_no }}</td>
+                            </tr>                              
+                            <tr>
+                                <th>Payment Method</th>
+                                <td>{{ $order->payment_method }}</td>
+                            </tr>              
+                            <tr>
+                                <th>Order Type</th>
+                                <td>{{ ucfirst($order->order_type) }}</td>
+                            </tr>                  
+                            <tr>
+                                <th>Total Price</th>
+                                <td>${{ number_format($order->total_price, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>{!! $order->status == 'pending'  ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> ' .ucfirst($order->status). '</span>'  : ucfirst($order->status) !!}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </div>
+            
         </div>
    
 
@@ -120,10 +142,8 @@
         <div class="card mt-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Order Items </span>
-          
             </div>
             <div class="card-body">
-  
                 <table class="table">
                     <thead>
                         <tr>
@@ -133,26 +153,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($order->orderItems as $item)
+                        @foreach ($order->orderItems as $item)
                             <tr>
                                 <td><i class="fa fa-circle"></i> {{ $item->menu_name }}</td>
                                 <td>x {{ $item->quantity }}</td>
                                 <td>${{ number_format($item->subtotal, 2) }}</td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="text-center">No items in this order.</td>
-                            </tr>
-                        @endforelse
+                        @endforeach
+                        <tr style="border:2px solid #000">
+                            <td><b>TOTAL</b></td>
+                            <td> </td>
+                            <td><b>{{ $order->delivery_fee === null  ? '$' . number_format($order->total_price, 2)  : '$' . number_format($order->total_price - $order->delivery_fee, 2) }}</b></td>
+                        </tr>
                     </tbody>
                 </table>
-
-
-
-
-
+            </div>
+            <div class="card-footer">
+                {!! $order->additional_info   ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> Additional Info:</span>  ' . e($order->additional_info)    : '' !!}
             </div>
         </div>
+        
    
 
 

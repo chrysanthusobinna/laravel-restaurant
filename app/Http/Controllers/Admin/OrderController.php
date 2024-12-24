@@ -112,6 +112,7 @@ class OrderController extends Controller
             'email' => 'nullable|email|max:255|unique:customers,email',
             'phone_number' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:500',
+            'additional_info' => 'nullable|string|max:255',
             'payment_method' => 'required|max:255',  
         ]);
 
@@ -144,6 +145,10 @@ class OrderController extends Controller
             'total_price' => $totalPrice,
             'status' => 'completed',
             'payment_method' => $validatedData['payment_method'],
+            'delivery_fee' => null,
+            'delivery_distance' => null,
+            'price_per_mile' => null,
+
         ]);
 
         if ($order) {
