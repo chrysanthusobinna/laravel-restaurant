@@ -13,17 +13,22 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\PasswordChangedNotification;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Controllers\Traits\OrderStatisticsTrait;
 
 class AdminController extends Controller
 {
-    
+    use OrderStatisticsTrait;
+
     public function __construct()
     {
         // Share the logged-in user with all views
         view()->share('loggedInUser', Auth::User());
+        $this->shareOrderStatistics();
+
         
     }
     
+   
 
     public function index()
     {
@@ -43,10 +48,8 @@ class AdminController extends Controller
             'December' => rand(100, 1000),
         ];
 
-        $orders = Order::select('id', 'order_no', 'created_at', 'total_price', 'status', 'order_type')->orderBy('created_at', 'desc')->limit(10)->get();
 
-
-        return view('admin.index', compact('salesData','orders'));
+        return view('admin.index', compact('salesData'));
     }
 
 

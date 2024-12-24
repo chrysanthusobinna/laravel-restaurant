@@ -9,6 +9,8 @@
     <!-- DataTables   CSS -->
 
     <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="/admin_resources/css/small-box.css">
 @endpush
 
 @push('scripts')
@@ -31,22 +33,27 @@
     <!-- Include jQuery and DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#orders-table').DataTable({
-                paging: true,
-                searching: true,
-                lengthChange: false,   
-                pageLength: 10,       
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search orders..."
-                }
-            });
-        });
-    </script>
+ 
 
-    
+<script type="text/javascript">
+    $(function () {
+          
+      var table = $('.data-table').DataTable({
+          processing: true,
+          serverSide: true,
+          ajax: "{{ route('admin.orders.index') }}",
+          columns: [
+            { data: 'order_no', name: 'order_no' },
+            { data: 'created_at', name: 'created_at' },
+            { data: 'total_price', name: 'total_price' },
+            { data: 'status', name: 'status' },
+            { data: 'order_type', name: 'order_type' },
+            {data: 'action', name: 'action', orderable: false, searchable: false},
+          ]
+      });
+          
+    });
+  </script>
 @endpush
 
 
@@ -88,47 +95,29 @@
         </div>
       </div>
 
- 
+    @include('partials.order-stats')
+
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">Orders</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                @if($orders->isEmpty())
-                    <p class="text-center">No orders available.</p>
-                @else
-                    <table class="table table-bordered" id="orders-table">
-                        <thead>
-                            <tr>
-                                <th>Order No.</th>
-                                <th>Date</th>
-                                <th>Total Price</th>
-                                <th>Status</th>
-                                <th>Order Type</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($orders as $order)
-                                <tr>
-                                    <td><i class="fa fa-file"></i> &nbsp; # {{ $order->order_no }} </td>
-                                    <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
-                                    <td>${{ number_format($order->total_price, 2) }}</td>
-                                    <td>{{ ucfirst($order->status) }}</td>
-                                    <td>{{ ucfirst($order->order_type) }}</td>
-                                    <td>
-                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @endif
+                <table class="table table-bordered data-table" id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order No.</th>
+                            <th>Date</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                            <th>Order Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
-    </div> 
-
+    </div>
    
     </div>
     <!-- content-wrapper ends -->

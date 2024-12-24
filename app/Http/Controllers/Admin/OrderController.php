@@ -7,10 +7,13 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+use App\Http\Controllers\Traits\OrderStatisticsTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 
 class OrderController extends Controller
 {
+    use OrderStatisticsTrait;
     use OrderNumberGeneratorTrait;
 
     public function __construct()
@@ -18,16 +21,53 @@ class OrderController extends Controller
         // Share the logged-in user with all views
         view()->share('loggedInUser', Auth::User());
         
+        $this->shareOrderStatistics();
+        
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
         //$orders = Order::orderBy('id', 'desc')->paginate(3);  
 
-        $orders = Order::orderBy('id', 'desc')->get();;  
+       // $orders = Order::orderBy('id', 'desc')->get();;  
 
-        return view('admin.orders-index', compact('orders'));
+        //return view('admin.orders-index', compact('orders'));
+
+        if ($request->ajax()) {
+
+            //$order = Order::query();
+            $orders = Order::select(['id', 'order_no', 'created_at', 'total_price', 'status', 'order_type'])->orderBy('id', 'desc');
+
+            return Datatables::of($orders)
+                    ->addIndexColumn()
+                    ->addColumn('action', function ($order) {
+                        return '<a href="'.route('admin.orders.show', $order->id).'" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>';
+                    })
+                    ->editColumn('order_no', function ($order) {
+                        return "#".$order->order_no;
+                    })                   
+                    ->editColumn('created_at', function ($order) {
+                        return $order->created_at->format('g:i A -  j M, Y');
+                    })          
+ 
+                    ->editColumn('total_price', function ($order) {
+                        return '$' . number_format($order->total_price, 2);
+                    })
+                    ->editColumn('status', function ($order) {
+                        return $order->status == 'pending' 
+                            ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i>'.ucfirst($order->status).'</span>' 
+                            : ucfirst($order->status);
+                    })
+                    
+                    ->editColumn('order_type', function ($order) {
+                        return ucfirst($order->order_type);
+                    })                   
+                    ->rawColumns(['action','status'])
+                    ->make(true);
+        }
+          
+        return view('admin.orders-index');
     }
     
     public function show($id)

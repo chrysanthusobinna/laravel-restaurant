@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="/admin_resources/vendors/typicons.font/font/typicons.css">
     <link rel="stylesheet" href="/admin_resources/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="/admin_resources/css/vertical-layout-light/style.css">
+  
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="/admin_resources/css/small-box.css">
 @endpush
 
 @push('scripts')
@@ -121,6 +124,8 @@
         </div>
       </div>
 
+      @include('partials.order-stats')
+
 
       <div class="row">
         <div class="col-lg-12 d-flex grid-margin stretch-card">
@@ -139,51 +144,7 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Recent Orders</h5>
-          @if($orders->count() > 0)
-            <button class="btn btn-primary btn-sm" onclick="window.location.href='{{ route('admin.orders.index') }}'">View More Orders</button>
-          @endif
-
-      </div>
-        <div class="card-body">
- 
-          <div class="table-responsive">
-            @if($orders->isEmpty())
-            <p class="text-center">No orders available.</p>
-        @else
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Order No.</th>
-                        <th>Date</th>
-                        <th>Total Price</th>
-                        <th>Status</th>
-                        <th>Order Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($orders as $order)
-                        <tr>
-                            <td><i class="fa fa-file"></i> &nbsp; # {{ $order->order_no }} </td>
-                            <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
-                            <td>${{ number_format($order->total_price, 2) }}</td>
-                            <td>{{ ucfirst($order->status) }}</td>
-                            <td>{{ ucfirst($order->order_type) }}</td>
-                            <td>
-                                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-        
-          </div>
-        </div>
-      </div>
+    
     </div>
     <!-- content-wrapper ends -->
     @include('partials.admin.footer')
