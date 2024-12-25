@@ -145,7 +145,7 @@
                         <tr style="border:2px solid #000">
                             <td><b>TOTAL</b></td>
                             <td> </td>
-                            <td><b>{{ $order->delivery_fee === null  ? '$' . number_format($order->total_price, 2)  : '$' . number_format($order->total_price - $order->delivery_fee, 2) }}</b></td>
+                            <td><b>{{ '$' . number_format($order->total_price, 2)  }}</b></td>
                         </tr>
                     </tbody>
                 </table>

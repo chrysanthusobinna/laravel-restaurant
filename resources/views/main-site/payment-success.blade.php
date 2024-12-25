@@ -120,7 +120,7 @@
                     <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a>.
                 </p>
                 <hr>
-
+                <a href="{{ route('home') }}" class="btn btn-danger">Return to Homepage</a>
             </div>
         </div>
     </div>

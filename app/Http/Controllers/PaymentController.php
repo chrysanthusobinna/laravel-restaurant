@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Stripe\Charge;
 use Stripe\Stripe;
 use App\Models\Order;
+use App\Mail\OrderEmail;
 use App\Models\Customer;
 use Stripe\PaymentIntent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Models\RestaurantPhoneNumber;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Controllers\Traits\ViewSharedDataTrait;
@@ -207,9 +212,34 @@ class PaymentController extends Controller
                             ]);
                         }
                     }
+                    
 
-                    // Clear the cart
-                    session()->forget($this->cartkey);
+ 
+                    // Send the email
+                    try {
+                        Mail::to($customerDetails['email'])->send(new OrderEmail(
+                            $cart,
+                            $customerDetails['name'],
+                            $customerDetails['email'],
+                            $order_no,
+                            $delivery_fee,
+                            $totalPrice,
+                            config('site.email'),
+                            RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
+                        ));
+                    } catch (Exception $e) {
+                        Log::error('Order email failed to send: ' . $e->getMessage());
+                    }
+                    
+
+                    // Clear the session
+                    session()->forget([
+                        $this->cartkey, 
+                        'customer_details', 
+                        'delivery_details', 
+                        'order_no'
+                    ]);
+                    
     
                     return view('main-site.payment-success', ['customer_email' => $customer_email,  'metadata' => $metadata, ]);
 
@@ -259,7 +289,8 @@ class PaymentController extends Controller
     protected function checkOrderNo()
     {
         if (!session()->has('order_no')) {
-            return redirect()->route('menu')->withErrors('We could not retrieve your order number. Please try again or contact support if the issue persists.')->send();
+            //return redirect()->route('menu')->withErrors('We could not retrieve your order number. Please try again or contact support if the issue persists.')->send();
+            return redirect()->route('menu')->send();
         }
     }
 
