@@ -5,18 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class CategoryController extends Controller
 {
+    use AdminViewSharedDataTrait;
+
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         
     }
     
-
+   
     public function index()
     {
         $categories = Category::all();

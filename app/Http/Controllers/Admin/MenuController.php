@@ -8,15 +8,18 @@ use App\Http\Requests\MenuRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Laravel\Facades\Image;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class MenuController extends Controller
 {
+    use AdminViewSharedDataTrait;
+
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         
     }
+    
     public function index()
     {
         $categories = Category::with('menus')->get();  

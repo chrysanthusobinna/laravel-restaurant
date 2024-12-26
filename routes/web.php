@@ -129,7 +129,8 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
     //Admin Settings Orders
     Route::post('order-settings', [GeneralSettingsController::class, 'updateOrderSettings'])->name('admin.order-settings.update');
-
+    Route::post('/site-settings/save', [GeneralSettingsController::class, 'siteSettings'])->name('site-settings.save');
+   
 
 
     //Admin Users routes
@@ -145,10 +146,6 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('blog/{id}/edit', [BlogController::class, 'edit'])->name('admin.blog.edit');
     Route::put('blog/{id}', [BlogController::class, 'update'])->name('admin.blog.update');
     Route::delete('blog/{id}', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
-
-
-
-    
  
     // Admin Cart / POS routes
     Route::get('pos/', [CartController::class, 'index'])->name('admin.pos.index');
@@ -167,5 +164,10 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
     
 });
+
+
+ 
+
+
 
   

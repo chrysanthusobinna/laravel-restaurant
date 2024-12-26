@@ -58,7 +58,33 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <table class="table table-bordered">    
+                        <table class="table table-bordered mt-2">    
+                            <tr>
+                                <th>Order No.</th>
+                                <td>#{{ $order->order_no }}</td>
+                            </tr>                               
+                 
+                            <tr>
+                                <th>Total Paid</th>
+                                <td>{!! $site_settings->currency_symbol !!}{{ number_format($order->total_price + ($order->delivery_fee ?? 0), 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Delivery Fee</th>
+                                <td>{{ $order->delivery_fee === null ? 'N/A' : html_entity_decode($site_settings->currency_symbol) . number_format($order->delivery_fee, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Delivery Distance</th>
+                                <td> {{ $order->delivery_distance === null ? 'N/A' : $order->delivery_distance . ' miles' }}</td>                              
+                            </tr>
+                            <tr>
+                                <th>Price Per Mile</th>
+                                <td> {{ $order->price_per_mile === null ? 'N/A' : html_entity_decode($site_settings->currency_symbol) . number_format($order->price_per_mile,2) }}</td>                              
+                            </tr>
+                            
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-bordered mt-2">     
                             <tr>
                                 <th>Created At</th>
                                 <td>{{ $order->created_at->format('g:i A -  j M, Y') }}</td>
@@ -66,27 +92,7 @@
                             <tr>
                                 <th>Updated At</th>
                                 <td>{{ $order->updated_at->format('g:i A -  j M, Y') }}</td>
-                            </tr>                    
-                            <tr>
-                                <th>Total Price</th>
-                                <td>${{ number_format($order->total_price, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Delivery Fee</th>
-                                <td>{{ $order->delivery_fee === null ? 'N/A' : '$' . number_format($order->delivery_fee, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Delivery Distance</th>
-                                <td> {{ $order->delivery_distance === null ? 'N/A' : $order->delivery_distance . ' miles' }}</td>                              
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="table table-bordered">     
-                            <tr>
-                                <th>Order No.</th>
-                                <td>#{{ $order->order_no }}</td>
-                            </tr>                              
+                            </tr>                             
                             <tr>
                                 <th>Payment Method</th>
                                 <td>{{ $order->payment_method }}</td>
@@ -95,10 +101,7 @@
                                 <th>Order Type</th>
                                 <td>{{ ucfirst($order->order_type) }}</td>
                             </tr>                  
-                            <tr>
-                                <th>Total Price</th>
-                                <td>${{ number_format($order->total_price, 2) }}</td>
-                            </tr>
+
                             <tr>
                                 <th>Status</th>
                                 <td>
@@ -139,13 +142,13 @@
                             <tr>
                                 <td><i class="fa fa-circle"></i> {{ $item->menu_name }}</td>
                                 <td>x {{ $item->quantity }}</td>
-                                <td>${{ number_format($item->subtotal, 2) }}</td>
+                                <td>{!! $site_settings->currency_symbol !!}{{ number_format($item->subtotal, 2) }}</td>
                             </tr>
                         @endforeach
                         <tr style="border:2px solid #000">
                             <td><b>TOTAL</b></td>
                             <td> </td>
-                            <td><b>{{ '$' . number_format($order->total_price, 2)  }}</b></td>
+                            <td><b>{!! $site_settings->currency_symbol !!} {{ number_format($order->total_price, 2)  }}</b></td>
                         </tr>
                     </tbody>
                 </table>

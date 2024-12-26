@@ -4,23 +4,24 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
 use App\Models\Customer;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Traits\OrderStatisticsTrait;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 
 class OrderController extends Controller
 {
+    use AdminViewSharedDataTrait;
     use OrderStatisticsTrait;
     use OrderNumberGeneratorTrait;
 
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
-
+        $this->shareAdminViewData();
         $this->shareOrderStatistics();
         
     }
@@ -35,6 +36,8 @@ class OrderController extends Controller
         if ($filter && !in_array($filter, $allowedFilters)) {
             return redirect()->route('admin.orders.index')->with('error', 'Invalid filter value.');
         }
+
+
 
         if ($request->ajax()) {
  
@@ -65,7 +68,12 @@ class OrderController extends Controller
                     })          
  
                     ->editColumn('total_price', function ($order) {
-                        return '$' . number_format($order->total_price, 2);
+                        //Get Site Settings
+                        $site_settings      =   SiteSetting::latest()->first();
+                        $currency_symbol    =   $site_settings->currency_symbol ?? config('site.currency_symbol');
+
+                        return html_entity_decode($currency_symbol) . number_format($order->total_price, 2);
+
                     })
                     ->editColumn('status', function ($order) {
                         return $order->status == 'pending' 
@@ -112,8 +120,8 @@ class OrderController extends Controller
             'email' => 'nullable|email|max:255|unique:customers,email',
             'phone_number' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:500',
-            'additional_info' => 'nullable|string|max:255',
             'payment_method' => 'required|max:255',  
+            'additional_info' => 'nullable|string|max:255',           
         ]);
 
         // Check if at least one of the fields is provided then Create a new customer
@@ -145,6 +153,7 @@ class OrderController extends Controller
             'total_price' => $totalPrice,
             'status' => 'completed',
             'payment_method' => $validatedData['payment_method'],
+            'additional_info' => $validatedData['additional_info'],
             'delivery_fee' => null,
             'delivery_distance' => null,
             'price_per_mile' => null,

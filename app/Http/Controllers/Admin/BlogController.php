@@ -5,16 +5,21 @@ use App\Models\Blog;
 use App\Http\Requests\BlogRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class BlogController extends Controller
 {
 
+    use AdminViewSharedDataTrait;
+
+
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         
     }
+    
+   
     
     // Show list of blogs
     public function index()

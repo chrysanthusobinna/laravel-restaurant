@@ -16,29 +16,27 @@ use App\Models\RestaurantPhoneNumber;
 use App\Models\RestaurantWorkingHour;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
-use GetCountryCurrency\CountryCurrencyAPI;
 use App\Http\Requests\CustomerDetailsRequest;
-use App\Http\Controllers\Traits\ViewSharedDataTrait;
+use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 
 
 class MainSiteController extends Controller
 {
     use CartTrait;
-    use ViewSharedDataTrait;
+    use MainSiteViewSharedDataTrait;
     use OrderNumberGeneratorTrait;
 
 
     public function __construct()
     {
-        $this->initializeSharedLogic();
+        $this->shareMainSiteViewData();
     }
 
     public function home()
     {
 
-        //$country 	=	"United Kingdom"; 
-       // $currencyData = (new CountryCurrencyAPI())->fetchCurrencyData($country);
+
        $menus = Menu::all();
 
         return view('main-site.index', compact('menus'));
@@ -67,11 +65,27 @@ class MainSiteController extends Controller
     public function menuItem($id)
     {
         $menu = Menu::with(['category'])->findOrFail($id);
+
+        $cart = session()->get($this->cartkey, []);
+
+        function getItemQuantity($cart, $itemId) {
+            foreach ($cart as $item) {
+                if ($item['id'] == $itemId) {
+                    return $item['quantity'];
+                }
+            }
+            return 0; // Return 0 if item is not found
+        }
+        
+        // Usage example
+        $quantity = getItemQuantity($cart, $id);
+        
+    
     
         // Fetch 5 random related menus (same category as the current menu)
         $relatedMenus = Menu::where('id', '!=', $id)->inRandomOrder()->limit(5)->get();
     
-        return view('main-site.menu-item', compact('menu', 'relatedMenus'));
+        return view('main-site.menu-item', compact('menu','quantity', 'relatedMenus'));
     }
     
 

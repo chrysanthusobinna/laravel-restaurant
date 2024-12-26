@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/admin_resources/vendors/typicons.font/font/typicons.css">
   <link rel="stylesheet" href="/admin_resources/vendors/css/vendor.bundle.base.css">
   <link rel="stylesheet" href="/admin_resources/css/vertical-layout-light/style.css">
-  <link rel="shortcut icon" href="/admin_resources/images/favicon.png" />
+  <link rel="shortcut icon" href="/favicon_io/favicon.ico" />
 </head>
 
 <body>
@@ -19,7 +19,7 @@
           <div class="col-lg-6 mx-auto">
             <div class="auth-form-light text-left py-5 px-4 px-sm-5">
               <div class="brand-logo">
-                <img src="/admin_resources/images/logo.svg" alt="logo">
+                <img src="/assets/images/logo_dashboard.png" alt="logo">
               </div>
 
               @yield('content')

@@ -92,14 +92,12 @@
             $('#workingHourModalLabel').text('Edit Working Hour');
         };
 
-
-          // Social Media Handle Modal
-          function resetSocialMediaModal() {
+        // Social Media Handle Modal
+        function resetSocialMediaModal() {
             $('#socialMediaForm')[0].reset();
             $('#socialMediaForm').attr('action', "{{ route('admin.social-media-handles.store') }}");
             $('#handle').val('');
             $('#socialMediaFormMethod').val('');
-
         }
 
         window.createSocialMediaHandle = function () {
@@ -116,68 +114,86 @@
             $('#socialMediaFormMethod').val('PUT');
             $('#socialMediaModalLabel').text('Edit Social Media Handle');
         };      
- 
-    // Phone Number Delete
-    window.deletePhoneNumber = function (id) {
-        let actionUrl = "{{ route('admin.phone-number.delete', ':id') }}".replace(':id', id);
-        $('#deletePhoneNumberForm').attr('action', actionUrl);
-        $('#deletePhoneNumberModal').modal('show');
-    };
 
-    // Address Delete
-    window.deleteAddress = function (id) {
-        let actionUrl = "{{ route('admin.address.delete', ':id') }}".replace(':id', id);
-        $('#deleteAddressForm').attr('action', actionUrl);
-        $('#deleteAddressModal').modal('show');
-    };
+        // Phone Number Delete
+        window.deletePhoneNumber = function (id) {
+            let actionUrl = "{{ route('admin.phone-number.delete', ':id') }}".replace(':id', id);
+            $('#deletePhoneNumberForm').attr('action', actionUrl);
+            $('#deletePhoneNumberModal').modal('show');
+        };
 
-    // Working Hour Delete
-    window.deleteWorkingHour = function (id) {
-        let actionUrl = "{{ route('admin.working-hour.delete', ':id') }}".replace(':id', id);
-        $('#deleteWorkingHourForm').attr('action', actionUrl);
-        $('#deleteWorkingHourModal').modal('show');
-    };
+        // Address Delete
+        window.deleteAddress = function (id) {
+            let actionUrl = "{{ route('admin.address.delete', ':id') }}".replace(':id', id);
+            $('#deleteAddressForm').attr('action', actionUrl);
+            $('#deleteAddressModal').modal('show');
+        };
 
+        // Working Hour Delete
+        window.deleteWorkingHour = function (id) {
+            let actionUrl = "{{ route('admin.working-hour.delete', ':id') }}".replace(':id', id);
+            $('#deleteWorkingHourForm').attr('action', actionUrl);
+            $('#deleteWorkingHourModal').modal('show');
+        };
 
-    // social media handle Delete
-    window.deleteSocialMediaHandle = function (id) {
-        let actionUrl = "{{ route('admin.social-media-handles.delete', ':id') }}".replace(':id', id);
-        $('#deleteSocialMediaHandleForm').attr('action', actionUrl);
-        $('#deleteSocialMediaHandleModal').modal('show');
-    };
-	
-
-
-
-        // JavaScript for dynamic updates
-        document.getElementById('country').addEventListener('change', function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const timezone = selectedOption.getAttribute('data-timezone');
-        const currencySymbol = selectedOption.getAttribute('data-currency-symbol');
-        const currencyCode = selectedOption.getAttribute('data-currency-code');
-
-        // Update timezone select
-        const timezoneSelect = document.getElementById('timezone');
-        timezoneSelect.innerHTML = `<option value="${timezone}" selected>${timezone}</option>`;
-        timezoneSelect.disabled = false;
-
-        // Update currency symbol and code
-        document.getElementById('currencySymbol').value = currencySymbol || '';
-        document.getElementById('currencyCode').value = currencyCode || '';
+        // Social Media Handle Delete
+        window.deleteSocialMediaHandle = function (id) {
+            let actionUrl = "{{ route('admin.social-media-handles.delete', ':id') }}".replace(':id', id);
+            $('#deleteSocialMediaHandleForm').attr('action', actionUrl);
+            $('#deleteSocialMediaHandleModal').modal('show');
+        };
     });
-
-});
-
-
-
-
-
-
 </script>
 
 
 
- 
+ <script>
+    $(document).ready(function () {
+        $('#country').on('change', function () {
+            // Get the selected country
+            var country = $(this).val();
+
+            // Ensure a country is selected
+            if (!country) return;
+
+            // API URL
+            var apiUrl = "https://www.getcountrycurrency.com/api/country-currency/" + encodeURIComponent(country);
+
+            // Make AJAX request to fetch currency details
+            $.ajax({
+                url: apiUrl,
+                method: "GET",
+                dataType: "json",
+                success: function (data) {
+                    // Check if data contains expected fields
+                    if (data.currency_name && data.currency_code && data.currency_symbol) {
+                        // Decode the HTML entity for the currency symbol
+                        var parser = new DOMParser();
+                        var decodedSymbol = parser.parseFromString(data.currency_symbol, 'text/html').body.textContent;
+                        
+
+                        // Populate the fields with currency details
+                        $('#decoded_symbol').val(decodedSymbol);
+                        $('#currency_code').val(data.currency_code);
+                        $('#currency_symbol').val(data.currency_symbol);
+
+                    } else {
+                        alert("Currency details not found for the selected country.");
+                        $('#currency_code, #currency_symbol, #decoded_symbol').val("");
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching currency details:", error);
+                    alert("An error occurred while fetching currency details.");
+                    $('#currency_code, #currency_symbol, #decoded_symbol').val("");
+
+                }
+            });
+        });
+    });
+
+ </script>
  
 
 
@@ -429,7 +445,7 @@
                 </div>
                 <div class="form-group mt-3">
                     <label for="script_code">Script Code</label>
-                    <textarea class="form-control" id="script_code" name="script_code" rows="6" placeholder="Paste the script code here..." required>{{ $script->script_code ?? '' }}</textarea>
+                    <textarea class="form-control" id="script_code" name="script_code" rows="2" placeholder="Paste the script code here..." required>{{ $script->script_code ?? '' }}</textarea>
                 </div>
             </div>
             <div class="card-footer d-flex justify-content-between mt-4">
@@ -451,59 +467,83 @@
         </div>
         <div class="col-lg-6 d-flex grid-margin stretch-card">
  
- 
             <div class="card">
                 <div class="card-header">
-                    Select Country / Time Zone 
+                    Other Settings
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <!-- Country Selection -->
-                            <tr>
-                                <td><strong>Country</strong></td>
-                                <td>
-                                    <select class="form-control" id="country">
-                                        <option value="" selected disabled>Select a country</option>
-                                        <option value="US" data-timezone="America/New_York" data-currency-symbol="$" data-currency-code="USD">United States</option>
-                                        <option value="IN" data-timezone="Asia/Kolkata" data-currency-symbol="?" data-currency-code="INR">India</option>
-                                        <option value="GB" data-timezone="Europe/London" data-currency-symbol="£" data-currency-code="GBP">United Kingdom</option>
-                                        <option value="JP" data-timezone="Asia/Tokyo" data-currency-symbol="¥" data-currency-code="JPY">Japan</option>
-                                        <option value="AU" data-timezone="Australia/Sydney" data-currency-symbol="A$" data-currency-code="AUD">Australia</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            
-                            <!-- Timezone Selection -->
-                            <tr>
-                                <td><strong>Timezone</strong></td>
-                                <td>
-                                    <select class="form-control" id="timezone" readonly>
-                                        <option value="" selected >Select a country first</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            
-                            <!-- Currency Details -->
-                            <tr>
-                                <td><strong>Currency Symbol</strong></td>
-                                <td>
-                                    <input type="text" id="currencySymbol" class="form-control" placeholder="Currency Symbol" readonly>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Currency Code</strong></td>
-                                <td>
-                                    <input type="text" id="currencyCode" class="form-control" placeholder="Currency Code" readonly>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer text-end">
-                    <button type="button" class="btn btn-primary">Save</button>
-                </div>
-            </div> 
+                     <form action="{{ route('site-settings.save') }}" method="POST" style="display: contents;">
+                    @csrf
+                    <input value="{{ $site_settings->currency_symbol ?? '' }}" required type="hidden" id="currency_symbol" name="currency_symbol" class="form-control">
+            
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <!-- Country Selection -->
+                                <tr>
+                                    <td><strong>Country</strong></td>
+                                    <td>
+                                        <select required class="form-control" id="country" name="country">
+                                            <option value="" disabled {{ is_null($site_settings->country) ? 'selected' : '' }}>Select a country</option>
+                                            @php
+                                                $countries = [
+                                                    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia",
+                                                    "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
+                                                    "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria",
+                                                    "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad",
+                                                    "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", "Croatia", "Cuba", "Cyprus",
+                                                    "Czechia (Czech Republic)", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt",
+                                                    "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini (fmr. \"Swaziland\")", "Ethiopia", "Fiji",
+                                                    "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala",
+                                                    "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "India", "Indonesia",
+                                                    "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
+                                                    "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania",
+                                                    "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania",
+                                                    "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique",
+                                                    "Myanmar (formerly Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger",
+                                                    "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine State", "Panama",
+                                                    "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia",
+                                                    "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+                                                    "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
+                                                    "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain",
+                                                    "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", "Tanzania", "Thailand",
+                                                    "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda",
+                                                    "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu",
+                                                    "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+                                                ];
+                                            @endphp
+                                            @foreach ($countries as $country)
+                                                <option value="{{ $country }}" {{ $site_settings->country == $country ? 'selected' : '' }}>
+                                                    {{ $country }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        
+                                    </td>
+                                </tr>
+            
+                                <!-- Currency Details -->
+                                <tr>
+                                    <td><strong>Currency Symbol</strong></td>
+                                    <td>
+                                        <input value="{!! $site_settings->currency_symbol ?? '' !!}" required type="text" id="decoded_symbol" class="form-control" placeholder="Currency Symbol" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Currency Code</strong></td>
+                                    <td>
+                                        <input value="{{ $site_settings->currency_code ?? '' }}" required type="text" id="currency_code" name="currency_code" class="form-control" placeholder="Currency Code" readonly>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+            
+   
         </div>
       </div>
 
@@ -518,7 +558,7 @@
                 @csrf
     
                 <div class="form-group">
-                    <label for="price_per_mile">Price per Mile ($)</label>
+                    <label for="price_per_mile">Price per Mile ({!! $site_settings->currency_symbol !!})</label>
                     <input type="number" name="price_per_mile" id="price_per_mile" class="form-control" value="{{ $order_settings->price_per_mile ?? '' }}" step="0.01" required>
                 </div>
     

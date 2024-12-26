@@ -191,14 +191,14 @@
                                 @foreach($cart as $item)
                                 <tr>
                                     <td>{{ $item['name'] }} <span class="product-qty">x {{ $item['quantity'] }}</span></td>
-                                    <td>${{ number_format($item['price'] * $item['quantity'], 2) }}</td>
+                                    <td>{!! $site_settings->currency_symbol !!}{{ number_format($item['price'] * $item['quantity'], 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <th>Cart Subtotal</th>
-                                    <td class="product-subtotal">${{ number_format($subtotal, 2) }}</td>
+                                    <td class="product-subtotal">{!! $site_settings->currency_symbol !!}{{ number_format($subtotal, 2) }}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -216,8 +216,14 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-default">Place Order</button>
-
+                    <div class="row">
+                        <div class="col-6 text-start">
+                            <button onclick="window.location.href='{{ route('customer.cart') }}'" type="button" class="btn btn-secondary btn-block">Return to Cart</button>
+                        </div>
+                        <div class="col-6 text-end">
+                            <button type="submit" class="btn btn-default btn-block">Place Order</button>
+                        </div>
+                    </div>
 
                 </div>
             </div>

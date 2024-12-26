@@ -10,17 +10,20 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class UserController extends Controller
 {
 
+    use AdminViewSharedDataTrait;
+
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         
     }
+    
     // Show the admin management page
     public function index()
     {

@@ -36,9 +36,12 @@ trait CartTrait
         // Update the session with the new cart
         session()->put($request->cartkey, $cart);
 
+        $totalItems = $this->getTotalItems($request->cartkey);
+
             return response()->json([
                 'success' => true,
                 'cart' => $cart,
+                'total_items' => $totalItems,
             ]);
      
     }
@@ -48,21 +51,24 @@ trait CartTrait
     public function removeFromCart(Request $request)
     {
         $cart = session()->get($request->cartkey, []);
-
+    
         if (isset($cart[$request->id])) {
             // Remove the item from the cart
             unset($cart[$request->id]);
         }
-
+    
         // Update the session
         session()->put($request->cartkey, $cart);
-
+    
+        $totalItems = $this->getTotalItems($request->cartkey);
+    
         return response()->json([
             'success' => true,
             'cart' => $cart,
+            'total_items' => $totalItems,
         ]);
-
     }
+    
 
 
 
@@ -96,11 +102,13 @@ trait CartTrait
             $cart[$id]['quantity'] = $quantity;
             session()->put($request->cartkey, $cart);
         }
-
-        return response()->json(['success' => true, 'cart' => $cart]);
-
-
+    
+        $totalItems = $this->getTotalItems($request->cartkey);
+    
+        return response()->json(['success' => true, 'cart' => $cart, 'total_items' => $totalItems]);
     }
+    
+    
 
     public function getTotalItems($cartkey)
     {

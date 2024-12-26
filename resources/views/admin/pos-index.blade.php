@@ -94,9 +94,9 @@ $(document).ready(function () {
             cartContainer.append(`
                 <tr class="cart-item">
                     <td>${item.name}</td>
-                    <td>$${item.price}</td>
+                    <td>{!! $site_settings->currency_symbol !!}${(item.price).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
                     <td><input type="number" value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input" style="width: 4.5em;"></td>
-                    <td>$${subtotal.toFixed(2)}</td>
+                    <td>{!! $site_settings->currency_symbol !!}${subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
                     <td><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"> <i class="fa fa-times" aria-hidden="true"></i></button></td>
                 </tr> 
 
@@ -112,7 +112,7 @@ $(document).ready(function () {
         }
 
         // Display the total
-        $('#cart-total').text('Total: $' + total.toFixed(2));
+        $('#cart-total').text('Total: {!! html_entity_decode($site_settings->currency_symbol) !!}' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         $('#total').val(total.toFixed(2))
         
         // listener to remove buttons
@@ -226,7 +226,7 @@ $('#payment_method').on('change', function() {
                                 <!-- Trigger for Lightbox Modal -->
                                 <img src="{{ asset('storage/' . $menu->image) }}" alt="Menu Image" width="50" class="img-thumbnail trigger-lightbox" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="{{ asset('storage/' . $menu->image) }}">  {{ $menu->name }}
                             </td>
-                            <td>${{ $menu->price }}</td>
+                            <td>{!! $site_settings->currency_symbol !!}{{ $menu->price }}</td>
                             <td>
      
                                 <button class="m-1 btn btn-secondary btn-sm add-to-cart"
@@ -330,9 +330,14 @@ $('#payment_method').on('change', function() {
               </div>
 
               <hr>
-              <table class="table table-bordered">
+              <table class="table table-bordered"> 
                 <tbody>
- 
+                    <tr>
+                        <td><strong>Additional Info</strong></td>
+                        <td>
+                            <textarea class="form-control" id="additional_info" name="additional_info" rows="2" placeholder="e.g., allergies or any other information "></textarea>
+                        </td>
+                    </tr>
                     <tr>
                         <td><strong>Payment Method</strong></td>
                         <td>
@@ -345,6 +350,7 @@ $('#payment_method').on('change', function() {
                     </tr>
                 </tbody>
             </table>
+            
 
 
             </form>

@@ -83,16 +83,22 @@
                 $.each(cart, function (index, item) {
                     var subtotal = item.quantity * item.price;
                     total += subtotal;
-    
+                    // Use the Laravel route helper to generate the URLs
+                    var menuItemUrl = "{{ route('menu.item', ':id') }}".replace(':id', item.id);
+                
                     cartContainer.append(`
                         <tr>
-                            <td class="product-thumbnail"><a href="${item.id}"><img src="${item.img_src}" alt="product1"></a></td>
+                            <td class="product-thumbnail"><a href="${menuItemUrl}"><img src="${item.img_src}" alt="product1"></a></td>
                             <td class="product-name" data-title="Product"><a href="${item.id}">${item.name}</a></td>
-                            <td class="product-price" data-title="Price">$${item.price}</td>
-                            <td class="product-quantity" data-title="Quantity"><div class="quantity">
-                                <input type="number" min="1" name="quantity" value="${item.quantity}" title="Qty" class="qty quantity-input" size="4" data-id="${item.id}">
-                            </div></td>
-                            <td class="product-subtotal" data-title="Total">$${subtotal.toFixed(2)}</td>
+                            <td class="product-price" data-title="Price">{!! $site_settings->currency_symbol !!}${(item.price).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
+                            <td class="product-quantity" data-title="Quantity">
+                                <div class="quantity">
+                                    <input type="button" value="-" class="minus">
+                                    <input type="text" min="1" name="quantity" value="${item.quantity}" title="Qty" class="qty quantity-input" size="4" data-id="${item.id}">
+                                    <input type="button" value="+" class="plus">
+                                </div>
+                            </td>
+                            <td class="product-subtotal" data-title="Total">{!! $site_settings->currency_symbol !!}${subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
                             <td class="product-remove" data-title="Remove"><button class="btn btn-danger btn-sm remove-btn" data-id="${item.id}"  > <i class="ti-close"></i></button></td>
                         </tr>
                     `);
@@ -112,7 +118,7 @@
                 }
     
                 // Display the total
-                $('#cart-subtotal').text("$" + total.toFixed(2));
+                $('#cart-subtotal').text("{!! html_entity_decode($site_settings->currency_symbol) !!}" + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
                 $('#total').val(total.toFixed(2));
     
                 // Listener to remove buttons
@@ -138,7 +144,7 @@
                     if (data.success) {
                         updateCartUI(data.cart);
                         if (currentCount > 0) {
-                            updateCartCount();
+                            $('#cart_count').text(data.total_items);
                         }
                     }
                 });
@@ -162,22 +168,11 @@
                 $.post('{{ route('customer.cart.update')  }}', {   _token: "{{ csrf_token() }}",   cartkey: 'customer', id: id, quantity: quantity }, function (data) {
                     if (data.success) {
                         updateCartUI(data.cart);
-                        updateCartCount();
-
+                        $('#cart_count').text(data.total_items);
                     }
                 });
             }
 
-            // Function to update the cart count
-            function updateCartCount() {
-                var totalItems = 0;
-                $('.quantity-input').each(function () {
-                    totalItems += parseInt($(this).val());
-                });
-                $('#cart_count').text(totalItems);
-            }           
-
-    
             // Listener to remove buttons
             $('.remove-btn').click(function () {
                 var id = $(this).data('id');
@@ -188,6 +183,21 @@
             $.get('{{ route('customer.cart.view') }}', { cartkey: 'customer' }, function (data) {
                 updateCartUI(data.cart);
             });
+
+            $(document).on('click', '.plus', function () {
+                var input = $(this).prev();  
+                if (input.val()) {
+                    input.val(+input.val() + 1).trigger('change');  
+                }
+            });
+
+            $(document).on('click', '.minus', function () {
+                var input = $(this).next(); 
+                if (input.val() > 1) {
+                    input.val(+input.val() - 1).trigger('change'); 
+                }
+            });
+                        
         });
     </script>
     
@@ -268,6 +278,8 @@
                             </tr>
                         </tfoot> 
                     </table>
+
+                    
                 </div>
             </div>
  
@@ -290,7 +302,7 @@
                             <tbody>
                                 <tr>
                                     <td class="cart_total_label">Cart Subtotal</td>
-                                    <td class="cart_total_amount" id="cart-subtotal">$0.00</td>
+                                    <td class="cart_total_amount" id="cart-subtotal">{!! $site_settings->currency_symbol !!}0.00</td>
                                 </tr>
                             </tbody>
                         </table>

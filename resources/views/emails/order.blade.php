@@ -118,16 +118,16 @@
                 @foreach($cartItems as $item)
                     <tr>
                         <td>{{ $item['name'] }}</td>
-                        <td>${{ number_format($item['price'], 2) }}</td>
+                        <td>{!! $site_settings->currency_symbol !!}{{ number_format($item['price'], 2) }}</td>
                         <td>{{ $item['quantity'] }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
-        <p><strong>Subtotal:</strong> ${{ number_format($totalPrice, 2) }}</p>
-        <p><strong>Delivery Fee:</strong> ${{ number_format($deliveryFee, 2) }}</p>
-        <p><strong>Total Price Paid:</strong> ${{ number_format($totalPrice + $deliveryFee, 2) }}</p>
+        <p><strong>Subtotal:</strong> {!! $site_settings->currency_symbol !!}{{ number_format($totalPrice, 2) }}</p>
+        <p><strong>Delivery Fee:</strong> {!! $site_settings->currency_symbol !!}{{ number_format($deliveryFee, 2) }}</p>
+        <p><strong>Total Price Paid:</strong> {!! $site_settings->currency_symbol !!}{{ number_format($totalPrice + $deliveryFee, 2) }}</p>
 
         <p>If you have any questions or need assistance, feel free to contact us:</p>
         <p><strong>Contact Information:</strong></p>

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
 use App\Models\LiveChatScript;
 use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AddressRequest;
 use App\Models\RestaurantPhoneNumber;
 use App\Models\RestaurantWorkingHour;
@@ -16,14 +16,15 @@ use App\Http\Requests\PhoneNumberRequest;
 use App\Http\Requests\WorkingHourRequest;
 use App\Http\Requests\LiveChatScriptRequest;
 use App\Http\Requests\SocialMediaHandleRequest;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class GeneralSettingsController extends Controller
 {
+    use AdminViewSharedDataTrait;
 
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         
     }
     
@@ -34,7 +35,14 @@ class GeneralSettingsController extends Controller
         $workingHours = RestaurantWorkingHour::all();
         $socialMediaHandles = SocialMediaHandle::all();
         $script = LiveChatScript::latest()->first();
-        $order_settings = OrderSettings::firstOrNew();
+        $order_settings = OrderSettings::latest()->first();
+
+        $site_settings = SiteSetting::firstOrCreate([], [
+            'country' => config('site.country'),
+            'currency_symbol' => config('site.currency_symbol'),
+            'currency_code' => config('site.currency_code'),
+        ]);
+
 
 
         return view('admin.general-settings', compact('addresses', 'phoneNumbers', 'workingHours','socialMediaHandles','script','order_settings'));
@@ -203,4 +211,24 @@ class GeneralSettingsController extends Controller
         return redirect()->back()->with('success', 'Order Settings updated successfully!');
 
     }
+ 
+    public function siteSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'country' => 'required|string|max:255',
+            'currency_symbol' => 'required|string|max:10',
+            'currency_code' => 'required|string|max:10',
+        ]);
+
+        $siteSetting = SiteSetting::firstOrNew();
+        $siteSetting->currency_symbol = $validated['currency_symbol'];
+        $siteSetting->currency_code = $validated['currency_code'];
+        $siteSetting->country = $validated['country'];
+        $siteSetting->save();
+
+         return redirect()->back()->with('success', 'Site settings saved successfully!');
+
+    }
+ 
+    
 }

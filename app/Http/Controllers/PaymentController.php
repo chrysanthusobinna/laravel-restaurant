@@ -9,22 +9,23 @@ use App\Models\Order;
 use App\Mail\OrderEmail;
 use App\Models\Customer;
 use Stripe\PaymentIntent;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\RestaurantPhoneNumber;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
-use App\Http\Controllers\Traits\ViewSharedDataTrait;
+use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 
 class PaymentController extends Controller
 {
     use CartTrait;
-    use ViewSharedDataTrait;
+    use MainSiteViewSharedDataTrait;
 
     public function __construct()
     {
-        $this->initializeSharedLogic();
+        $this->shareMainSiteViewData();
 
     }
 
@@ -56,6 +57,9 @@ class PaymentController extends Controller
             return redirect() ->route('menu')->withErrors('The order number already exists. Please try again.');
         }
 
+        //Get Site Settings
+        $site_settings  =   SiteSetting::latest()->first();
+        $currency_code  =   strtolower($site_settings->currency_code);
 
 
         // Initialize the line_items array
@@ -65,7 +69,7 @@ class PaymentController extends Controller
         foreach ($cart_items as $cart_item) {
             $line_items[] = [
                 'price_data' => [
-                    'currency' => 'gbp',
+                    'currency' => $currency_code,
                     'product_data' => [
                         'name' => $cart_item['name'],
                     ],
@@ -80,13 +84,13 @@ class PaymentController extends Controller
         if (isset($delivery_fee)) {
             $line_items[] = [
                 'price_data' => [
-                    'currency' => 'gbp',
+                    'currency' => $currency_code,
                     'product_data' => [
                         'name' => 'Delivery Fee',
                     ],
                     'unit_amount' => $delivery_fee * 100, // Convert to cents
                 ],
-                'quantity' => 1, // Delivery fee is a one-time charge
+                'quantity' => 1, 
             ];
         }
 
@@ -94,9 +98,7 @@ class PaymentController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
-            // Get the site URL
-            $SITE_URL = env('APP_URL');
-
+ 
             // Create a Stripe Checkout session
             $checkout_session = \Stripe\Checkout\Session::create([
                 'line_items' => $line_items,
@@ -112,13 +114,13 @@ class PaymentController extends Controller
                     'postcode' => $customerDetails['postcode'],
                 ],
 
-                'success_url' => $SITE_URL . 'payment-success/?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => $SITE_URL . 'payment-cancel/',
+                'success_url' => config('site.url') . 'payment-success/?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => config('site.url')  . 'payment-cancel/',
             ]);
 
             // Redirect the user to the Stripe Checkout session URL
             return redirect($checkout_session->url);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error_msg  =  $e->getMessage();
             return redirect()->route('menu')->withErrors($error_msg);            
         }
@@ -248,7 +250,7 @@ class PaymentController extends Controller
                     return redirect()->route('menu')->withErrors('Order verification failed');
                 }
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error_msg  =  $e->getMessage();
                 return redirect()->route('menu')->withErrors($error_msg);
             }

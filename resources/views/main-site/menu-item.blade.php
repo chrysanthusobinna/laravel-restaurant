@@ -70,6 +70,16 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script>
+        const csrfToken = "{{ csrf_token() }}";
+        const addToCartUrl = "{{ route('customer.cart.add') }}";
+        const removeFromCartUrl = "{{ route('customer.cart.remove') }}";
+        const updateCartUrl = "{{ route('customer.cart.update') }}"; 
+    </script>
+    <script src="{{ asset('/assets/js/customer-cart-menu-route.js') }}"></script>
+
+ 
 @endpush
 
 
@@ -121,7 +131,7 @@
                     <div class="product_description">
                         <h4 class="product_title"><a href="#">{{ $menu->name }}</a></h4>
                         <div class="product_price"> 
-                            <span class="price">${{ number_format($menu->price, 2) }}</span> 
+                            <span class="price">{!! $site_settings->currency_symbol !!}{{ number_format($menu->price, 2) }}</span> 
                         </div>
                         <div class="rating_wrap">
                                 <div class="rating">
@@ -141,14 +151,22 @@
                     <hr />
                     <div class="cart_extra">
                         <div class="cart-product-quantity">
-                            <div class="quantity">
+                            <div class="quantity {{ $quantity==0? 'd-none':'' }}"  >
                                 <input type="button" value="-" class="minus">
-                                <input type="text" name="quantity" value="1" title="Qty" class="qty" size="4">
+                                <input type="text" min="0" name="quantity" value="{{ $quantity }}" title="Qty" class="qty quantity-input" size="4" data-id="{{ $menu->id }}">
                                 <input type="button" value="+" class="plus">
                             </div>
                         </div>
                         <div class="cart_btn">
-                            <button class="btn btn-default btn-addtocart" type="button"><span>Add to cart</span></button>
+                            <button data-id="{{ $menu->id }}"
+                                data-name="{{ $menu->name }}"
+                                data-price="{{ $menu->price }}" 
+                                data-img_src="{{ asset('storage/' . $menu->image) }}"                                            
+                                type="button"  class="{{ $quantity==0 ? '':'d-none' }} btn btn-default rounded-0 add-to-cart"  >Add To Cart</button>
+
+
+                                <button onclick="window.location.href='{{ route('customer.checkout') }}'" type="button" class="{{ $quantity == 0 ? 'd-none' : '' }} btn checkout-btn btn-secondary rounded-0">Proceed To CheckOut</button>
+
                         </div>
                     </div>
                     <hr />
@@ -207,23 +225,16 @@
 
                             <div class="item">
                                 <div class="single_product">
+                                    <a href="{{ route('menu.item',$relatedMenu->id) }}">
                                     <div class="menu_product_img">
-                                        <img src="/assets/images/menu_item1.jpg" alt="menu_item1">
-                                        <div class="action_btn"><a href="#" class="btn btn-white">Add To Cart</a></div>
+                                        <img src="{{ asset('storage/' . $relatedMenu->image) }}" alt="{{ $relatedMenu->name }} img" >
                                     </div>
+                                    </a>
                                     <div class="menu_product_info">
                                         <div class="title">
                                             <h5><a href="{{ route('menu.item',$relatedMenu->id) }}"> {{ $relatedMenu->name }}</a></h5>
                                         </div>
-                                        <p>{{ $relatedMenu->description }}</p>
-                                    </div>
-                                    <div class="menu_footer">
-                                        <div class="rating">
-                                            <div class="product_rate" style="width:100%"></div>
-                                        </div>
-                                        <div class="price">
-                                            <span>${{ number_format($relatedMenu->price, 2) }}</span>
-                                        </div>
+                                        <p>{!! $site_settings->currency_symbol !!}{{ number_format($relatedMenu->price, 2) }}</p>
                                     </div>
                                 </div>
                             </div>

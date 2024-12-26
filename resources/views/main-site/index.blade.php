@@ -73,11 +73,6 @@
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
 
-    <script>
-        const csrfToken = "{{ csrf_token() }}";
-        const addToCartUrl = "{{ route('customer.cart.add') }}";
-    </script>
-    <script src="{{ asset('/assets/js/add-to-cart.js') }}"></script>
 @endpush
 
 
@@ -206,18 +201,8 @@
                                     <div class="title">
                                         <h5><a href="{{ route('menu.item',$menu->id) }}"> {{ $menu->name }}</a></h5>
                                     </div>
-                                    <p>${{ number_format($menu->price, 2) }}</p>
-                                </div>
-                                <div class="menu_footer">
-                            
-                                    <hr/>
-                                    <button data-id="{{ $menu->id }}"
-                                            data-name="{{ $menu->name }}"
-                                            data-price="{{ $menu->price }}" 
-                                            data-img_src="{{ asset('storage/' . $menu->image) }}"                                            
-                                            type="button"  class="btn btn-block btn-default rounded-0 add-to-cart"  >Add To Cart</button>
-
-                                </div>
+                                    <p>{!! $site_settings->currency_symbol !!}{{ number_format($menu->price, 2) }}</p>
+                                </div>                    
                             </div>
                         </div>
                         

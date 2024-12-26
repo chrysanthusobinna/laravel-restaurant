@@ -117,7 +117,7 @@
                                                 <img src="{{ asset('storage/' . $menu->image) }}" alt="Menu Image" width="50" class="img-thumbnail trigger-lightbox" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="{{ asset('storage/' . $menu->image) }}">  {{ $menu->name }}
                                             </td>
                                             <td>{{ $menu->description }}</td>
-                                            <td>${{ $menu->price }}</td>
+                                            <td>{!! $site_settings->currency_symbol !!}{{ $menu->price }}</td>
                                             <td>
                                                 <button class="m-1 btn btn-primary btn-sm edit-btn"
                                                         data-id="{{ $menu->id }}"
@@ -191,7 +191,7 @@
                         <textarea name="description" class="form-control" id="description" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="price" class="form-label">Price</label>
+                        <label for="price" class="form-label">Price ({!! $site_settings->currency_symbol !!})</label>
                         <input type="number" step="0.01" name="price" class="form-control" id="price" required>
                     </div>
                     <div class="alert alert-danger" role="alert">
@@ -241,7 +241,7 @@
                         <textarea name="description" class="form-control" id="editDescription" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="editPrice" class="form-label">Price</label>
+                        <label for="editPrice" class="form-label">Price ({!! $site_settings->currency_symbol !!})</label>
                         <input type="number" step="0.01" name="price" class="form-control" id="editPrice" required>
                     </div>
                     <div class="alert alert-danger" role="alert">

@@ -14,17 +14,18 @@ use Illuminate\Support\Facades\Storage;
 use App\Mail\PasswordChangedNotification;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Controllers\Traits\OrderStatisticsTrait;
+use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class AdminController extends Controller
 {
     use OrderStatisticsTrait;
+    use AdminViewSharedDataTrait;
+
 
     public function __construct()
     {
-        // Share the logged-in user with all views
-        view()->share('loggedInUser', Auth::User());
+        $this->shareAdminViewData();
         $this->shareOrderStatistics();
-
         
     }
     
