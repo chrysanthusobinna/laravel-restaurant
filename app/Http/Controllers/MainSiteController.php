@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Blog;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Category;
@@ -17,8 +18,8 @@ use App\Models\RestaurantWorkingHour;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Requests\CustomerDetailsRequest;
-use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
+use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 
 
 class MainSiteController extends Controller
@@ -37,9 +38,12 @@ class MainSiteController extends Controller
     {
 
 
-       $menus = Menu::all();
+        $menus = Menu::inRandomOrder()->get();
+        $blogs = Blog::orderBy('created_at', 'desc')->limit(3)->get();
 
-        return view('main-site.index', compact('menus'));
+
+
+        return view('main-site.index', compact('menus','blogs'));
     }
 
     public function about()
@@ -56,16 +60,27 @@ class MainSiteController extends Controller
     }
     
 
-    public function menu()
+    public function menu(Request $request)
     {
-        $categories = Category::with('menus')->get();  
-        return view('main-site.menu',compact('categories'));
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+        ]);
+        
+        $query = Category::with(['menus' => function ($query) use ($request) {
+            if ($request->has('search') && $request->search != '') {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            }
+        }]);
+    
+        $categories = $query->get();
+    
+        return view('main-site.menu', compact('categories'));
     }
+    
 
     public function menuItem($id)
     {
         $menu = Menu::with(['category'])->findOrFail($id);
-
         $cart = session()->get($this->cartkey, []);
 
         function getItemQuantity($cart, $itemId) {
@@ -82,7 +97,7 @@ class MainSiteController extends Controller
         
     
     
-        // Fetch 5 random related menus (same category as the current menu)
+        // Fetch 5 random related menus  
         $relatedMenus = Menu::where('id', '!=', $id)->inRandomOrder()->limit(5)->get();
     
         return view('main-site.menu-item', compact('menu','quantity', 'relatedMenus'));
@@ -173,14 +188,31 @@ class MainSiteController extends Controller
     
     
 
-    public function blog()
+    public function blogs(Request $request)
     {
-        return view('main-site.blog');
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+        ]);
+    
+        $query = Blog::query();
+    
+        // Check if there's a search query
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%')->orWhere('content', 'like', '%' . $request->search . '%');
+        }
+    
+        $blogs = $query->paginate(10);
+    
+        return view('main-site.blogs', compact('blogs'));
     }
-
-    public function blogDetails()
+    
+    public function blogView($id)
     {
-        return view('main-site.blog-details');
+        $blog = Blog::findOrFail($id);
+
+        $relatedBlogs = Blog::where('id', '!=', $id)->inRandomOrder()->limit(5)->get();
+
+        return view('main-site.blog-view', compact('blog','relatedBlogs'));
     }
 
     public function login()

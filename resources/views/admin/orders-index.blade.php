@@ -76,7 +76,7 @@
             <h5 class="card-title mb-0">{{ $filter }} Orders</h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive pb-5">
                 <table class="table table-bordered data-table" id="orders-table">
                     <thead>
                         <tr>
@@ -89,6 +89,7 @@
                         </tr>
                     </thead>
                 </table>
+              
             </div>
         </div>
     </div>

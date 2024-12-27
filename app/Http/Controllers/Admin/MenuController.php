@@ -8,11 +8,14 @@ use App\Http\Requests\MenuRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Laravel\Facades\Image;
+use App\Http\Controllers\Traits\ImageHandlerTrait;
 use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class MenuController extends Controller
 {
     use AdminViewSharedDataTrait;
+    use ImageHandlerTrait;
+
 
     public function __construct()
     {
@@ -31,7 +34,7 @@ class MenuController extends Controller
         $validated = $request->validated();
         
         if ($request->hasFile('image')) {
-            $validated['image'] = $this->handleImageUpload($validated['image']);
+            $validated['image'] = $this->handleImageUpload($validated['image'], "menus");
         }
     
         Menu::create($validated);
@@ -53,7 +56,7 @@ class MenuController extends Controller
             }
     
             // Handle new image upload
-            $validated['image'] = $this->handleImageUpload($validated['image']);
+            $validated['image'] = $this->handleImageUpload($validated['image'],"menus");
         }
     
         $menu->update($validated);
@@ -80,20 +83,5 @@ class MenuController extends Controller
         return redirect()->route('admin.menus.index')->with('success', 'Menu deleted successfully!');
     }
 
-    private function handleImageUpload($imageFile)
-    {
-        $image = Image::read($imageFile);
-        $imageName = time() . '-' . $imageFile->getClientOriginalName();
-        $path = storage_path('app/public/menus/');
-
-        // Save Main Image
-        $image->save($path . $imageName);
-
-        // Generate cropped image
-        $image->cover(500, 400);
-        $image->save($path . $imageName);
-
-        return 'menus/' . $imageName;
-    }
 
 }

@@ -190,7 +190,7 @@
                         @forelse ($menus as $menu) 
 
 
-                        <div class="col-lg-3 col-sm-6">
+                        <div class="d-flex col-lg-3 col-sm-6">
                             <div class="single_product">
                                 <a href="{{ route('menu.item',$menu->id) }}">
                                 <div class="menu_product_img">
@@ -414,66 +414,36 @@
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
-                <div class="blog_post blog_style2 box_shadow1">
-                    <div class="blog_img">
-                        <a href="#">
-                            <img src="/assets/images/blog_small_img1.jpg" alt="blog_small_img1">
-                        </a>
-                        <span class="post_date"><strong>02</strong> May</span>
-                    </div>
-                    <div class="blog_content">
-                        <div class="blog_text">
-                            <ul class="list_none blog_meta">
-                                <li><a href="#"><i class="linearicons-user"></i> By Admin</a></li>
-                                <li><a href="#"><i class="linearicons-bubbles"></i> 2 Comments</a></li>
-                            </ul>
-                            <h5 class="blog_title"><a href="#">The Art of Charcoal Grilling</a></h5>
-                            <p>Discover the secrets behind our traditional charcoal-grilled suya, delivering smoky and bold flavors in every bite.</p>
+
+
+           
+                @forelse($blogs as $blog)
+                    <div class="d-flex col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
+                        <div class="blog_post blog_style2 box_shadow1">
+                            <div class="blog_img">
+                                <a href="{{ route('blog.view', $blog->id) }}">
+                                    <img src="{{ asset('storage/' . $blog->image) }}" alt="blog_small_img1">
+                                </a>
+                                <span class="post_date">
+                                    <strong>{{ $blog->created_at->format('d') }}</strong> {{ $blog->created_at->format('M') }}
+                                </span>
+                            </div>
+                            <div class="blog_content">
+                                <div class="blog_text">
+                             
+                                    <h5 class="blog_title"><a href="#">{{ $blog->name }}</a></h5>
+                                    <p>{{ Str::limit(strip_tags($blog->content), 50) }}</p>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.3s">
-                <div class="blog_post blog_style2 box_shadow1">
-                    <div class="blog_img">
-                        <a href="#">
-                            <img src="/assets/images/blog_small_img2.jpg" alt="blog_small_img2">
-                        </a>
-                        <span class="post_date"><strong>02</strong> May</span>
-                    </div>
-                    <div class="blog_content">
-                        <div class="blog_text">
-                            <ul class="list_none blog_meta">
-                                <li><a href="#"><i class="linearicons-user"></i> By Admin</a></li>
-                                <li><a href="#"><i class="linearicons-bubbles"></i> 2 Comments</a></li>
-                            </ul>
-                            <h5 class="blog_title"><a href="#">Homemade African Meals</a></h5>
-                            <p>We bring you the essence of home with carefully prepared dishes inspired by age-old African recipes.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.4s">
-                <div class="blog_post blog_style2 box_shadow1">
-                    <div class="blog_img">
-                        <a href="#">
-                            <img src="/assets/images/blog_small_img3.jpg" alt="blog_small_img3">
-                        </a>
-                        <span class="post_date"><strong>02</strong> May</span>
-                    </div>
-                    <div class="blog_content">
-                        <div class="blog_text">
-                            <ul class="list_none blog_meta">
-                                <li><a href="#"><i class="linearicons-user"></i> By Admin</a></li>
-                                <li><a href="#"><i class="linearicons-bubbles"></i> 2 Comments</a></li>
-                            </ul>
-                            <h5 class="blog_title"><a href="#">The Taste of Africa</a></h5>
-                            <p>Experience vibrant spices, hearty meals, and the unmatched warmth of African grills, made just for you.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                @empty
+                    <p>No blogs found.</p>
+                @endforelse
+          
+            
+            
         </div>
     </div>
 </div>

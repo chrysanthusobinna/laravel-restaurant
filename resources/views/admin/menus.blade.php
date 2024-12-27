@@ -98,9 +98,10 @@
             <div class="row">
                 @forelse ($categories as $category)
                     <div class="col-md-12 mb-4">
-                        <h4>{{ $category->name }}</h4>
+                        <h4>CATEGORY: {{ $category->name }}</h4>
+                        <hr style="border:1px solid #000">
                         <div class="table-responsive pt-3">
-                            <table class="table table-bordered">
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th style="width:20%">Name</th>

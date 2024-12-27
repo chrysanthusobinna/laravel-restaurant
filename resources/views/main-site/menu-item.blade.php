@@ -218,32 +218,26 @@
                 </div>
             	<div class="releted_product_slider carousel_slider owl-carousel owl-theme" data-margin="10" data-responsive='{"0":{"items": "1"}, "575":{"items": "2"}, "991":{"items": "3"}, "1199":{"items": "4"}}'>
 
-
-      
-                            @foreach ($relatedMenus as $relatedMenu)
-
-
+                        @forelse ($relatedMenus as $relatedMenu)
                             <div class="item">
                                 <div class="single_product">
-                                    <a href="{{ route('menu.item',$relatedMenu->id) }}">
-                                    <div class="menu_product_img">
-                                        <img src="{{ asset('storage/' . $relatedMenu->image) }}" alt="{{ $relatedMenu->name }} img" >
-                                    </div>
+                                    <a href="{{ route('menu.item', $relatedMenu->id) }}">
+                                        <div class="menu_product_img">
+                                            <img src="{{ asset('storage/' . $relatedMenu->image) }}" alt="{{ $relatedMenu->name }} img">
+                                        </div>
                                     </a>
                                     <div class="menu_product_info">
                                         <div class="title">
-                                            <h5><a href="{{ route('menu.item',$relatedMenu->id) }}"> {{ $relatedMenu->name }}</a></h5>
+                                            <h5><a href="{{ route('menu.item', $relatedMenu->id) }}">{{ $relatedMenu->name }}</a></h5>
                                         </div>
                                         <p>{!! $site_settings->currency_symbol !!}{{ number_format($relatedMenu->price, 2) }}</p>
                                     </div>
                                 </div>
                             </div>
-
-          
-                            @endforeach
-       
-                    
-
+                        @empty
+                            <p>No related menus found.</p>
+                        @endforelse
+                     
                 </div>
             </div>
         </div>

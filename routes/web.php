@@ -45,8 +45,8 @@ Route::get('payment-cancel/', [PaymentController::class, 'paymentCancel'])->name
 Route::get('about/', [MainSiteController::class, 'about'])->name('about');
 Route::get('contact/', [MainSiteController::class, 'contact'])->name('contact');
 
-Route::get('blog/', [MainSiteController::class, 'blog'])->name('blog');
-Route::get('blog-details/', [MainSiteController::class, 'blogDetails'])->name('blog.details');
+Route::get('blogs/', [MainSiteController::class, 'blogs'])->name('blogs');
+Route::get('blog/view/{id}', [MainSiteController::class, 'blogView'])->name('blog.view');
 
 Route::get('privacy-policy/', [MainSiteController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('terms-conditions/', [MainSiteController::class, 'termsConditions'])->name('terms.conditions');

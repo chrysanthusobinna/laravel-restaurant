@@ -75,7 +75,7 @@
 @endpush
 
 
-@section('title', 'Home')
+@section('title', 'Menus')
 
 
 @section('header')
@@ -116,48 +116,76 @@
         @include('partials.message-bag')
 
 
-        @forelse ($categories as $category)
 
-        <div class="row align-items-center">
-            <div class="col-md-12">
-                <div class="heading_tab_header animation" data-animation="fadeInUp" data-animation-delay="0.02s">
-                    <div class="heading_s1">  <h2>{{ $category->name }}</h2> </div>
+
+        <form action="{{ route('menu') }}" method="GET" class="mb-4">
+
+            <div class="form-group">
+                <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search menu items..." value="{{ request('search') }}">
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-sm btn-danger"  ><i class="linearicons-magnifier"></i> Search</button>
+                  </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-           
+              </div>
+  
+              @if (request('search'))
+              <div class="alert alert-info">
+                  We found 
+                  <strong>
+                      {{ $categories->sum(fn($category) => $category->menus->count()) }}
+                  </strong> 
+                  {{ $categories->sum(fn($category) => $category->menus->count()) === 1 ? 'result' : 'results' }} 
+                  for your query: <em>"{{ request('search') }}"</em>.
+                  <hr/>
+                  <a href="{{ route('menu') }}" class="btn-sm btn btn-light">Return to menu</a>
+              </div>
+          @endif
+              
+        </form>
 
-               
-            @forelse ($category->menus as $menu)
+        @if ($categories->isNotEmpty())
+        @foreach ($categories as $category)
 
-
-            <div class="col-lg-3 col-sm-6">
-                <div class="single_product">
-                    <a href="{{ route('menu.item',$menu->id) }}">
-                    <div class="menu_product_img">
-                        <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }} img" >
-                    </div>
-                    </a>
-                    <div class="menu_product_info">
-                        <div class="title">
-                            <h5><a href="{{ route('menu.item',$menu->id) }}"> {{ $menu->name }}</a></h5>
+    
+            @if ($category->menus->isNotEmpty())
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="heading_tab_header animation" data-animation="fadeInUp" data-animation-delay="0.02s">
+                        <div class="heading_s1">
+                            <h2>{{ $category->name }}</h2>
                         </div>
-                        <p>{!! $site_settings->currency_symbol !!}{{ number_format($menu->price, 2) }}</p>
                     </div>
                 </div>
             </div>
-                                                                                             
-            @empty
-                No menus available
-            @endforelse
+                <div class="row">
+                    @foreach ($category->menus as $menu)
+                        <div class="d-flex col-lg-3 col-sm-6">
+                            <div class="single_product">
+                                <a href="{{ route('menu.item', $menu->id) }}">
+                                    <div class="menu_product_img">
+                                        <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }} img">
+                                    </div>
+                                </a>
+                                <div class="menu_product_info">
+                                    <div class="title">
+                                        <h5><a href="{{ route('menu.item', $menu->id) }}">{{ $menu->name }}</a></h5>
+                                    </div>
+                                    <p>{!! $site_settings->currency_symbol !!}{{ number_format($menu->price, 2) }}</p>
+                                </div>
+                            </div>
+                        </div>
 
-        </div>
+                    @endforeach
+                </div>
 
-
-        @empty
-        <p>No categories available.</p>
-    @endforelse
+            @endif
+        @endforeach
+    @else
+        <p>No categories found.</p>
+    @endif
+            
+ 
 
     </div>
 </div>

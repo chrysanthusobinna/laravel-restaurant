@@ -43,7 +43,7 @@
             </a>
         </li>
         
-        <li class="nav-item {{ request()->route()->named('admin.blog.index') ? 'active-nav' : '' }}">
+        <li class="nav-item {{ Request::is('admin/blog*') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.blog.index') }}">
                 <i class="far fa-newspaper menu-icon"></i>
                 <span class="menu-title">Manage Blog</span>

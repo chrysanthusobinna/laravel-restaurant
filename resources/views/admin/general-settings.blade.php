@@ -423,41 +423,39 @@
     
     <div class="row">
         <div class="col-lg-6 d-flex grid-margin stretch-card">
-     
- 
-    <form method="POST" action="{{ $script ? route('admin.livechat.update', $script->id) : route('admin.livechat.store') }}">
-        <div class="card">
-            <div class="card-header">
-                <span>{{ $script ? 'Edit Live Chat Script' : 'Add Live Chat Script' }}</span>
-            </div>
-            <div class="card-body">
-                @csrf
-                @if($script)
-                    @method('PUT')
-                @endif
-                <div class="alert alert-danger" role="alert">
-                    <i class="fa fa-exclamation-triangle"></i> <b>Please ensure you enter a valid live chat script code. Make sure the code is copied from a reliable third-party live chat provider.</b>
+            <form method="POST" action="{{ $script ? route('admin.livechat.update', $script->id) : route('admin.livechat.store') }}">
+                <div class="card">
+                    <div class="card-header">
+                        <span>{{ $script ? 'Edit Live Chat Script' : 'Add Live Chat Script' }}</span>
+                    </div>
+                    <div class="card-body">
+                        @csrf
+                        @if($script)
+                            @method('PUT')
+                        @endif
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fa fa-exclamation-triangle"></i> <b>Please ensure you enter a valid live chat script code. Make sure the code is copied from a reliable third-party live chat provider.</b>
+                        </div>
+                        <hr/>
+                        <div class="form-group">
+                            <label for="name">Live Chat Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="e.g., Tawk.to" value="{{ $script->name ?? '' }}" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="script_code">Script Code</label>
+                            <textarea class="form-control" id="script_code" name="script_code" rows="2" placeholder="Paste the script code here..." required>{{ $script->script_code ?? '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between mt-4">
+                        @if($script)
+                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="button" class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete this script?')) { document.getElementById('form-delete-livechat').submit(); }">Remove Live Chat</button>
+                        @else
+                            <button type="submit" class="btn btn-primary">Add Live Chat</button>
+                        @endif
+                    </div>
                 </div>
-                <hr/>
-                <div class="form-group">
-                    <label for="name">Live Chat Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="e.g., Tawk.to" value="{{ $script->name ?? '' }}" required>
-                </div>
-                <div class="form-group mt-3">
-                    <label for="script_code">Script Code</label>
-                    <textarea class="form-control" id="script_code" name="script_code" rows="2" placeholder="Paste the script code here..." required>{{ $script->script_code ?? '' }}</textarea>
-                </div>
-            </div>
-            <div class="card-footer d-flex justify-content-between mt-4">
-                @if($script)
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    <button type="button" class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete this script?')) { document.getElementById('form-delete-livechat').submit(); }">Remove Live Chat</button>
-                @else
-                    <button type="submit" class="btn btn-primary">Add Live Chat</button>
-                @endif
-            </div>
-        </div>
-    </form>
+            </form>
     @if($script)
         <form method="POST" id="form-delete-livechat" action="{{ route('admin.livechat.destroy', $script->id) }}">
             @csrf

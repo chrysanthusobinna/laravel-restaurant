@@ -5,12 +5,15 @@ use App\Models\Blog;
 use App\Http\Requests\BlogRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Traits\ImageHandlerTrait;
 use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class BlogController extends Controller
 {
 
     use AdminViewSharedDataTrait;
+    use ImageHandlerTrait;
+
 
 
     public function __construct()
@@ -28,21 +31,31 @@ class BlogController extends Controller
         return view('admin.blog', compact('blogs'));
     }
 
+    public function create()
+    {
+        return view('admin.blog-create');
+    }
+
     // Store a new blog
     public function store(BlogRequest $request)
     {
         $validated = $request->validated();
-    
-        // Handle image upload
-        $imageName = time() . '.' . $request->image->extension();
-        $request->image->move(public_path('blog-images'), $imageName);
-        $validated['image'] = 'blog-images/' . $imageName;
-    
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $this->handleImageUpload($validated['image'], "blog-images");
+        }
+
         Blog::create($validated);
     
-        return back()->with('success', 'Blog post created successfully.');
+        return redirect()->route('admin.blog.index')->with('success', 'Blog post created successfully.');
+
     }
     
+    public function edit($id)
+    {
+        $blog = Blog::findOrFail($id);
+        return view('admin.blog-edit', compact('blog'));
+    }
 
     // Update an existing blog
     public function update(BlogRequest $request, $id)
@@ -51,17 +64,23 @@ class BlogController extends Controller
         $validated = $request->validated();
     
         if ($request->hasFile('image')) {
-            // Handle image upload
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('blog-images'), $imageName);
-            $validated['image'] = 'blog-images/' . $imageName;
+            // Delete old image
+            $imagePath = storage_path('app/public/' . ltrim($blog->image, '/'));
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+
+            // Handle new image upload
+            $validated['image'] = $this->handleImageUpload($validated['image'],"blog-images");
+
         } else {
             $validated['image'] = $blog->image;
         }
     
         $blog->update($validated);
     
-        return back()->with('success', 'Blog post updated successfully.');
+        return redirect()->route('admin.blog.index')->with('success', 'Blog post updated successfully.');
+
     }
     
 
