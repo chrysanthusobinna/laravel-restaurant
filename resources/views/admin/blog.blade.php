@@ -77,7 +77,7 @@
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Blog</span>
+                <span>Blog ({{ $blogs->count() }})</span>
                 <button class="btn btn-sm btn-primary" onclick="window.location.href='{{ route('admin.blog.create') }}'">
                     Create New Blog
                 </button>                

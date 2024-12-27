@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
 
 
@@ -146,7 +147,14 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('blog/{id}/edit', [BlogController::class, 'edit'])->name('admin.blog.edit');
     Route::put('blog/{id}', [BlogController::class, 'update'])->name('admin.blog.update');
     Route::delete('blog/{id}', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
- 
+     
+    //Admin testimonies routes
+    Route::get('testimonies', [TestimonyController::class, 'index'])->name('admin.testimonies.index');
+    Route::post('testimonies/store', [TestimonyController::class, 'store'])->name('admin.testimonies.store');
+    Route::put('testimonies/{id}', [TestimonyController::class, 'update'])->name('admin.testimonies.update');
+    Route::delete('testimonies/{id}', [TestimonyController::class, 'destroy'])->name('admin.testimonies.destroy');
+    
+    
     // Admin Cart / POS routes
     Route::get('pos/', [CartController::class, 'index'])->name('admin.pos.index');
     Route::post('cart/add', [CartController::class, 'addToCart'])->name('admin.cart.add');

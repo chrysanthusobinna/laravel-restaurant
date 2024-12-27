@@ -89,7 +89,7 @@
  
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Menus</span>
+            <span>Menus ({{ $categories->sum(fn($category) => $category->menus->count()) }})</span>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
                 Add Menu
             </button>

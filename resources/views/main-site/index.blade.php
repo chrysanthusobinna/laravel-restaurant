@@ -348,50 +348,21 @@
         <div class="row justify-content-center">
             <div class="col-12 animation" data-animation="fadeInUp" data-animation-delay="0.03s">
                 <div class="testimonial_slider testimonial_style2 carousel_slider owl-carousel owl-theme" data-margin="10" data-loop="true" data-autoplay="true" data-responsive='{"0":{"items": "1"}, "767":{"items": "2"}, "1199":{"items": "3"}}'>
+
+                    @foreach($testimonies as $testimony)
+
                     <div class="testimonial_box">
                         <div class="author_info">
                             <div class="author_name">
-                                <h5>Richard</h5>
-                                <span>Customer</span>
-                            </div>
+                                <h5>{{ $testimony->name }}</h5>
+                             </div>
                         </div>
                         <div class="testimonial_desc">
-                            <p>The flavors are simply amazing! It's like a little piece of Africa on my plate. Highly recommend.</p>
+                            <p>{{ Str::limit($testimony->content, 300) }}</p>
                         </div>
                     </div>
-                    <div class="testimonial_box">
-                        <div class="author_info">
-                            <div class="author_name">
-                                <h5>Aisha</h5>
-                                <span>Customer</span>
-                            </div>
-                        </div>
-                        <div class="testimonial_desc">
-                            <p>From the suya to the stews, every dish is bursting with authentic spices. I’ll be back for more!</p>
-                        </div>
-                    </div>
-                    <div class="testimonial_box">
-                        <div class="author_info">
-                            <div class="author_name">
-                                <h5>Emily</h5>
-                                <span>Customer</span>
-                            </div>
-                        </div>
-                        <div class="testimonial_desc">
-                            <p>The food was delightful, and the service was even better. A wonderful dining experience.</p>
-                        </div>
-                    </div>
-                    <div class="testimonial_box">
-                        <div class="author_info">
-                            <div class="author_name">
-                                <h5>Chukwu</h5>
-                                <span>Customer</span>
-                            </div>
-                        </div>
-                        <div class="testimonial_desc">
-                            <p>This is the taste of home I’ve been missing. Every bite feels like a celebration.</p>
-                        </div>
-                    </div>
+                    @endforeach
+
                 </div>
             </div>
         </div>

@@ -72,7 +72,10 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link " href="{{ route('admin.categories.index') }}">Category</a>
-                        </li>                         
+                        </li> 
+                        <li class="nav-item">
+                          <a class="nav-link " href="{{ route('admin.testimonies.index') }}">Testimony</a>
+                        </li>                                                   
                         <li class="nav-item">
                             <a class="nav-link " href="{{ route('admin.general-settings') }}">General Settings</a>
                         </li>

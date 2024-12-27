@@ -37,4 +37,10 @@ class BlogRequest extends FormRequest
             'image.max' => 'The image may not be greater than 2048 kilobytes.',
         ];
     }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'name' => ucwords($this->name),
+        ]);
+    }
 }

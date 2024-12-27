@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\Testimony;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
 use App\Models\LiveChatScript;
@@ -40,10 +41,12 @@ class MainSiteController extends Controller
 
         $menus = Menu::inRandomOrder()->get();
         $blogs = Blog::orderBy('created_at', 'desc')->limit(3)->get();
+        $testimonies = Testimony::inRandomOrder()->limit(5)->get();
 
 
 
-        return view('main-site.index', compact('menus','blogs'));
+
+        return view('main-site.index', compact('menus','blogs','testimonies'));
     }
 
     public function about()
@@ -65,7 +68,7 @@ class MainSiteController extends Controller
         $validated = $request->validate([
             'search' => 'nullable|string|max:255',
         ]);
-        
+
         $query = Category::with(['menus' => function ($query) use ($request) {
             if ($request->has('search') && $request->search != '') {
                 $query->where('name', 'like', '%' . $request->search . '%');

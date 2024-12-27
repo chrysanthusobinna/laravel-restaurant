@@ -102,7 +102,7 @@
  
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Manage Admin</span>
+            <span>Manage Admin ({{ $users->count() }})</span>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal">Add Admin</button>
         </div>
         <div class="card-body">

@@ -37,7 +37,6 @@
            let actionUrl = "{{ route('admin.categories.update', ':id') }}".replace(':id', categoryId);
            $('#editForm').attr('action', actionUrl);
    
-           console.log('Edit URL:', actionUrl); // Optional: Log the action URL for debugging
        });
    });
    </script>
@@ -74,13 +73,13 @@
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Categories</span>
+                <span>Categories ({{ $categories->count() }})</span>
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createModal">
                     Add New Category
                 </button>
             </div>
             <div class="card-body">
-                <table class="table table-bordered">
+                <table class="table">
                     <thead>
                         <tr>
                             <th style="width:80%;">Name</th>
