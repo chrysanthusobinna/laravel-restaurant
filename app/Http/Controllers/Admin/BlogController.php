@@ -6,6 +6,7 @@ use App\Http\Requests\BlogRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Traits\ImageHandlerTrait;
+use App\Http\Controllers\Traits\SanitizesInputTrait;
 use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class BlogController extends Controller
@@ -13,6 +14,8 @@ class BlogController extends Controller
 
     use AdminViewSharedDataTrait;
     use ImageHandlerTrait;
+    use SanitizesInputTrait;
+
 
 
 
@@ -44,6 +47,7 @@ class BlogController extends Controller
         if ($request->hasFile('image')) {
             $validated['image'] = $this->handleImageUpload($validated['image'], "blog-images");
         }
+        $validated['content'] = $this->sanitizeHtmlContent($validated['content']);
 
         Blog::create($validated);
     
@@ -76,7 +80,8 @@ class BlogController extends Controller
         } else {
             $validated['image'] = $blog->image;
         }
-    
+        $validated['content'] = $this->sanitizeHtmlContent($validated['content']);
+
         $blog->update($validated);
     
         return redirect()->route('admin.blog.index')->with('success', 'Blog post updated successfully.');

@@ -16,11 +16,14 @@ use App\Http\Requests\PhoneNumberRequest;
 use App\Http\Requests\WorkingHourRequest;
 use App\Http\Requests\LiveChatScriptRequest;
 use App\Http\Requests\SocialMediaHandleRequest;
+use App\Http\Controllers\Traits\SanitizesInputTrait;
 use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 
 class GeneralSettingsController extends Controller
 {
     use AdminViewSharedDataTrait;
+    use SanitizesInputTrait;
+
 
     public function __construct()
     {
@@ -57,7 +60,6 @@ class GeneralSettingsController extends Controller
             RestaurantPhoneNumber::where('use_whatsapp', 1)->update(['use_whatsapp' => 0]);
         }
     
-        // Create the new phone number
         RestaurantPhoneNumber::create([
             'phone_number' => $request->phone_number,
             'use_whatsapp' => $request->has('use_whatsapp') ? 1 : 0,
@@ -79,7 +81,6 @@ class GeneralSettingsController extends Controller
             RestaurantPhoneNumber::where('use_whatsapp', 1)->update(['use_whatsapp' => 0]);
         }
     
-        // Update the specific record
         $phoneNumber->update([
             'phone_number' => $request->phone_number,
             'use_whatsapp' => $request->has('use_whatsapp') ? 1 : 0,
@@ -172,10 +173,15 @@ class GeneralSettingsController extends Controller
     // live chat script CRUD
     public function createLiveChatScript(LiveChatScriptRequest $request)
     {
-        LiveChatScript::create($request->validated());
-
+        $validated = $request->validated();
+    
+        $validated['script_code'] = $this->sanitizeHtmlContent($validated['script_code']);
+    
+        LiveChatScript::create($validated);
+    
         return redirect()->back()->with('success', 'Live chat script created successfully!');
     }
+    
 
 
     public function updateLiveChatScript(LiveChatScriptRequest $request, $id)
@@ -221,7 +227,7 @@ class GeneralSettingsController extends Controller
         ]);
 
         $siteSetting = SiteSetting::firstOrNew();
-        $siteSetting->currency_symbol = $validated['currency_symbol'];
+        $siteSetting->currency_symbol = $this->sanitizeHtmlContent($validated['currency_symbol']);
         $siteSetting->currency_code = $validated['currency_code'];
         $siteSetting->country = $validated['country'];
         $siteSetting->save();
