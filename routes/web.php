@@ -16,7 +16,9 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
+use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
+use App\Http\Controllers\Admin\TermsAndConditionController;
 
 
 Route::get('/', [MainSiteController::class, 'home'])->name('home');
@@ -153,8 +155,16 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::post('testimonies/store', [TestimonyController::class, 'store'])->name('admin.testimonies.store');
     Route::put('testimonies/{id}', [TestimonyController::class, 'update'])->name('admin.testimonies.update');
     Route::delete('testimonies/{id}', [TestimonyController::class, 'destroy'])->name('admin.testimonies.destroy');
-    
-    
+
+    //Admin Terms And Condition routes
+    Route::get('terms-and-conditions/edit', [TermsAndConditionController::class, 'edit'])->name('admin.terms.edit');
+    Route::post('terms-and-conditions/update', [TermsAndConditionController::class, 'update'])->name('admin.terms.update');
+
+
+    // Admin Privacy Policy routes
+    Route::get('privacy-policy/edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy-policy.edit');
+    Route::post('privacy-policy/update', [PrivacyPolicyController::class, 'update'])->name('admin.privacy-policy.update');
+
     // Admin Cart / POS routes
     Route::get('pos/', [CartController::class, 'index'])->name('admin.pos.index');
     Route::post('cart/add', [CartController::class, 'addToCart'])->name('admin.cart.add');

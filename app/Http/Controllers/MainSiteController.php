@@ -10,10 +10,12 @@ use App\Models\Customer;
 use App\Models\Testimony;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
+use App\Models\PrivacyPolicy;
 use App\Models\LiveChatScript;
 use App\Helpers\DistanceHelper;
 use App\Models\RestaurantAddress;
 use App\Models\SocialMediaHandle;
+use App\Models\TermsAndCondition;
 use App\Models\RestaurantPhoneNumber;
 use App\Models\RestaurantWorkingHour;
 use Illuminate\Support\Facades\Session;
@@ -226,12 +228,14 @@ class MainSiteController extends Controller
 
     public function privacyPolicy()
     {
-        return view('main-site.privacy-policy');
+        $privacyPolicy  = PrivacyPolicy::latest()->first();
+        return view('main-site.privacy-policy',compact('privacyPolicy'));
     }
     public function termsConditions()
     {
-        return view('main-site.terms-conditions');
-    }
+        $termsAndCondition = TermsAndCondition::latest()->first();
+        return view('main-site.terms-conditions', compact('termsAndCondition'));
+     }
  
 
     

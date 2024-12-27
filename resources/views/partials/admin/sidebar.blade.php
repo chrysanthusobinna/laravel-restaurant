@@ -67,20 +67,12 @@
                 </a>
                 <div class="collapse" id="site-settings" style="">
                     <ul class="nav flex-column sub-menu">
-                        <li class="nav-item">
-                            <a class="nav-link " href="{{ route('admin.menus.index') }}">Menu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link " href="{{ route('admin.categories.index') }}">Category</a>
-                        </li> 
-                        <li class="nav-item">
-                          <a class="nav-link " href="{{ route('admin.testimonies.index') }}">Testimony</a>
-                        </li>                                                   
-                        <li class="nav-item">
-                            <a class="nav-link " href="{{ route('admin.general-settings') }}">General Settings</a>
-                        </li>
-
-                                           
+                        <li class="nav-item">  <a class="nav-link " href="{{ route('admin.menus.index') }}">Menu</a>  </li>
+                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.categories.index') }}">Category</a>  </li> 
+                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.testimonies.index') }}">Testimony</a> </li>
+                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.terms.edit') }}">Terms & Condition</a> </li>                                                   
+                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.privacy-policy.edit') }}">Privacy Policy</a> </li>                                                                                                
+                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.general-settings') }}">General Settings</a>  </li>                                         
                     </ul>
                 </div>
             </li>

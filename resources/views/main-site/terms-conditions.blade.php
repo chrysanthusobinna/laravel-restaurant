@@ -115,38 +115,10 @@
                     <div class="card">
                    
                         <div class="card-body">
-                            <p>Welcome to {{ config('site.name') }}. These terms and conditions outline the rules and regulations for the use of {{ config('site.name') }}'s Website.</p>
-
-                            <h6>Introduction</h6>
-                            <p>By accessing this website we assume you accept these terms and conditions. Do not continue to use {{ config('site.name') }} if you do not agree to take all of the terms and conditions stated on this page.</p>
-
-                            <h6>License</h6>
-                            <p>Unless otherwise stated, {{ config('site.name') }} and/or its licensors own the intellectual property rights for all material on {{ config('site.name') }}. All intellectual property rights are reserved. You may access this from {{ config('site.name') }} for your own personal use subjected to restrictions set in these terms and conditions.</p>
-
-                            <h6>User Comments</h6>
-                            <p>Certain parts of this website offer the opportunity for users to post and exchange opinions and information in certain areas of the website. {{ config('site.name') }} does not filter, edit, publish or review Comments prior to their presence on the website. Comments do not reflect the views and opinions of {{ config('site.name') }},its agents and/or affiliates. Comments reflect the views and opinions of the person who post their views and opinions. To the extent permitted by applicable laws, {{ config('site.name') }} shall not be liable for the Comments or for any liability, damages or expenses caused and/or suffered as a result of any use of and/or posting of and/or appearance of the Comments on this website.</p>
-
-                            <h6>Hyperlinking to our Content</h6>
-                            <p>The following organizations may link to our Website without prior written approval: Government agencies; Search engines; News organizations; Online directory distributors may link to our Website in the same manner as they hyperlink to the Websites of other listed businesses; and System wide Accredited Businesses except soliciting non-profit organizations, charity shopping malls, and charity fundraising groups which may not hyperlink to our Web site.</p>
-
-                            <h6>iFrames</h6>
-                            <p>Without prior approval and written permission, you may not create frames around our Webpages that alter in any way the visual presentation or appearance of our Website.</p>
-
-                            <h6>Content Liability</h6>
-                            <p>We shall not be hold responsible for any content that appears on your Website. You agree to protect and defend us against all claims that is rising on your Website. No link(s) should appear on any Website that may be interpreted as libelous, obscene or criminal, or which infringes, otherwise violates, or advocates the infringement or other violation of, any third party rights.</p>
-
-                            <h6>Your Privacy</h6>
-                            <p>Please read our Privacy Policy.</p>
-
-                            <h6>Reservation of Rights</h6>
-                            <p>We reserve the right to request that you remove all links or any particular link to our Website. You approve to immediately remove all links to our Website upon request. We also reserve the right to amen these terms and conditions and it’s linking policy at any time. By continuously linking to our Website, you agree to be bound to and follow these linking terms and conditions.</p>
-
-                            <h6>Removal of links from our website</h6>
-                            <p>If you find any link on our Website that is offensive for any reason, you are free to contact and inform us any moment. We will consider requests to remove links but we are not obligated to or so or to respond to you directly.</p>
-
-                            <h6>Disclaimer</h6>
-                            <p>To the maximum extent permitted by applicable law, we exclude all representations, warranties and conditions relating to our website and the use of this website. Nothing in this disclaimer will: limit or exclude our or your liability for death or personal injury; limit or exclude our or your liability for fraud or fraudulent misrepresentation; limit any of our or your liabilities in any way that is not permitted under applicable law; or exclude any of our or your liabilities that may not be excluded under applicable law.</p>
-                        </div>
+                            <div class="mx-3">
+                                {!! $termsAndCondition->content ?? '' !!}
+                            </div>
+                         </div>
                          
                     </div>
                 </div>

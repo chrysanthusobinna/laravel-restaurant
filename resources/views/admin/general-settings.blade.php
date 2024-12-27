@@ -390,7 +390,7 @@
                             @forelse($workingHours as $workingHour)
                                 <tr>
                                     <td>
-                                        <i class="fa fa-clock-o" aria-hidden="true"></i> 
+                                        <i class="fa fa-clock" aria-hidden="true"></i> 
                                         {{ $workingHour->working_hours }}
                                     </td>
                                     <td class="text-end">
