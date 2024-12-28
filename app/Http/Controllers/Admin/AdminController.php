@@ -29,31 +29,29 @@ class AdminController extends Controller
         
     }
     
-   
-
     public function index()
     {
-        // Fake sales data for all months
-        $salesData = [
-            'January' => rand(100, 1000),
-            'February' => rand(100, 1000),
-            'March' => rand(100, 1000),
-            'April' => rand(100, 1000),
-            'May' => rand(100, 1000),
-            'June' => rand(100, 1000),
-            'July' => rand(100, 1000),
-            'August' => rand(100, 1000),
-            'September' => rand(100, 1000),
-            'October' => rand(100, 1000),
-            'November' => rand(100, 1000),
-            'December' => rand(100, 1000),
+        $currentYear = now()->year;
+    
+        $salesData = \DB::table('orders')
+            ->selectRaw('MONTHNAME(created_at) as month, COUNT(*) as total_sales')
+            ->whereYear('created_at', $currentYear)  
+            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
+            ->orderByRaw('MONTH(created_at)')
+            ->pluck('total_sales', 'month');
+    
+        // Ensure all months are represented with zero sales if necessary
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 'June', 
+            'July', 'August', 'September', 'October', 'November', 'December'
         ];
-
-
-        return view('admin.index', compact('salesData'));
+        $formattedSalesData = collect($months)->mapWithKeys(function ($month) use ($salesData) {
+            return [$month => $salesData->get($month, 0)];
+        });
+    
+        return view('admin.index', compact('formattedSalesData'));
     }
-
-
+    
 
     public function viewMyProfile()
     {

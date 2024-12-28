@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckRole;
 
 //use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\RedirectIfNotAdmin;
@@ -14,12 +15,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\TableBookingController;
-use App\Http\Controllers\Admin\TableBookingController as AdminTableBookingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
 use App\Http\Controllers\Admin\TermsAndConditionController;
+use App\Http\Controllers\Admin\TableBookingController as AdminTableBookingController;
 
 
 Route::get('/', [MainSiteController::class, 'home'])->name('home');
@@ -94,58 +95,6 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('change-password', [AdminController::class, 'showChangePasswordForm'])->name('change.password.form');
     Route::post('change-password', [AdminController::class, 'changePassword'])->name('change-password.update');
 
-    Route::prefix('settings')->group(function () {
-        Route::get('category', [CategoryController::class, 'index'])->name('admin.categories.index');
-        Route::post('category/store', [CategoryController::class, 'store'])->name('admin.categories.store');
-        Route::post('category/update/{id}', [CategoryController::class, 'update'])->name('admin.categories.update');
-        Route::post('category/delete/{id}', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
-
-        Route::get('menu', [MenuController::class, 'index'])->name('admin.menus.index');
-        Route::post('menu', [MenuController::class, 'store'])->name('admin.menus.store');
-        Route::patch('menu/{id}', [MenuController::class, 'update'])->name('admin.menus.update');
-        Route::delete('menu/{id}', [MenuController::class, 'destroy'])->name('admin.menus.destroy');
-    });
-
-    Route::get('general-settings', [GeneralSettingsController::class, 'index'])->name('admin.general-settings');
-
-    
-    //Admin Settings Phone Number routes
-    Route::post('phone-number', [GeneralSettingsController::class, 'storePhoneNumber'])->name('admin.phone-number.store');
-    Route::put('phone-number/{id}', [GeneralSettingsController::class, 'updatePhoneNumber'])->name('admin.phone-number.update');
-    Route::delete('phone-number/{id}', [GeneralSettingsController::class, 'deletePhoneNumber'])->name('admin.phone-number.delete');
-
-    //Admin Settings Address routes 
-    Route::post('address', [GeneralSettingsController::class, 'storeAddress'])->name('admin.address.store');
-    Route::put('address/{id}', [GeneralSettingsController::class, 'updateAddress'])->name('admin.address.update');
-    Route::delete('address/{id}', [GeneralSettingsController::class, 'deleteAddress'])->name('admin.address.delete');
-
-    //Admin Settings Working hour routes 
-    Route::post('working-hour', [GeneralSettingsController::class, 'storeWorkingHour'])->name('admin.working-hour.store');
-    Route::put('working-hour/{id}', [GeneralSettingsController::class, 'updateWorkingHour'])->name('admin.working-hour.update');
-    Route::delete('working-hour/{id}', [GeneralSettingsController::class, 'deleteWorkingHour'])->name('admin.working-hour.delete');
-
-    //Admin Settings Social Media routes 
-    Route::post('social-media-handles', [GeneralSettingsController::class, 'storeSocialMediaHandle'])->name('admin.social-media-handles.store');
-    Route::put('social-media-handles/{id}', [GeneralSettingsController::class, 'updateSocialMediaHandle'])->name('admin.social-media-handles.update');
-    Route::delete('social-media-handles/{id}', [GeneralSettingsController::class, 'deleteSocialMediaHandle'])->name('admin.social-media-handles.delete');
-
-    //Admin Settings Livechat routes 
-    Route::post('livechat', [GeneralSettingsController::class, 'createLiveChatScript'])->name('admin.livechat.store');
-    Route::put('livechat/{id}', [GeneralSettingsController::class, 'updateLiveChatScript'])->name('admin.livechat.update');
-    Route::delete('livechat/{id}', [GeneralSettingsController::class, 'destroyLiveChatScript'])->name('admin.livechat.destroy');
-
-    //Admin Settings Orders
-    Route::post('order-settings', [GeneralSettingsController::class, 'updateOrderSettings'])->name('admin.order-settings.update');
-    Route::post('/site-settings/save', [GeneralSettingsController::class, 'siteSettings'])->name('site-settings.save');
-   
-
-
-    //Admin Users routes
-    Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
-    Route::post('users', [UserController::class, 'store'])->name('admin.users.store');
-    Route::put('users/{id}', [UserController::class, 'update'])->name('admin.users.update');
-    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
-
     //Admin Blog routes
     Route::get('blog', [BlogController::class, 'index'])->name('admin.blog.index');
     Route::get('blog/create', [BlogController::class, 'create'])->name('admin.blog.create');
@@ -154,20 +103,7 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::put('blog/{id}', [BlogController::class, 'update'])->name('admin.blog.update');
     Route::delete('blog/{id}', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
      
-    //Admin testimonies routes
-    Route::get('testimonies', [TestimonyController::class, 'index'])->name('admin.testimonies.index');
-    Route::post('testimonies/store', [TestimonyController::class, 'store'])->name('admin.testimonies.store');
-    Route::put('testimonies/{id}', [TestimonyController::class, 'update'])->name('admin.testimonies.update');
-    Route::delete('testimonies/{id}', [TestimonyController::class, 'destroy'])->name('admin.testimonies.destroy');
 
-    //Admin Terms And Condition routes
-    Route::get('terms-and-conditions/edit', [TermsAndConditionController::class, 'edit'])->name('admin.terms.edit');
-    Route::post('terms-and-conditions/update', [TermsAndConditionController::class, 'update'])->name('admin.terms.update');
-
-
-    // Admin Privacy Policy routes
-    Route::get('privacy-policy/edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy-policy.edit');
-    Route::post('privacy-policy/update', [PrivacyPolicyController::class, 'update'])->name('admin.privacy-policy.update');
 
     // Admin Cart / POS routes
     Route::get('pos/', [CartController::class, 'index'])->name('admin.pos.index');
@@ -184,11 +120,86 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
     Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
 
+
+    //Admin Manage Booking
     Route::get('table-bookings', [AdminTableBookingController::class, 'index'])->name('admin.table-bookings');
     Route::post('table-bookings/store', [AdminTableBookingController::class, 'store'])->name('admin.table-bookings.store');
     Route::put('table-bookings/{id}', [AdminTableBookingController::class, 'update'])->name('admin.table-bookings.update');
     Route::delete('table-bookings/{id}', [AdminTableBookingController::class, 'destroy'])->name('admin.table-bookings.destroy');
    
+
+    // Routes with CheckRole is Global Admin middleware
+    Route::middleware(CheckRole::class)->group(function () {
+
+        // Admin Settings Category
+        Route::get('category', [CategoryController::class, 'index'])->name('admin.categories.index');
+        Route::post('category/store', [CategoryController::class, 'store'])->name('admin.categories.store');
+        Route::post('category/update/{id}', [CategoryController::class, 'update'])->name('admin.categories.update');
+        Route::post('category/delete/{id}', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
+
+        //Admin Settings Menu
+        Route::get('menu', [MenuController::class, 'index'])->name('admin.menus.index');
+        Route::post('menu', [MenuController::class, 'store'])->name('admin.menus.store');
+        Route::patch('menu/{id}', [MenuController::class, 'update'])->name('admin.menus.update');
+        Route::delete('menu/{id}', [MenuController::class, 'destroy'])->name('admin.menus.destroy');
+    
+        Route::get('general-settings', [GeneralSettingsController::class, 'index'])->name('admin.general-settings');
+
+        
+        //Admin Settings Phone Number routes
+        Route::post('phone-number', [GeneralSettingsController::class, 'storePhoneNumber'])->name('admin.phone-number.store');
+        Route::put('phone-number/{id}', [GeneralSettingsController::class, 'updatePhoneNumber'])->name('admin.phone-number.update');
+        Route::delete('phone-number/{id}', [GeneralSettingsController::class, 'deletePhoneNumber'])->name('admin.phone-number.delete');
+
+        //Admin Settings Address routes 
+        Route::post('address', [GeneralSettingsController::class, 'storeAddress'])->name('admin.address.store');
+        Route::put('address/{id}', [GeneralSettingsController::class, 'updateAddress'])->name('admin.address.update');
+        Route::delete('address/{id}', [GeneralSettingsController::class, 'deleteAddress'])->name('admin.address.delete');
+
+        //Admin Settings Working hour routes 
+        Route::post('working-hour', [GeneralSettingsController::class, 'storeWorkingHour'])->name('admin.working-hour.store');
+        Route::put('working-hour/{id}', [GeneralSettingsController::class, 'updateWorkingHour'])->name('admin.working-hour.update');
+        Route::delete('working-hour/{id}', [GeneralSettingsController::class, 'deleteWorkingHour'])->name('admin.working-hour.delete');
+
+        //Admin Settings Social Media routes 
+        Route::post('social-media-handles', [GeneralSettingsController::class, 'storeSocialMediaHandle'])->name('admin.social-media-handles.store');
+        Route::put('social-media-handles/{id}', [GeneralSettingsController::class, 'updateSocialMediaHandle'])->name('admin.social-media-handles.update');
+        Route::delete('social-media-handles/{id}', [GeneralSettingsController::class, 'deleteSocialMediaHandle'])->name('admin.social-media-handles.delete');
+
+        //Admin Settings Livechat routes 
+        Route::post('livechat', [GeneralSettingsController::class, 'createLiveChatScript'])->name('admin.livechat.store');
+        Route::put('livechat/{id}', [GeneralSettingsController::class, 'updateLiveChatScript'])->name('admin.livechat.update');
+        Route::delete('livechat/{id}', [GeneralSettingsController::class, 'destroyLiveChatScript'])->name('admin.livechat.destroy');
+
+        //Admin Settings Orders
+        Route::post('order-settings', [GeneralSettingsController::class, 'updateOrderSettings'])->name('admin.order-settings.update');
+        Route::post('/site-settings/save', [GeneralSettingsController::class, 'siteSettings'])->name('site-settings.save');
+
+        //Admin Terms And Condition routes
+        Route::get('terms-and-conditions/edit', [TermsAndConditionController::class, 'edit'])->name('admin.terms.edit');
+        Route::post('terms-and-conditions/update', [TermsAndConditionController::class, 'update'])->name('admin.terms.update');
+    
+    
+        // Admin Privacy Policy routes
+        Route::get('privacy-policy/edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy-policy.edit');
+        Route::post('privacy-policy/update', [PrivacyPolicyController::class, 'update'])->name('admin.privacy-policy.update');  
+        
+        
+        //Admin testimonies routes
+        Route::get('testimonies', [TestimonyController::class, 'index'])->name('admin.testimonies.index');
+        Route::post('testimonies/store', [TestimonyController::class, 'store'])->name('admin.testimonies.store');
+        Route::put('testimonies/{id}', [TestimonyController::class, 'update'])->name('admin.testimonies.update');
+        Route::delete('testimonies/{id}', [TestimonyController::class, 'destroy'])->name('admin.testimonies.destroy');
+
+
+        //Admin Manage Users routes
+        Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::post('users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::put('users/{id}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::delete('users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+
+    });
+        
 });
 
  

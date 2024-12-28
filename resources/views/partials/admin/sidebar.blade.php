@@ -55,33 +55,48 @@
             </a>
         </li>
         
+
+
+        @if ($loggedInUser->role == "global_admin")
+
         <li class="nav-item {{ request()->route()->named('admin.users.index') ? 'active-nav' : '' }}">
-            <a class="nav-link" href="{{ route('admin.users.index') }}">
-                <i class="fa fa-users menu-icon"></i>
-                <span class="menu-title">Manage Admins</span>
-            </a>
+          <a class="nav-link" href="{{ route('admin.users.index') }}">
+              <i class="fa fa-users menu-icon"></i>
+              <span class="menu-title">Manage Admins</span>
+          </a>
         </li>
-        
-
-
-              <li class="nav-item">
-                <a class="nav-link collapsed" data-toggle="collapse" href="#site-settings" aria-expanded="false" aria-controls="site-settings">
-                  <i class="fa fa-cog menu-icon"></i>
-                    <span class="menu-title">Site Settings</span>
-                    <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="site-settings" style="">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item">  <a class="nav-link " href="{{ route('admin.menus.index') }}">Menu</a>  </li>
-                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.categories.index') }}">Category</a>  </li> 
-                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.testimonies.index') }}">Testimony</a> </li>
-                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.terms.edit') }}">Terms & Condition</a> </li>                                                   
-                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.privacy-policy.edit') }}">Privacy Policy</a> </li>                                                                                                
-                        <li class="nav-item"> <a class="nav-link " href="{{ route('admin.general-settings') }}">General Settings</a>  </li>                                         
-                    </ul>
-                </div>
-            </li>
-            
+              
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#site-settings" aria-expanded="false" aria-controls="site-settings">
+                <i class="fa fa-cog menu-icon"></i>
+                <span class="menu-title">Site Settings</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="site-settings" style="">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.menus.index') }}">Menu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.categories.index') }}">Category</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.testimonies.index') }}">Testimony</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.terms.edit') }}">Terms & Condition</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.privacy-policy.edit') }}">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.general-settings') }}">General Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        @endif
+    
 
 
               <li class="nav-item {{ request()->route()->named('admin.view.myprofile') ? 'active-nav' : '' }}">

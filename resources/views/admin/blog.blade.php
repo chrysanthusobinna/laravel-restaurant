@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/admin_resources/vendors/typicons.font/font/typicons.css">
     <link rel="stylesheet" href="/admin_resources/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="/admin_resources/css/vertical-layout-light/style.css">
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
 
 @endpush
 
@@ -26,6 +27,23 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
  
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#orders-table').DataTable({
+            paging: true,
+            searching: true,
+            lengthChange: false,   
+            pageLength: 10,       
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search orders..."
+            }
+        });
+    });
+</script>
+
+
 <script>
 
     $('#imageModal').on('show.bs.modal', function (event) {
@@ -83,7 +101,7 @@
                 </button>                
             </div>
             <div class="card-body table-responsive">
-                <table class="table">
+                <table class="table" id="orders-table">
                     <thead>
                         <tr>
                             <th scope="col">Blog Name</th>

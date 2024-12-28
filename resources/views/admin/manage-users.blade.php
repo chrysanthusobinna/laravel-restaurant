@@ -111,7 +111,7 @@
                     No admin records found.
                 </div>
             @else
-                <table class="table table-bordered">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>Name</th>

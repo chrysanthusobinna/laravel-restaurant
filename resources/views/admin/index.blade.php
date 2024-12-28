@@ -29,15 +29,15 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var ctx = document.getElementById('salesBarChart').getContext('2d');
-        var salesData = {!! json_encode(array_values($salesData)) !!}; // Sales values
-        var salesLabels = {!! json_encode(array_keys($salesData)) !!}; // Month names
+        var salesData = {!! json_encode($formattedSalesData->values()->toArray()) !!}; // Sales values
+        var salesLabels = {!! json_encode($formattedSalesData->keys()->toArray()) !!}; // Month names
 
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: salesLabels, // Months
                 datasets: [{
-                    label: 'Monthly Sales (USD)',
+                    label: 'Monthly Sales',
                     data: salesData, // Sales data
                     backgroundColor: [
                         'rgba(75, 192, 192, 0.2)',
