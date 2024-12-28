@@ -40,7 +40,6 @@ class AdminController extends Controller
             ->orderByRaw('MONTH(created_at)')
             ->pluck('total_sales', 'month');
     
-        // Ensure all months are represented with zero sales if necessary
         $months = [
             'January', 'February', 'March', 'April', 'May', 'June', 
             'July', 'August', 'September', 'October', 'November', 'December'

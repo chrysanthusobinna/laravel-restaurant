@@ -111,7 +111,7 @@
     <div class="section pb_20">
         <div class="container">
             <div class="row d-flex align-items-stretch">
-                <div class="col-xl-3 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.2s">
+                <div class="col-xl-4 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.2s">
                     <div class="contact_wrap contact_style3 flex-fill">
                         <div class="contact_icon">
                             <i class="linearicons-map2"></i>
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.3s">
+                <div class="col-xl-4 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.3s">
                     <div class="contact_wrap contact_style3 flex-fill">
                         <div class="contact_icon">
                             <i class="linearicons-envelope-open"></i>
@@ -137,7 +137,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.4s">
+                <div class="col-xl-4 col-md-12 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.4s">
                     <div class="contact_wrap contact_style3 flex-fill">
                         <div class="contact_icon">
                             <i class="linearicons-tablet2"></i>
@@ -152,21 +152,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6 animation d-flex" data-animation="fadeInUp" data-animation-delay="0.5s">
-                    <div class="contact_wrap contact_style3 flex-fill">
-                        <div class="contact_icon">
-                            <i class="linearicons-clock"></i>
-                        </div>
-                        <div class="contact_text">
-                            <span>Opening Hours</span>
-                            @forelse($workingHours as $workingHour)
-                                <p>{{ $workingHour->working_hours }}</p>
-                            @empty
-                                <p>No working hours available.</p>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
+
             </div>
             
         </div>
@@ -184,38 +170,19 @@
             </div>
             <div class="row">
                 <div class="col-lg-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
-                    <div class="heading_s1">
-                        <h2>Get In Touch</h2>
-                    </div>
-                    <p class="leads">Have a question or want to share your feedback? We'd love to hear from you! Reach out to us and let's start a conversation about your next great dining experience at {{ config('site.name') }}.</p>
-                    <div class="rounded_input">
-                        <form method="post" name="enq">
-                            <div class="row">
-                                <div class="form-group col-md-6">
-                                    <input required placeholder="Enter Name *" id="first-name" class="form-control" name="name" type="text">
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <input required placeholder="Enter Email *" id="email" class="form-control" name="email" type="email">
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <input required placeholder="Enter Phone No. *" id="phone" class="form-control" name="phone">
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <input placeholder="Enter Subject" id="subject" class="form-control" name="subject">
-                                </div>
-                                <div class="form-group col-md-12">
-                                    <textarea required placeholder="Message *" id="description" class="form-control" name="message" rows="4"></textarea>
-                                </div>
-                                <div class="col-md-12">
-                                    <button type="submit" title="Submit Your Message!" class="btn btn-default btn-radius" id="submitButton" name="submit" value="Submit">Send Message</button>
-                                </div>
-                                <div class="col-md-12">
-                                    <div id="alert-msg" class="alert-msg text-center"></div>
-                                </div>
+
+                         <div class="contact_wrap contact_style3 flex-fill">
+                                 
+                            <div class="contact_text">
+                                <span>Opening Hours</span>
+                                @forelse($workingHours as $workingHour)
+                                    <p>{{ $workingHour->working_hours }}</p>
+                                @empty
+                                    <p>No working hours available.</p>
+                                @endforelse
                             </div>
-                        </form>     
-                    </div>
-                </div>
+                        </div>
+                 </div>
                 
                 <div class="col-lg-6 animation mt-4 mt-lg-0" data-animation="fadeInUp" data-animation-delay="0.3s">
                     <div class="map">
@@ -223,13 +190,11 @@
                         <iframe 
                             src="https://maps.google.com/maps?q={{ urlencode($firstRestaurantAddress->address) }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                             width="600" 
-                            height="450" 
-                            style="border:0;" 
+                            style="border:0; height:200px;" 
                             allowfullscreen="" 
                             loading="lazy">
                         </iframe>
-                    @endif
-                    
+                        @endif
                     </div>
                 </div>
             </div>
