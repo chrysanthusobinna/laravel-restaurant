@@ -42,7 +42,12 @@
                 <span class="menu-title">Manage Orders</span>
             </a>
         </li>
-        
+        <li class="nav-item {{ request()->route()->named('admin.table-bookings') ? 'active-nav' : '' }}">
+          <a class="nav-link" href="{{ route('admin.table-bookings') }}">
+              <i class="fa fa-folder-open menu-icon"></i>
+              <span class="menu-title">Manage Bookings</span>
+          </a>
+        </li>        
         <li class="nav-item {{ Request::is('admin/blog*') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.blog.index') }}">
                 <i class="far fa-newspaper menu-icon"></i>
@@ -53,7 +58,7 @@
         <li class="nav-item {{ request()->route()->named('admin.users.index') ? 'active-nav' : '' }}">
             <a class="nav-link" href="{{ route('admin.users.index') }}">
                 <i class="fa fa-users menu-icon"></i>
-                <span class="menu-title">Manage Users</span>
+                <span class="menu-title">Manage Admins</span>
             </a>
         </li>
         

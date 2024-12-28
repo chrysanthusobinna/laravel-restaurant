@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\RedirectIfNotAdmin;
-use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\MainSiteController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CartController;
@@ -14,6 +13,8 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\TableBookingController;
+use App\Http\Controllers\Admin\TableBookingController as AdminTableBookingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
@@ -22,6 +23,9 @@ use App\Http\Controllers\Admin\TermsAndConditionController;
 
 
 Route::get('/', [MainSiteController::class, 'home'])->name('home');
+
+Route::post('table-booking/', [TableBookingController::class, 'bookTable'])->name('table.booking');
+
 Route::get('menu/', [MainSiteController::class, 'menu'])->name('menu');
 Route::get('menu-item/{id}', [MainSiteController::class, 'menuItem'])->name('menu.item');
 
@@ -180,12 +184,11 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
     Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
 
-    
+    Route::get('table-bookings', [AdminTableBookingController::class, 'index'])->name('admin.table-bookings');
+    Route::post('table-bookings/store', [AdminTableBookingController::class, 'store'])->name('admin.table-bookings.store');
+    Route::put('table-bookings/{id}', [AdminTableBookingController::class, 'update'])->name('admin.table-bookings.update');
+    Route::delete('table-bookings/{id}', [AdminTableBookingController::class, 'destroy'])->name('admin.table-bookings.destroy');
+   
 });
 
-
  
-
-
-
-  

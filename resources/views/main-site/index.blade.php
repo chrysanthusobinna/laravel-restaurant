@@ -36,6 +36,10 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/responsive.css">
     <link id="layoutstyle" rel="stylesheet" href="/assets/color/theme-red.css">
+
+    
+    <!-- FancyBox CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox/dist/jquery.fancybox.min.css">
 @endpush
 
 
@@ -73,8 +77,51 @@
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
 
-@endpush
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox/dist/jquery.fancybox.min.js"></script>
 
+@if(session('success') || session('error'))
+<script>
+    $(document).ready(function() {
+        $.fancybox.open({
+            src: '<div class="row" style="width:350px; position: relative;">' +
+                    @if(session('success')) 
+                        '<div class="alert alert-success" role="alert">' +
+                            '<i class="fa fa-check-circle" style="font-size: 20px;"></i> {{ session('success') }}' +
+                        '</div>' +
+                    @elseif(session('error')) 
+                        '<div class="alert alert-danger" role="alert">' +
+                            '<i class="fa fa-exclamation-circle" style="font-size: 20px;"></i> {{ session('error') }}' +
+                        '</div>' +
+                    @endif
+                    '<button type="button" class="btn-close" aria-label="Close" style="position: absolute; top: 10px; right: 10px; border: none; background: transparent;">' +
+                        '<i class="fa fa-times" style="font-size: 20px;"></i>' +
+                    '</button>' +
+                 '</div>',
+            type: 'html',
+            opts: {
+                padding: 20,
+                width: 'auto',
+                height: 'auto',
+                maxWidth: 500,
+                maxHeight: 'auto',
+                modal: false, // Allow closing by clicking outside
+                clickOutside: true, // Allow closing by clicking on the overlay
+                afterShow: function(instance, current) {
+                    $('.btn-close').on('click', function() {
+                        $.fancybox.close();
+                    });
+                }
+            }
+        });
+    });
+</script>
+@endif
+
+
+
+
+@endpush
 
 
 @section('title', 'Home')
@@ -155,16 +202,6 @@
     </div>
 </div>
 <!-- END SECTION BANNER -->
-
-@if($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
  
  
@@ -257,7 +294,8 @@
                                     </div>
                                     <div class="small_divider clearfix"></div>
                                     <div class="field_form form_style1">
-                                        <form method="post" name="enq">
+                                        <form method="post" action="{{ route('table.booking') }}" name="enq">
+                                            @csrf
                                             <div class="row">
                                                 <div class="form-group col-md-6">
                                                     <div class="input_group">
@@ -277,7 +315,7 @@
                                                 </div>
                                                 <div class="form-group col-md-6">
                                                     <div class="input_group">
-                                                        <input placeholder="Time" class="form-control rounded-0 timepicker" data-theme="red" name="date" type="text">
+                                                        <input placeholder="Time" class="form-control rounded-0 timepicker" data-theme="red" name="time" type="text">
                                                         <div class="input_icon">
                                                             <i class="far fa-clock"></i>
                                                         </div>
@@ -301,20 +339,21 @@
                                                 </div>
                                                 <div class="form-group col-md-6">
                                                     <div class="custom_select">
-                                                        <select class="form-control rounded-0">
+                                                        <select class="form-control rounded-0" name="persons">
                                                             <option value="">Select Person</option>
                                                             <option value="1">1 Person</option>
-                                                            <option value="2">2 Person</option>
-                                                            <option value="3">3 Person</option>
-                                                            <option value="4">4 Person</option>
+                                                            <option value="2">2 Persons</option>
+                                                            <option value="3">3 Persons</option>
+                                                            <option value="4">4 Persons</option>
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
-                                                    <button type="submit" title="Submit Your Message!" class="btn btn-default rounded-0" name="submit" value="Submit">book now</button>
+                                                    <button type="submit" title="Submit Your Message!" class="btn btn-default rounded-0" name="submit" value="Submit">Book Now</button>
                                                 </div>
                                             </div>
                                         </form>
+                                        
                                     </div>
                                     <div class="medium_divider clearfix"></div>
                                 </div>
