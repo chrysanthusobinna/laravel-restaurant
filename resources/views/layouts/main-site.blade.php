@@ -40,7 +40,8 @@
 
  @yield('content')
  
- 
+ @include('partials.logout')
+
  @include('partials.footer')
 
 

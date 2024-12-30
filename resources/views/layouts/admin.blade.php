@@ -46,6 +46,8 @@
         
         @yield('content')
 
+        @include('partials.logout')
+
       </div>
       <!-- page-body-wrapper ends -->
     </div>

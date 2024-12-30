@@ -77,8 +77,11 @@
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox/dist/jquery.fancybox.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox/dist/jquery.fancybox.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+
 
 @if(session('success') || session('error'))
 <script>
@@ -105,8 +108,8 @@
                 height: 'auto',
                 maxWidth: 500,
                 maxHeight: 'auto',
-                modal: false, // Allow closing by clicking outside
-                clickOutside: true, // Allow closing by clicking on the overlay
+                modal: false,  
+                clickOutside: true,  
                 afterShow: function(instance, current) {
                     $('.btn-close').on('click', function() {
                         $.fancybox.close();
@@ -325,7 +328,7 @@
                                                     <div class="input_group">
                                                         <input required="required" placeholder="Mobile No." class="form-control rounded-0" name="phone" type="tel">
                                                         <div class="input_icon">
-                                                            <i class="fa fa-mobile-alt"></i>
+                                                            <i class="ti-mobile"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -345,6 +348,10 @@
                                                             <option value="2">2 Persons</option>
                                                             <option value="3">3 Persons</option>
                                                             <option value="4">4 Persons</option>
+                                                            <option value="5">5 Persons</option>
+                                                            <option value="6">6 Persons</option>
+                                                            <option value="7">7 Persons</option>
+                                                            <option value="8">8 Persons</option>
                                                         </select>
                                                     </div>
                                                 </div>

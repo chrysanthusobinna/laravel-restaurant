@@ -67,6 +67,8 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- Scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 @endpush
 
 @section('title', 'Payment Cancelled')

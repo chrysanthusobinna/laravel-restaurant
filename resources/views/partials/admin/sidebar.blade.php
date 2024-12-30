@@ -122,12 +122,11 @@
               </li>
 
               <li class="nav-item">
-                <a onclick="if (confirm('Are you Sure you want to Log out Now?')){return true;}else{event.stopPropagation(); event.preventDefault();};" class="nav-link" href="{{ route('admin.logout') }}">
-                  <i class="fa fa-power-off menu-icon"></i>
-                  <span class="menu-title">Logout</span>
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    <i class="fa fa-power-off menu-icon"></i>
+                    <span class="menu-title">Logout</span>
                 </a>
-              </li>
-
+            </li>
               
             </ul>
   

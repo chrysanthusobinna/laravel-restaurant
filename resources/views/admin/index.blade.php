@@ -22,9 +22,12 @@
 <!-- plugin js for this page -->
 <script src="/admin_resources/vendors/progressbar.js/progressbar.min.js"></script>
 <script src="/admin_resources/vendors/chart.js/Chart.min.js"></script>
-<!-- Custom js for this page-->
+  <!-- Custom js for this page-->
 <script src="/admin_resources/js/dashboard.js"></script>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ 
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
