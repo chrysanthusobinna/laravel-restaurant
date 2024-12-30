@@ -52,4 +52,11 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function deleteWithRelations()
+    {
+        $this->orderItems()->delete();
+        $this->customer()->delete();
+        $this->delete();
+    }   
 }

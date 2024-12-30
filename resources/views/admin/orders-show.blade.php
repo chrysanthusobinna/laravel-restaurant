@@ -300,13 +300,43 @@
            
             </div>
           </div>
-     
+     <hr/>
+
+     @if ($loggedInUser->role == "global_admin")
+ 
+        <!-- Delete Button to trigger modal -->
+        <button type="button" class="btn-sm btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="fa fa-trash"></i> Delete Order
+        </button>
 
 
 
 
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this order?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
+    @endif
 
 
 
@@ -343,6 +373,15 @@
                 </div>
             </div>
         </div>
+
+
+
+
+
+
+
+
+
 
 
     </div>

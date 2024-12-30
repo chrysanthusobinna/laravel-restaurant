@@ -68,6 +68,16 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+ 
+    <script>
+    $(document).ready(function() {
+        $('#cart_count').text(0);
+    });
+    </script>
+    
+
+
 @endpush
 
 

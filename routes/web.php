@@ -119,7 +119,8 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('order/{id}', [OrderController::class, 'show'])->name('admin.order.show');
     Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
     Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
-
+    Route::delete('orders/destroy/{id}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
+    
 
     //Admin Manage Booking
     Route::get('table-bookings', [AdminTableBookingController::class, 'index'])->name('admin.table-bookings');

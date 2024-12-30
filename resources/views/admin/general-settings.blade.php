@@ -583,7 +583,7 @@
                 <input type="hidden" id="socialMediaFormMethod" name="_method" value="">
                 <div class="modal-header">
                     <h5 class="modal-title" id="socialMediaModalLabel">Social Media Handle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -622,7 +622,7 @@
                     <input type="hidden" id="phoneNumberFormMethod" name="_method" value="">
                     <div class="modal-header">
                         <h5 class="modal-title" id="phoneNumberModalLabel">Phone Number</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -664,7 +664,7 @@
                     <input type="hidden" id="addressFormMethod" name="_method" value="">
                     <div class="modal-header">
                         <h5 class="modal-title" id="addressModalLabel">Address</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -691,7 +691,7 @@
                     <input type="hidden" id="workingHourId" name="_method" value="">
                     <div class="modal-header">
                         <h5 class="modal-title" id="workingHourModalLabel">Working Hour</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -724,7 +724,7 @@
                     @method('DELETE')
                     <div class="modal-header">
                         <h5 class="modal-title" id="deletePhoneNumberModalLabel">Delete Phone Number</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete this phone number?
@@ -749,7 +749,7 @@
                     @method('DELETE')
                     <div class="modal-header">
                         <h5 class="modal-title" id="deleteAddressModalLabel">Delete Address</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete this address?
@@ -778,7 +778,7 @@
                     @method('DELETE')
                     <div class="modal-header">
                         <h5 class="modal-title" id="deleteWorkingHourModalLabel">Delete Working Hour</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete this working hour?
@@ -801,7 +801,7 @@
                     @method('DELETE')
                     <div class="modal-header">
                         <h5 class="modal-title" id="deleteAddressModalLabel">Delete social media handle</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete this social media handle?

@@ -123,8 +123,7 @@ class PaymentController extends Controller
             ]);
 
             //PREPARE TO CREATE ORDER
-            $cart = session()->get($this->cartkey, []);
-
+ 
             $totalPrice = array_reduce($cart_items, function ($carry, $item) {
                 return $carry + ($item['price'] * $item['quantity']);
             }, 0);
@@ -370,7 +369,7 @@ class PaymentController extends Controller
     protected function clearOrderSession()
     {
         session()->forget([
-            $this->cartkey,
+            'customer',
             'customer_details',
             'delivery_details',
             'order_no'

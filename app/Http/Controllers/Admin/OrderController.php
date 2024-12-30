@@ -58,7 +58,11 @@ class OrderController extends Controller
             return Datatables::of($orders)
                     ->addIndexColumn()
                     ->addColumn('action', function ($order) {
-                        return '<a href="'.route('admin.order.show', $order->id).'" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>';
+                        $viewButton = '<a href="'.route('admin.order.show', $order->id).'" class="btn btn-secondary btn-sm"><i class="fa fa-eye"></i></a>';
+
+                        $deleteButton = Auth::user()->role == "global_admin"  ? '<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$order->id.'"><i class="fa fa-trash"></i></button>'   : '';
+                                            
+                        return $viewButton . ' ' . $deleteButton;
                     })
                     ->editColumn('order_no', function ($order) {
                         return "#".$order->order_no;
@@ -200,5 +204,11 @@ class OrderController extends Controller
     }
 
  
- 
+    public function destroy($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->deleteWithRelations();
+
+        return redirect()->route('admin.orders.index')->with('success', 'Order have been deleted successfully.');
+    }
 }
