@@ -25,8 +25,11 @@
     <ul class="navbar-nav attr-nav align-items-center">
         <li><a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}" ><i class="linearicons-cart"></i><span class="cart_count" id="cart_count">{{ $customer_total_cart_items }}</span></a></li>
     </ul>
+    @if($firstRestaurantPhoneNumber)  
     <div class="header_btn d-sm-block d-none">
-        <a href="book-table.html" class="btn btn-default rounded-0 ml-2 btn-sm">Order Online</a>
-    </div>
+        <a href="tel:{{ $firstRestaurantPhoneNumber->phone_number }}" class="btn btn-default rounded-0 ml-2 btn-sm"><i class="fa fa-phone"></i> CALL US</a>
+    </div>  
+    @endif
+
 </nav>
 

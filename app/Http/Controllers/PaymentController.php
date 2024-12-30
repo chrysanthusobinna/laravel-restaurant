@@ -17,6 +17,7 @@ use App\Models\RestaurantPhoneNumber;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaymentController extends Controller
 {
@@ -44,11 +45,14 @@ class PaymentController extends Controller
         // Retrieve cart items from session
         $cart_items = session()->get('customer', []);
 
-        // Retrieve Delivery Details
+    
+        // Retrieve Delivery Details from the session
         $deliveryDetails = session('delivery_details');
         $delivery_fee = $deliveryDetails['delivery_fee'];
-    
-        
+        $delivery_distance = $deliveryDetails['distance_in_miles'];
+        $price_per_mile= $deliveryDetails['price_per_mile'];
+              
+              
         // Retrieve order no. from session
         $order_no = session('order_no');
 
@@ -118,8 +122,56 @@ class PaymentController extends Controller
                 'cancel_url' => config('site.url')  . 'payment-cancel/',
             ]);
 
+            //PREPARE TO CREATE ORDER
+            $cart = session()->get($this->cartkey, []);
+
+            $totalPrice = array_reduce($cart_items, function ($carry, $item) {
+                return $carry + ($item['price'] * $item['quantity']);
+            }, 0);
+
+
+            // Create the customer
+            $customer = Customer::create([
+                'name' =>  $customerDetails['name'],
+                'email' =>  $customerDetails['email'] ,
+                'phone_number' => $customerDetails['phone_number'],
+                'address' => $customerDetails['address'] . " ".$customerDetails['city']." ".$customerDetails['state']." ".$customerDetails['postcode'],
+            ]);
+   
+            // Create a new order
+            $order = Order::create([
+                'customer_id' => $customer->id,
+                'order_no' => $order_no,
+                'order_type' => 'online',
+                'created_by_user_id' => null,
+                'updated_by_user_id' => null,
+                'total_price' => $totalPrice,
+                'status' => 'pending',
+                'status_online_pay' => 'unpaid',
+                'session_id' => $checkout_session->id,
+                'payment_method' => "STRIPE",
+                'additional_info' => $customerDetails['additional_info'],
+                'delivery_fee' => $delivery_fee,
+                'delivery_distance' => $delivery_distance,
+                'price_per_mile' => $price_per_mile,
+                
+            ]);
+
+            if ($order) {
+                // Create order items using the relationship
+                foreach ($cart_items as $cart_item) {
+                    $order->orderItems()->create([
+                        'menu_name' => $cart_item['name'],  
+                        'quantity' => $cart_item['quantity'],
+                        'subtotal' => $cart_item['price'] * $cart_item['quantity'],
+                    ]);
+                }
+            }
+            
+
             // Redirect the user to the Stripe Checkout session URL
             return redirect($checkout_session->url);
+
         } catch (Exception $e) {
             $error_msg  =  $e->getMessage();
             return redirect()->route('menu')->withErrors($error_msg);            
@@ -137,8 +189,6 @@ class PaymentController extends Controller
         //run all required session checks
         $this->runAllChecks();
 
-        $customerDetails = Session::get('customer_details', []);
-
         // Set Stripe secret key
         Stripe::setApiKey(config('services.stripe.secret'));
     
@@ -148,114 +198,68 @@ class PaymentController extends Controller
         // Retrieve the order number from the session
         $order_no = session('order_no');
 
-        // Retrieve Delivery Details from the session
-        $deliveryDetails = session('delivery_details');
-        $delivery_fee = $deliveryDetails['delivery_fee'];
-        $delivery_distance = $deliveryDetails['distance_in_miles'];
-        $price_per_mile= $deliveryDetails['price_per_mile'];
-    
         if ($session_id) {
             try {
-                    $cart = session()->get($this->cartkey, []);
 
                     // Retrieve the checkout session
                     $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
 
-                    $orderNoFromStripe = $checkout_session->metadata->order_no;
+                    $order = Order::with(['orderItems', 'customer'])->where('session_id', $checkout_session->id)->first();
+                    
+                    if (!$order) {
+                        throw new NotFoundHttpException();
+                        // return redirect()->route('menu')->withErrors('Order verification failed');
 
-                    // Verify the order number
-                    if ($order_no == $orderNoFromStripe) {
+                    }
 
-                    // Retrieve the customer and payment details
-                    $customer_email = $checkout_session->customer_email;
-                    $metadata = $checkout_session->metadata;
-        
+                    if ($order->status_online_pay === 'unpaid') {
+                        $order->status_online_pay = 'paid';
+                        $order->save();
 
-
-                    $totalPrice = array_reduce($cart, function ($carry, $item) {
-                        return $carry + ($item['price'] * $item['quantity']);
-                    }, 0);
-
-
-                    // Create the customer
-                    $customer = Customer::create([
-                        'name' =>  $metadata->name,
-                        'email' =>  $customer_email ,
-                        'phone_number' => $metadata->phone,
-                        'address' => $metadata->address . " ".$metadata->city." ".$metadata->state." ".$metadata->postcode,
-                    ]);
-
-
-
-                    // Create a new order
-                    $order = Order::create([
-                        'customer_id' => $customer->id,
-                        'order_no' => $metadata->order_no,
-                        'order_type' => 'online',
-                        'created_by_user_id' => null,
-                        'updated_by_user_id' => null,
-                        'total_price' => $totalPrice,
-                        'status' => 'pending',
-                        'payment_method' => "STRIPE",
-                        'additional_info' => $customerDetails['additional_info'],
-                        'delivery_fee' => $delivery_fee,
-                        'delivery_distance' => $delivery_distance,
-                        'price_per_mile' => $price_per_mile,
-                        
-                    ]);
-
-                    if ($order) {
-                        // Create order items using the relationship
-                        foreach ($cart as $item) {
-                            $order->orderItems()->create([
-                                'menu_name' => $item['name'],  
-                                'quantity' => $item['quantity'],
-                                'subtotal' => $item['price'] * $item['quantity'],
-                            ]);
+                        // Send the email
+                        try {
+                            Mail::to($order->customer->email)->send(new OrderEmail(
+                                $order->orderItems,
+                                $order->customer->name,
+                                $order->customer->email,
+                                $order->order_no,
+                                $order->delivery_fee,
+                                $order->total_price,
+                                config('site.email'),
+                                RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
+                            ));
+                        } catch (Exception $e) {
+                            Log::error('Order email failed to send: ' . $e->getMessage());
                         }
-                    }
-                    
+                        
 
+                        // Clear the session
+                        session()->forget([
+                            $this->cartkey, 
+                            'customer_details', 
+                            'delivery_details', 
+                            'order_no'
+                        ]);
+                        
+                        return view('main-site.payment-success', compact('order'));                       
+                    }
+                    elseif ($order->status_online_pay === 'paid') { 
+                        
+                        return view('main-site.payment-success', compact('order'));                       
+
+                    }
  
-                    // Send the email
-                    try {
-                        Mail::to($customerDetails['email'])->send(new OrderEmail(
-                            $cart,
-                            $customerDetails['name'],
-                            $customerDetails['email'],
-                            $order_no,
-                            $delivery_fee,
-                            $totalPrice,
-                            config('site.email'),
-                            RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
-                        ));
-                    } catch (Exception $e) {
-                        Log::error('Order email failed to send: ' . $e->getMessage());
-                    }
                     
-
-                    // Clear the session
-                    session()->forget([
-                        $this->cartkey, 
-                        'customer_details', 
-                        'delivery_details', 
-                        'order_no'
-                    ]);
-                    
-    
-                    return view('main-site.payment-success', ['customer_email' => $customer_email,  'metadata' => $metadata, ]);
+                    return redirect()->route('menu')->withErrors("There was an issue processing your payment. Please try again.");
 
 
-                } else {
-                    return redirect()->route('menu')->withErrors('Order verification failed');
-                }
 
             } catch (Exception $e) {
                 $error_msg  =  $e->getMessage();
                 return redirect()->route('menu')->withErrors($error_msg);
             }
         } else {
-            return redirect()->route('menu')->withErrors('Session ID not found. Please contact support.');
+            return redirect()->route('menu')->withErrors('Session ID not found!');
         }
     }
     

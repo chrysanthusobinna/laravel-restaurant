@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\SiteSetting;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -9,7 +10,7 @@ class OrderEmail extends Mailable
 {
     use SerializesModels;
 
-    public $cartItems;
+    public $orderItems;
     public $customerName;
     public $customerEmail;
     public $orderNo;
@@ -17,11 +18,14 @@ class OrderEmail extends Mailable
     public $totalPrice;
     public $companyEmail;
     public $companyPhone;
+    public $site_settings;
 
  
-    public function __construct($cartItems, $customerName, $customerEmail, $orderNo, $deliveryFee, $totalPrice, $companyEmail, $companyPhone)
+    public function __construct($orderItems, $customerName, $customerEmail, $orderNo, $deliveryFee, $totalPrice, $companyEmail, $companyPhone)
     {
-        $this->cartItems = $cartItems;
+        $this->site_settings  =   SiteSetting::latest()->first();
+
+        $this->orderItems = $orderItems;
         $this->customerName = $customerName;
         $this->customerEmail = $customerEmail;
         $this->orderNo = $orderNo;
@@ -37,7 +41,7 @@ class OrderEmail extends Mailable
         return $this->view('emails.order')
                     ->subject('Your Order Details')
                     ->with([
-                        'cartItems' => $this->cartItems,
+                        'orderItems' => $this->orderItems,
                         'customerName' => $this->customerName,
                         'customerEmail' => $this->customerEmail,
                         'orderNo' => $this->orderNo,
@@ -45,6 +49,7 @@ class OrderEmail extends Mailable
                         'totalPrice' => $this->totalPrice,
                         'companyEmail' => $this->companyEmail,
                         'companyPhone' => $this->companyPhone,
+                        'site_settings' => $this->site_settings,
                     ]);
     }
 }

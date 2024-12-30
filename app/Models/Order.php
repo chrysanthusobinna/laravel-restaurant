@@ -18,6 +18,8 @@ class Order extends Model
         'updated_by_user_id',
         'total_price',
         'status',
+        'status_online_pay',
+        'session_id',
         'payment_method',
         'additional_info',
         'delivery_fee',

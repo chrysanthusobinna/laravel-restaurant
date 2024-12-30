@@ -109,9 +109,9 @@
             <div class="alert alert-default text-center">
                 <hr>
                 <img src="/assets/images/thumbs.png" alt="Image description" style="width:20%" class="img-fluid rounded my-3">
-                <p>Thank you for your order, {{ $metadata->name }}!</p>
-                <p>Your order number is <strong>#{{ $metadata->order_no }}</strong>.</p>
-                <p>An email confirmation has been sent to {{ $customer_email }}.</p>
+                <p>Thank you for your order, {{ $order->customer->name }}!</p>
+                <p>Your order number is <strong>#{{ $order->order_no }}</strong>.</p>
+                <p>An email confirmation has been sent to {{ $order->customer->email }}.</p>
                 <p>If you have any questions , please contact us at 
                     @if($firstRestaurantPhoneNumber)
                         <a href="tel:{{ $firstRestaurantPhoneNumber->phone_number }}">{{ $firstRestaurantPhoneNumber->phone_number }}</a>

@@ -28,6 +28,24 @@
  
 <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 <link rel="stylesheet" href="/admin_resources/css/small-box.css">
+
+
+<script>
+    $(document).ready(function() {
+        $('#copy_session_id').click(function() {
+            var sessionIdInput = $('#session_id');
+
+            sessionIdInput.select();
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            $('#copy-alert').fadeIn();
+            setTimeout(function() {
+                $('#copy-alert').fadeOut();
+            }, 3000);
+        });
+    });
+</script>
+
 @endpush
 
 
@@ -45,14 +63,25 @@
 
       @include('partials.order-stats')
 
+        @if(!is_null($order->status_online_pay) && $order->status_online_pay == 'unpaid')
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <div>
+                This order payment has not been confirmed.
+            </div>
+        </div>
+        @endif
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Order Details - #{{ $order->order_no }} </span>
 
-                @if ($order->status != 'completed' && $order->status != 'cancelled')
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal">Update Order</button>
+                @if ($order->status_online_pay == 'paid' || is_null($order->status_online_pay))
+                    @if ($order->status !== 'completed' && $order->status !== 'cancelled')
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal">Update Order</button>
+                    @endif
                 @endif
+            
         
             </div>
             <div class="card-body">
@@ -105,19 +134,51 @@
                             <tr>
                                 <th>Status</th>
                                 <td>
-                                    @if ($order->status == 'pending')
-                                        <span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> {{ ucfirst($order->status) }}</span>
-                                    @elseif ($order->status == 'completed')
-                                        <span class="badge badge-success"><i class="fa fa-check"></i> {{ ucfirst($order->status) }}</span>
+
+
+                                    @if(!is_null($order->status_online_pay) && $order->status_online_pay === 'unpaid')
+                                    <span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> unpaid</span>
                                     @else
-                                        {{ ucfirst($order->status) }}
+                                        @switch($order->status)
+                                            @case('pending')
+                                                <span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> {{ ucfirst($order->status) }}</span>
+                                                @break
+                                            @case('completed')
+                                                <span class="badge badge-success"><i class="fa fa-check"></i> {{ ucfirst($order->status) }}</span>
+                                                @break
+                                            @default
+                                                {{ ucfirst($order->status) }}
+                                        @endswitch
                                     @endif
+                                                     
                                 </td>
                                 
                             </tr>
                         </table>
                     </div>
                 </div>
+
+                @if (!is_null($order->session_id))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" id="copy-alert" style="display: none;">
+                        SESSION ID COPIED TO CLIPBOARD
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Payment Session ID:</span>
+                              </div>
+                            <input type="text" class="form-control" id="session_id" value="{{ $order->session_id }}" readonly>
+                            <div class="input-group-append">
+                                <button id="copy_session_id" class="btn btn-sm btn-light" type="button">
+                                    <i class="fa fa-copy"></i> 
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+
             </div>
             
         </div>
@@ -208,25 +269,25 @@
                         <h5>Customer Information</h5>
                     </div>
                     <div class="card-body">
-                        @if($customer)
+                        @if($order->customer)
                             <!-- Customer Table -->
                             <table class="table table-bordered">
                                 <tbody>
                                     <tr>
                                         <td><strong>Name:</strong></td>
-                                        <td>{{ $customer->name }}</td>
+                                        <td>{{ $order->customer->name }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Email:</strong></td>
-                                        <td>{{ $customer->email }}</td>
+                                        <td>{{ $order->customer->email }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Phone Number:</strong></td>
-                                        <td>{{ $customer->phone_number }}</td>
+                                        <td>{{ $order->customer->phone_number }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Address:</strong></td>
-                                        <td>{{ $customer->address }}</td>
+                                        <td>{{ $order->customer->address }}</td>
                                     </tr>
                                 </tbody>
                             </table>

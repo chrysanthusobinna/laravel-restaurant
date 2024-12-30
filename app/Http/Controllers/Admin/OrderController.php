@@ -41,7 +41,7 @@ class OrderController extends Controller
 
         if ($request->ajax()) {
  
-            $orders = Order::select(['id', 'order_no', 'created_at', 'total_price', 'status', 'order_type'])->orderBy('id', 'desc');
+            $orders = Order::select(['id', 'order_no', 'created_at', 'total_price', 'status','status_online_pay', 'order_type'])->orderBy('id', 'desc');
 
 
             // Apply filters based on the user's selection
@@ -76,9 +76,21 @@ class OrderController extends Controller
 
                     })
                     ->editColumn('status', function ($order) {
-                        return $order->status == 'pending' 
-                            ? '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> '.ucfirst($order->status).'</span>' 
-                            : ucfirst($order->status);
+                        
+                        if (!is_null($order->status_online_pay) && $order->status_online_pay == 'unpaid') {
+                            return '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> unpaid</span>';
+                        } else {
+                            switch ($order->status) {
+                                case 'pending':
+                                    return '<span class="badge badge-danger"><i class="fa fa-exclamation-circle"></i> ' . ucfirst($order->status) . '</span>';
+                                case 'completed':
+                                    return '<span class="badge badge-success"><i class="fa fa-check"></i> ' . ucfirst($order->status) . '</span>';
+                                default:
+                                    return ucfirst($order->status);
+                            }
+                        }
+                            
+
                     })
                     
                     ->editColumn('order_type', function ($order) {
@@ -94,10 +106,8 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with(['orderItems', 'createdByUser', 'updatedByUser', 'customer'])->findOrFail($id);
-    
-        $customer = $order->customer ? $order->customer : null; // Handle null customer
-    
-        return view('admin.orders-show', compact('order', 'customer'));
+        
+        return view('admin.orders-show', compact('order'));
     }
     
 

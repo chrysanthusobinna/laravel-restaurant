@@ -110,15 +110,15 @@
             <thead>
                 <tr>
                     <th>Item</th>
-                    <th>Price</th>
+                    <th>Subtotal</th>
                     <th>Quantity</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($cartItems as $item)
+                @foreach($orderItems as $item)
                     <tr>
-                        <td>{{ $item['name'] }}</td>
-                        <td>{!! $site_settings->currency_symbol !!}{{ number_format($item['price'], 2) }}</td>
+                        <td>{{ $item['menu_name'] }}</td>
+                        <td>{!! $site_settings->currency_symbol !!}{{ number_format($item['subtotal'], 2) }}</td>
                         <td>{{ $item['quantity'] }}</td>
                     </tr>
                 @endforeach

@@ -17,10 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            'getcart-totalitems/',
-            'cart/remove',
-            'cart/',
-            'cart/clear',
+            'stripe/webhook/',
         ]);
     })->create();
 
