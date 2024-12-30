@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\TableBookingController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
@@ -41,15 +40,13 @@ Route::post('cart/update', [MainSiteController::class, 'updateCartQuantity'])->n
 Route::get('checkout/', [MainSiteController::class, 'checkout'])->name('customer.checkout');
 
 Route::post('proccess-checkout/', [MainSiteController::class, 'proccessCheckout'])->name('customer.proccess.checkout');
-
 Route::get('getcart-totalitems/', [MainSiteController::class, 'getTotalItems'])->name('customer.getcart.totalitems');
 
- 
+ //stripe payment routes
 Route::get('payment/', [PaymentController::class, 'payment'])->name('payment');
 Route::get('payment-success/', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('payment-cancel/', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
-
-Route::post('stripe/webhook/', [PaymentWebhookController::class, 'handleStripeWebhook']);
+Route::post('stripe/webhook/', [PaymentController::class, 'handleStripeWebhook']);
 
   
 

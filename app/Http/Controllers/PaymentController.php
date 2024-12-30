@@ -232,19 +232,15 @@ class PaymentController extends Controller
                             Log::error('Order email failed to send: ' . $e->getMessage());
                         }
                         
-
                         // Clear the session
-                        session()->forget([
-                            $this->cartkey, 
-                            'customer_details', 
-                            'delivery_details', 
-                            'order_no'
-                        ]);
+                        $this->clearOrderSession();
                         
                         return view('main-site.payment-success', compact('order'));                       
                     }
                     elseif ($order->status_online_pay === 'paid') { 
-                        
+
+                        // Clear the session
+                        $this->clearOrderSession();
                         return view('main-site.payment-success', compact('order'));                       
 
                     }
@@ -301,6 +297,67 @@ class PaymentController extends Controller
     }
 
 
+    public function handleStripeWebhook(Request $request)
+    {
+        $endpoint_secret =  config('services.stripe.webhookkey');
+    
+        // Retrieve the raw payload
+        $payload = @file_get_contents('php://input');
+        $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+        $event = null;
+    
+    
+        try {
+            // Verify the event signature
+            $event = \Stripe\Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
+    
+            // Handle specific event types
+            if ($event->type === 'checkout.session.completed') {
+                $session = $event->data->object;  
+     
+                $order = Order::with(['orderItems', 'customer'])->where('session_id', $session->id)->first();
+    
+    
+                if ($order->status_online_pay === 'unpaid') {
+                    $order->status_online_pay = 'paid';
+                    $order->save();
+    
+                    // Send the email
+                    try {
+                        Mail::to($order->customer->email)->send(new OrderEmail(
+                            $order->orderItems,
+                            $order->customer->name,
+                            $order->customer->email,
+                            $order->order_no,
+                            $order->delivery_fee,
+                            $order->total_price,
+                            config('site.email'),
+                            RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
+                        ));
+                    } catch (Exception $e) {
+                        Log::error('Order email failed to send: ' . $e->getMessage());
+                    }
+                    
+                }
+     
+            }
+    
+            return response('Webhook handled', 200);
+        } catch (\UnexpectedValueException $e) {
+            // Invalid payload
+            Log::error('Invalid payload: ' . $e->getMessage());
+            return response('Invalid payload', 400);
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+            // Invalid signature
+            Log::error('Invalid signature: ' . $e->getMessage());
+            return response('Invalid signature', 400);
+        } catch (Exception $e) {
+            // General error
+            Log::error('Webhook error: ' . $e->getMessage());
+            return response('Webhook error', 500);
+        }
+    }
+
     // Call all checks at once
     protected function runAllChecks()
     {
@@ -309,4 +366,15 @@ class PaymentController extends Controller
         $this->checkDeliveryDetails();
         $this->checkOrderNo();
     }
+
+    protected function clearOrderSession()
+    {
+        session()->forget([
+            $this->cartkey,
+            'customer_details',
+            'delivery_details',
+            'order_no'
+        ]);
+    }
+    
 }
