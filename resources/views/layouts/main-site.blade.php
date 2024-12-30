@@ -5,10 +5,10 @@
 <!-- Meta -->
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta content="Templatemanja" name="author">
+<meta content="{{ config('site.name') }}" name="author">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="if you are looking for the best free restaurant, you better not miss checking out They are all you need to introduce your restaurant and food business to the world.">
-<meta name="keywords" content="	asian food, Fast Food, cafe, bar, bbq, restaurant, sushi, steakhouse, pizza, Mexican Food, menu, meat, Breakfast, Lunch, Dinner, Delicious, Tasty, Snack, Wine, Cola, html, template, css, Restaurant Web Templates.">
+<meta name="description" content="Best restaurant experience, don't miss out on {{ config('site.name') }}.">
+<meta name="keywords" content="African food, Fast Food, cafe, bar, BBQ, restaurant, sushi, steakhouse, pizza, Mexican Food, menu, meat, Breakfast, Lunch, Dinner, Delicious, Tasty, Snack, Wine, Cola">
 
 <!-- SITE TITLE -->
 <title>@yield('title')</title>

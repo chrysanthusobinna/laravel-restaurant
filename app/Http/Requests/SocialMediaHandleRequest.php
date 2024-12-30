@@ -9,7 +9,7 @@ class SocialMediaHandleRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true; 
+        return true;
     }
 
 
@@ -19,7 +19,7 @@ class SocialMediaHandleRequest extends FormRequest
             'handle' => [
                 'required',
                 'string',
-                'regex:/^[A-Za-z-]+$/',
+                'regex:/^[A-Za-z-_]+$/',
             ],
             'social_media' => 'required|in:facebook,instagram,youtube,tiktok',
         ];
@@ -28,7 +28,7 @@ class SocialMediaHandleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'handle.regex' => 'Enter a valid Social Media handle only, not a link, and it must only contain letters or hyphens.',
+            'handle.regex' => 'Enter a valid Social Media handle only, not a link, and it must only contain letters, hyphens, or underscores.',
         ];
     }
 }
