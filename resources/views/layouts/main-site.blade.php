@@ -11,7 +11,7 @@
 <meta name="keywords" content="African food, Fast Food, cafe, bar, BBQ, restaurant, sushi, steakhouse, pizza, Mexican Food, menu, meat, Breakfast, Lunch, Dinner, Delicious, Tasty, Snack, Wine, Cola">
 
 <!-- SITE TITLE -->
-<title>@yield('title')</title>
+<title>{{ config('site.name') }} - @yield('title')</title>
 <!-- Favicon Icon -->
 <link rel="shortcut icon" type="image/x-icon" href="/favicon_io/favicon.ico" />
 
