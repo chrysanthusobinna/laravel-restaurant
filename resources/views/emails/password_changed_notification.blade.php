@@ -25,6 +25,9 @@
         .logo {
             text-align: center;
             margin-bottom: 20px;
+            background-color: #000; /* Ensure a contrasting background */
+            padding: 10px;
+            border-radius: 5px;
         }
 
         .logo img {

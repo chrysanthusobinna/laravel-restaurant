@@ -23,6 +23,17 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #000; /* Ensure a contrasting background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .logo img {
+            max-width: 150px;
+        }
 
         h1 {
             color: #0073e6;
@@ -33,7 +44,7 @@
         }
 
         a.button {
-            background-color: #0073e6;
+            background-color: #ff6347;
             color: white;
             padding: 10px 15px;
             text-decoration: none;
@@ -41,7 +52,7 @@
         }
 
         a.button:hover {
-            background-color: #005bb5;
+            background-color: #5a1105;
         }
 
         .link-text {
@@ -68,6 +79,11 @@
 <body>
 
     <div class="container">
+         <!-- Logo -->
+         <div class="logo">
+            <img src="{{ config('site.url') . 'assets/images/logo_light.png' }}" alt="Logo">
+        </div>       
+
         <h1>Activate Your Account</h1>
         <p>Hi {{ $user->first_name }},</p>
         <p>Thank you for registering with us. To activate your account and access the admin dashboard, please click the button below:</p>
