@@ -44,9 +44,9 @@ Route::get('getcart-totalitems/', [MainSiteController::class, 'getTotalItems'])-
 
  //stripe payment routes
 Route::get('payment/', [PaymentController::class, 'payment'])->name('payment');
-Route::get('payment-success/', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
-Route::get('payment-cancel/', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
-Route::post('stripe/webhook/', [PaymentController::class, 'handleStripeWebhook']);
+Route::get('payment-success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+Route::get('payment-cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+Route::post('stripe/webhook', [PaymentController::class, 'handleStripeWebhook']);
 
   
 

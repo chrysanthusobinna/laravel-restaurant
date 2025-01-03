@@ -118,8 +118,8 @@ class PaymentController extends Controller
                     'postcode' => $customerDetails['postcode'],
                 ],
 
-                'success_url' => config('site.url') . 'payment-success/?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => config('site.url')  . 'payment-cancel/',
+                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('payment.cancel'),
             ]);
 
             //PREPARE TO CREATE ORDER
