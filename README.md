@@ -17,6 +17,14 @@ This project is a **Restaurant Management System** built using Laravel. It provi
 
 ---
 
+## Demo
+Check out the live demo of the project: [Restaurant Management System Demo](https://restaurant.chrys-online.com/)
+
+![Screenshot](documentation/demo-main-site.png)
+![Screenshot](documentation/demo-admin-dashboard.png)
+
+---
+
 ## Security
 Best practices are being employed in this project according to the latest Laravel 11 documentation. This includes proper data encryption and two-factor authentication to ensure the security and privacy of user data.
 
