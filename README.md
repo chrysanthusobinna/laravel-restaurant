@@ -43,6 +43,9 @@ This project utilizes the following libraries for enhanced functionality:
 - **[getcountrycurrency/country-currency-api (1.0.0)](https://github.com/getcountrycurrency/country-currency-api)**: A PHP library for fetching country currency details.  
 
 --- 
+## How to Deploy On Shared Host Cpanel
+
+[Deploy On Shared Host Cpanel ](DEPLOY.md)
 
 ## How to Run This Project on Your Local Machine
 Follow these steps to set up and run the project locally:
