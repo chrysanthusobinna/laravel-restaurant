@@ -33,13 +33,24 @@ Best practices are being employed in this project according to the latest Larave
 
 ---
 
+## Libraries Used
+This project utilizes the following libraries for enhanced functionality:  
+
+- **[ezyang/htmlpurifier (4.18.0)](https://github.com/ezyang/htmlpurifier)**: Standards-compliant HTML filter written in PHP to ensure clean and secure HTML content.  
+- **[intervention/image-laravel (1.3.0)](https://github.com/Intervention/image)**: Laravel integration of Intervention Image for image manipulation.  
+- **[yajra/laravel-datatables-oracle (11.1.5)](https://yajrabox.com/docs/laravel-datatables/master)**: jQuery DataTables API for Laravel, simplifying server-side processing.  
+- **[stripe/stripe-php (16.4.0)](https://github.com/stripe/stripe-php)**: Stripe PHP library for payment processing and integration.  
+- **[getcountrycurrency/country-currency-api (1.0.0)](https://github.com/getcountrycurrency/country-currency-api)**: A PHP library for fetching country currency details.  
+
+--- 
+
 ## How to Run This Project on Your Local Machine
 Follow these steps to set up and run the project locally:
 
 ### **Step 1: Clone the Repository**
 ```bash
-git clone https://github.com/chrysanthusobinna/restaurant.git
-cd restaurant
+git clone https://github.com/chrysanthusobinna/laravel-restaurant.git
+cd laravel-restaurant
 ```
 
 ### **Step 2: Set Up the Environment**
@@ -47,36 +58,65 @@ cd restaurant
    ```bash
    mv .env.example .env
    ```
-2. Configure your `.env` file with the correct settings:
-   ```plaintext
-   DB_CONNECTION=sqlite
-   # DB_HOST=
-   # DB_PORT=
-   # DB_DATABASE=
-   # DB_USERNAME=
-   # DB_PASSWORD=
-   
-   MAIL_MAILER=log
-   MAIL_HOST=1
-   MAIL_PORT=
-   MAIL_USERNAME=
-   MAIL_PASSWORD=
-   MAIL_ENCRYPTION=
-   MAIL_FROM_ADDRESS=
-   MAIL_FROM_NAME="${APP_NAME}"
-   ```
+ 
+### 2. Configure Your `.env` File  
+Set up your `.env` file with the following configurations:  
+
+#### **Database Connection**  
+Define the database connection settings:  
+```plaintext  
+DB_CONNECTION=sqlite  
+# DB_HOST=  
+# DB_PORT=  
+# DB_DATABASE=  
+# DB_USERNAME=  
+# DB_PASSWORD=  
+```  
+
+#### **Mail Configuration**  
+Set up mail configurations:  
+```plaintext  
+MAIL_MAILER=log  
+MAIL_HOST=1  
+MAIL_PORT=  
+MAIL_USERNAME=  
+MAIL_PASSWORD=  
+MAIL_ENCRYPTION=  
+MAIL_FROM_ADDRESS=  
+```  
+
+#### **Stripe Configuration**  
+Get your Stripe secret key and webhook secret from [Stripe](https://stripe.com/):  
+```plaintext  
+STRIPE_SECRET=sk_test_51QXsFHH0D0ZWmXgHToLB6PKtssHccRow20HQXoaFVYdopTLxzjR2HGNozoK7DS5HM4D6OMWqwLVV0nLqE1FjbzlL0046KoGP7I  
+STRIPE_WEBHOOK_SECRET=whsec_9af732c3626f65f00507fd4bd6e0474b68ad036558db586a4aef74e273154f5e  
+```  
+
+#### **Google Maps API Key**  
+Get your Google Maps API key from the [Google Cloud Console](https://console.cloud.google.com/):  
+```plaintext  
+GOOGLE_MAPS_API_KEY=AIzaSyCDC0tAy9sV41Wwa9Ou-Kch95GJIQ51JKw  
+```  
+
+#### **Company Address**  
+Set the company address here. Note that the address saved in the database will take precedence, and this will only serve as a fallback:  
+```plaintext  
+ADDRESS="Bradshawgate Bolton, BL1 1QD"  
+```  
+
+-- 
 
 ### **Step 3: Set Up the Database**
 1. Create a new MySQL database (e.g., `restaurant_db`).
 2. Run migrations and seeders:
    ```bash
-   php artisan migrate --seed
+   php artisan migrate
    ```
 
 ### **Step 4: Start the Application**
-Run the development server:
+Run the application on port 8000 or any port of your choice:
 ```bash
-php artisan serve
+php artisan serve --port=8000
 ```
 Visit the application at `http://127.0.0.1:8000`.
 
@@ -92,7 +132,8 @@ This user account will have global rights and can be used to create other user a
 ---
 
 ## Credits
-- **[AdminLTE 3](https://adminlte.io/themes/v3/)**: The admin dashboard design is powered by AdminLTE 3, offering a modern and customizable interface.
+- **[BootstrapDash](https://github.com/BootstrapDash/celestialAdmin-free-admin-template)**: The admin dashboard celestialAdmin admin template
+ design is powered by BootstrapDash, offering a modern and customizable interface.
 - **[Templatemagic Portfolio](https://themeforest.net/user/templatemagic/portfolio)**: The front-end template for the website is inspired by Templatemagic's portfolio designs.
 
 ---
