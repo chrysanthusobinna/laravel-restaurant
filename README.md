@@ -99,8 +99,8 @@ MAIL_FROM_ADDRESS=
 #### **Stripe Configuration**  
 Get your Stripe secret key and webhook secret from [Stripe](https://stripe.com/):  
 ```plaintext  
-STRIPE_SECRET=sk_test_51QXsFHH0D0ZWmXgHToLB6PKtssHccRow20HQXoaFVYdopTLxzjR2HGNozoK7DS5HM4D6OMWqwLVV0nLqE1FjbzlL0046KoGP7I  
-STRIPE_WEBHOOK_SECRET=whsec_9af732c3626f65f00507fd4bd6e0474b68ad036558db586a4aef74e273154f5e  
+STRIPE_SECRET=sk_xxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxx
 ```  
 
 #### **Google Maps API Key**  
