@@ -30,7 +30,7 @@
             <li class="nav-item {{ request()->route()->named('admin.pos.index') ? 'active-nav' : '' }}">
               <a class="nav-link" href="{{ route('admin.pos.index') }}">
                 <i class="fa fa-shopping-cart menu-icon" ></i>
-                  <span class="menu-title">Pont of Sale</span>
+                  <span class="menu-title">Point of Sale</span>
               </a>
           </li>
           
