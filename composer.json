@@ -13,6 +13,7 @@
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "stripe/stripe-php": "^16.4",
+        "twilio/sdk": "^8.3",
         "yajra/laravel-datatables-oracle": "^11.1"
     },
     "require-dev": {

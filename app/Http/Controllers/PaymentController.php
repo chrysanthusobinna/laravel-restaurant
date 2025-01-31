@@ -11,6 +11,7 @@ use App\Models\Customer;
 use Stripe\PaymentIntent;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use App\Helpers\TwilioHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\RestaurantPhoneNumber;
@@ -231,6 +232,9 @@ class PaymentController extends Controller
                             Log::error('Order email failed to send: ' . $e->getMessage());
                         }
                         
+                        // send whatsapp message
+                        $this->sendWhatsAppNotification($order);    
+
                         // Clear the session
                         $this->clearOrderSession();
                         
@@ -337,6 +341,8 @@ class PaymentController extends Controller
                         Log::error('Order email failed to send: ' . $e->getMessage());
                     }
                     
+                    // send whatsapp message
+                    $this->sendWhatsAppNotification($order);                       
                 }
      
             }
@@ -375,5 +381,14 @@ class PaymentController extends Controller
             'order_no'
         ]);
     }
+
+    protected function sendWhatsAppNotification(Order $order)
+    {
+        try {
+            TwilioHelper::sendWhatsAppMessage($order->customer->phone_number, $order->order_no, $order->customer->name);
+        } catch (Exception $e) {
+            Log::error('Failed to send WhatsApp message: ' . $e->getMessage());
+        }
+    }    
     
 }
