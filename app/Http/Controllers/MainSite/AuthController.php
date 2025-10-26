@@ -1,25 +1,39 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\MainSite;
 
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ActivationLinkEmail;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
+use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 
 class AuthController extends Controller
 {
     
-     // Show the login form
-     public function showLoginForm()
-     {
-         return view('admin.login');
-     }
+    use CartTrait;
+    use MainSiteViewSharedDataTrait;
+    use OrderNumberGeneratorTrait;
+
+
+    public function __construct()
+    {
+        $this->shareMainSiteViewData();
+    }
+
+    // Show the login form
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
 
      
      // Handle the login request
@@ -33,19 +47,26 @@ class AuthController extends Controller
          $user = user::where('email', $request->email)->first();
      
          if ($user && Hash::check($request->password, $user->password)) {
+
+            $dashboardRoute = $this->getDashboardRoute($user);
+          
+
              if ($user->status == 1) {
                  auth()->login($user);
-                 return redirect()->route('admin.index');
+                 return redirect()->route($dashboardRoute);
              } else {
                  session(['user_email' => $user->email, 'user_name' => $user->first_name]);
      
                  if ($user->notice === "change_password_to_activate_account") {
-                     return redirect()->route('admin.activate.link.request');
+
+                     return redirect()->route('auth.activate.link.request');
+
                  } elseif ($user->notice === "banned") {
-                     return redirect()->route('admin.login')->withErrors(['account' => 'Your account has been banned. Please contact Support for assistance.']);
-                 } else {
-                     return redirect()->route('admin.login')->withErrors(['authentication' => 'Authentication error. Something occurred. Please try again.']);
-                 }
+
+                     $errorMessage = 'Your account has been banned. Please contact Support for assistance.';
+                     return redirect()->route('auth.login')->withErrors(['account' => $errorMessage]);
+
+                 } 
              }
          } else {
              return back()->withErrors(['email' => 'Invalid email or password.']);
@@ -59,7 +80,8 @@ class AuthController extends Controller
      public function requestActivationLink(Request $request)
      {
         if (!session()->has('user_email') || !session()->has('user_name')) {
-            return redirect()->route('admin.login')->withErrors(['error' => 'Something went wrong, please try to login again.']);
+            $errorMessage = 'Something went wrong, please try to login again.';
+            return redirect()->route('auth.login')->withErrors(['error' => $errorMessage]);
         }
         $email = session('user_email');
         $user = user::where('email', $email)->first();
@@ -75,7 +97,7 @@ class AuthController extends Controller
          // Send activation link email
          Mail::to($user->email)->send(new ActivationLinkEmail($user, $token));
  
-         return view('admin.activation-link-sent', ['email' => $user->email]);
+         return view('auth.activation-link-sent', ['email' => $user->email]);
      }
 
      
@@ -83,14 +105,15 @@ class AuthController extends Controller
     public function activateAccount()
     {
         if (!session()->has('user_email') || !session()->has('user_name')) {
-            return redirect()->route('admin.login')->withErrors(['error' => 'Something went wrong, please try to login again.']);
+            $errorMessage = 'Something went wrong, please try to login again.';
+            return redirect()->route('auth.login')->withErrors(['error' => $errorMessage]);
         }
     
         //send  a verification code email to the user 
 
         $user_name = session('user_name');
 
-        return view('admin.activate-account', compact('user_name'));
+        return view('auth.activate-account', compact('user_name'));
     }
     
 
@@ -98,7 +121,8 @@ class AuthController extends Controller
     {
 
         if (!session()->has('user_email') || !session()->has('user_name')) {
-            return redirect()->route('admin.login')->withErrors(['error' => 'Something went wrong, please try to login again.']);
+            $errorMessage = 'Something went wrong, please try to login again.';
+            return redirect()->route('auth.login')->withErrors(['error' => $errorMessage]);
         }
 
         // Retrieve the user's email from the session
@@ -110,7 +134,8 @@ class AuthController extends Controller
         }
 
         if (!Hash::check($request->old_password, $user->password)) {
-            return back()->withErrors(['old_password' => 'The provided old password is incorrect.']);
+            $errorMessage = 'The provided old password is incorrect.';
+            return back()->withErrors(['old_password' => $errorMessage]);
         }
 
         // Update the password
@@ -124,13 +149,15 @@ class AuthController extends Controller
         Auth::login($user);
         session()->forget(['user_email', 'user_name']);
 
+        $dashboardRoute = $this->getDashboardRoute($user);
 
-        return redirect()->route('admin.index')->with('success', 'Your new password has been updated. You have been logged in successfully.');
+        $successMessage = 'Your new password has been updated. You have been logged in successfully.';
+        return redirect()->route($dashboardRoute)->with('success', $successMessage);
     }
 
     public function showLinkRequestForm()
     {
-        return view('admin.request-password');
+        return view('auth.request-password');
     }
 
     // Handle sending the password reset email
@@ -150,7 +177,7 @@ class AuthController extends Controller
     {
         $token = $request->token;
         $email = $request->email;
-        return view('admin.password-reset', compact('token', 'email'));
+        return view('auth.password-reset', compact('token', 'email'));
     }
 
     
@@ -174,9 +201,24 @@ class AuthController extends Controller
             }
         );
 
+        $dashboardRoute = $this->getDashboardRoute(Auth::user());
+
         return $status === Password::PASSWORD_RESET
-            ? redirect()->route('admin.index')->with('success', 'Your password has been reset successfully.')
+            ? redirect()->route($dashboardRoute)->with('success', 'Your password has been reset successfully.')
             : back()->withErrors(['email' => [__($status)]]);
     }
- 
+
+    private function getDashboardRoute(User $user): string
+    {
+        return in_array($user->role, ['admin', 'global_admin']) 
+            ? 'admin.dashboard' 
+            : 'customer.dashboard';
+    }
+
+      // Handle logout
+     public function logout()
+     {
+         Auth::logout();
+         return redirect()->route('auth.login')->with('success', 'Logged out successfully.');
+     }
 }

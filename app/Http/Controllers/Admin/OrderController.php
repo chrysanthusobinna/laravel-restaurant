@@ -190,6 +190,8 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders.index')->with('success', 'Order Created successfully.');
     }
+
+    
     public function update(Request $request, $id)
     {
         // Validate the input data

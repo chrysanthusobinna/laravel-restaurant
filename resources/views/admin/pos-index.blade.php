@@ -290,7 +290,8 @@ $('#payment_method').on('change', function() {
         </div>
       </div>
 
-      <div class="card mb-4">
+    @if ($menus->count() != 0)
+       <div class="card mb-4">
         <div class="card-body">
           <form id="checkout-form" method="POST" action="{{ route('admin.order.store') }}">
             <input type="hidden"   id="total" value="0">
@@ -357,10 +358,12 @@ $('#payment_method').on('change', function() {
         </div>
         <div class="card-footer text-right">
             <button type="button" style="display:none;" id="checkout-btn" form="checkout-form" class="btn btn-primary">Checkout</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.index') }}'">Cancel</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.dashboard') }}'">Cancel</button>
 
         </div>
-    </div>
+    </div>     
+    @endif
+
     
  
 

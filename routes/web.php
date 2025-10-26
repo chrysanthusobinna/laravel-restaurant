@@ -1,21 +1,23 @@
 <?php
 
-use App\Http\Middleware\CheckRole;
-
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+
+use App\Http\Middleware\CheckRoleAdmin;
+use App\Http\Middleware\CheckRoleCustomer;
 use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\RedirectIfNotAdmin;
 use App\Http\Controllers\MainSiteController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\MenuController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\TableBookingController;
+use App\Http\Controllers\MainSite\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
+use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
 use App\Http\Controllers\Admin\TermsAndConditionController;
@@ -62,27 +64,45 @@ Route::get('terms-conditions/', [MainSiteController::class, 'termsConditions'])-
 //Resetting Password
 Route::middleware(['guest'])->group(function () {
 
-    // Admin login routes
-    Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('admin/process-login/', [AuthController::class, 'login'])->name('admin.login.process');
+    // Customer account creation routes
+    Route::get('customer/create-account', [CustomerController::class, 'create'])->name('customer.account.create');
+    Route::post('customer/store-account', [CustomerController::class, 'store'])->name('customer.account.store');
 
-    //admin activate route
-    Route::get('admin/activate-link-request', [AuthController::class, 'requestActivationLink'])->name('admin.activate.link.request');
-    Route::get('admin/activate-account/{token}', [AuthController::class, 'activateAccount'])->name('admin.activate.account');
-    Route::post('admin/process-activate-account/', [AuthController::class, 'processApdatePassword'])->name('admin.process.activate.account');
+    // login routes
+    Route::get('auth/login', [AuthController::class, 'showLoginForm'])->name('auth.login');
+    Route::post('auth/process-login/', [AuthController::class, 'login'])->name('auth.login.process');
+
+
+    // activate route
+    Route::get('auth/activate-link-request', [AuthController::class, 'requestActivationLink'])->name('auth.activate.link.request');
+    Route::get('auth/activate-account/{token}', [AuthController::class, 'activateAccount'])->name('auth.activate.account');
+    Route::post('auth/process-activate-account/', [AuthController::class, 'processApdatePassword'])->name('auth.process.activate.account');
 
     //password reset routes
-    Route::get('admin/password/request', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('admin/password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('admin/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-    Route::post('admin/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::get('auth/password/request', [AuthController::class, 'showLinkRequestForm'])->name('auth.password.request');
+    Route::post('auth/password/email', [AuthController::class, 'sendResetLinkEmail'])->name('auth.password.email');
+    Route::get('auth/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('auth/password/reset', [AuthController::class, 'resetPassword'])->name('auth.password.update');
+});
+
+//Logout route
+Route::middleware(['auth'])->group(function () {
+    Route::get('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+});
+
+
+//Customer Dashboard routes
+Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function () {
+
+
+     Route::get('/', [CustomerController::class, 'index'])->name('customer.dashboard');
+
 });
 
 
 //Admin Dashboard routes
 Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function () {
-    Route::get('logout', [AdminController::class, 'logout'])->name('admin.logout');
-    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
 
 
     Route::get('profile', [AdminController::class, 'viewMyProfile'])->name('admin.view.myprofile');
@@ -118,7 +138,7 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::get('order/{id}', [OrderController::class, 'show'])->name('admin.order.show');
     Route::post('order/create', [OrderController::class, 'createOrder'])->name('admin.order.store');
     Route::post('orders/update/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
-    Route::delete('orders/destroy/{id}', [OrderController::class, 'destroy'])->name('admin.orders.destroy')->middleware(CheckRole::class);
+    Route::delete('orders/destroy/{id}', [OrderController::class, 'destroy'])->name('admin.orders.destroy')->middleware(CheckRoleAdmin::class);
     
 
     //Admin Manage Booking
@@ -128,8 +148,8 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
     Route::delete('table-bookings/{id}', [AdminTableBookingController::class, 'destroy'])->name('admin.table-bookings.destroy');
    
 
-    // Routes with CheckRole is Global Admin middleware
-    Route::middleware(CheckRole::class)->group(function () {
+    // Routes with CheckRoleAdmin is Global Admin middleware
+    Route::middleware(CheckRoleAdmin::class)->group(function () {
 
         // Admin Settings Category
         Route::get('category', [CategoryController::class, 'index'])->name('admin.categories.index');
@@ -193,10 +213,10 @@ Route::prefix('admin')->middleware(RedirectIfNotAdmin::class)->group(function ()
 
 
         //Admin Manage Users routes
-        Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
-        Route::post('users', [UserController::class, 'store'])->name('admin.users.store');
-        Route::put('users/{id}', [UserController::class, 'update'])->name('admin.users.update');
-        Route::delete('users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+        Route::get('users', [UserAdminController::class, 'index'])->name('admin.users.index');
+        Route::post('users', [UserAdminController::class, 'store'])->name('admin.users.store');
+        Route::put('users/{id}', [UserAdminController::class, 'update'])->name('admin.users.update');
+        Route::delete('users/{id}', [UserAdminController::class, 'destroy'])->name('admin.users.destroy');
 
     });
         

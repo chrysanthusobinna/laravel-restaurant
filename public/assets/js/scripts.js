@@ -165,15 +165,15 @@ PAGE JS
 		$("body").append('<div id="header-overlay" class="header-overlay"></div>');
 	});
 	
-	$('.cart_trigger').on('click', function() {
-		$('.cart_box').addClass('show');
+	$('.account_trigger').on('click', function() {
+		$('.account_box').addClass('show');
 		$('body').toggleClass("cart_open");
-		$(".cart_box").after('<div id="header-overlay" class="header-overlay"></div>');
+		$(".account_box").after('<div id="header-overlay" class="header-overlay"></div>');
 	});
 	
 	$(document).on('click', '#header-overlay, .sidemenu_close',function() {
 		$('.sidetoggle').removeClass('open');
-		$('.cart_box').removeClass('show');
+		$('.account_box').removeClass('show');
 		$('body').removeClass('cart_open');
 		$('body,.sidebar_menu').removeClass('active');
 		$('#header-overlay').fadeOut('3000',function(){

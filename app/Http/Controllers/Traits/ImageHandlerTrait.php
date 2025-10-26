@@ -14,6 +14,11 @@ trait ImageHandlerTrait
         $imageName = time() . '-' . $imageFile->getClientOriginalName();
         $storagePath = storage_path("app/public/$path");
 
+         if (!is_dir($storagePath)) {
+            mkdir($storagePath, 0755, true);
+        }
+
+
         // Save Main Image
         $image->save($storagePath . '/' . $imageName);
 

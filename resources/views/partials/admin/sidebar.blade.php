@@ -11,15 +11,15 @@
                       {{ $loggedInUser->first_name }}
                     </p>
                     <p class="sidebar-designation">
-                      Welcome
+                      Admin
                     </p>
                   </div>
                 </div>
               </li>
 
 
-              <li class="nav-item {{ request()->route()->named('admin.index') ? 'active-nav' : '' }} ">
-                <a class="nav-link" href="{{ route('admin.index') }}">
+              <li class="nav-item {{ request()->route()->named('admin.dashboard') ? 'active-nav' : '' }} ">
+                <a class="nav-link" href="{{ route('admin.dashboard') }}">
                     <i class="fa fa-desktop menu-icon"></i>
                     <span class="menu-title">Dashboard</span>
                 </a>
@@ -115,7 +115,7 @@
 
 
               <li class="nav-item">
-                <a class="nav-link" href="{{ route('home') }}">
+                <a target="_blank" class="nav-link" href="{{ route('home') }}">
                   <i class="fa fa-globe menu-icon"></i>
                   <span class="menu-title">Main Website</span>
                 </a>

@@ -13,18 +13,27 @@
             <li>  <a href="{{ route('blogs') }}" class="nav-link {{ Request::is('blog*') ? 'active' : '' }}">Blogs</a> </li>
             <li>  <a href="{{ route('about') }}" class="nav-link {{ Request::routeIs('about') ? 'active' : '' }}">About</a> </li>
             <li> <a href="{{ route('contact') }}" class="nav-link {{ Request::routeIs('contact') ? 'active' : '' }}">Contact</a> </li>
-            @if (Auth::check())
-                <li> <a href="{{ route('admin.index') }}" class="nav-link">Admin Dashboard</a> </li>
-                <li> <a  data-bs-toggle="modal" data-bs-target="#logoutModal" href="#" class="nav-link">Logout</a> </li>
-            @endif
-
 
         </ul>
         
     </div>
     <ul class="navbar-nav attr-nav align-items-center">
-        <li><a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}" ><i class="linearicons-cart"></i><span class="cart_count" id="cart_count">{{ $customer_total_cart_items }}</span></a></li>
+        <li>
+            <a class="nav-link account_trigger" href="#"><i class="linearicons-user"></i></a>
+        </li>
+
+        @auth
+            @if (Auth::user()->role === 'customer')
+                <li>
+                    <a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}">
+                        <i class="linearicons-cart"></i>
+                        <span class="cart_count" id="cart_count">{{ $customer_total_cart_items }}</span>
+                    </a>
+                </li>
+            @endif
+        @endauth
     </ul>
+
     @if($firstRestaurantPhoneNumber)  
     <div class="header_btn d-sm-block d-none">
         <a href="tel:{{ $firstRestaurantPhoneNumber->phone_number }}" class="btn btn-default rounded-0 ml-2 btn-sm"><i class="fa fa-phone"></i> CALL US</a>

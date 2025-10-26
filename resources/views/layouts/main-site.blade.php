@@ -38,6 +38,8 @@
 <!-- END LOADER --> 
  @yield('header')
 
+ @include('partials.account')
+
  @yield('content')
  
  @include('partials.logout')

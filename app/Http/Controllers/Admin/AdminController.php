@@ -48,7 +48,7 @@ class AdminController extends Controller
             return [$month => $salesData->get($month, 0)];
         });
     
-        return view('admin.index', compact('formattedSalesData'));
+        return view('admin.dashboard', compact('formattedSalesData'));
     }
     
 
@@ -124,14 +124,9 @@ class AdminController extends Controller
         // Send password changed notification email
         Mail::to($user->email)->send(new PasswordChangedNotification($user));
 
-        return redirect()->route('admin.index')->with('success', 'Your password has been successfully updated.');
+        return redirect()->route('admin.dashboard')->with('success', 'Your password has been successfully updated.');
     }    
 
-     // Handle logout
-     public function logout()
-     {
-         Auth::logout();
-         return redirect()->route('admin.login')->with('success', 'Logged out successfully.');
-     }
+
     
 }

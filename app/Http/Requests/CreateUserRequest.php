@@ -18,7 +18,8 @@ class CreateUserRequest extends FormRequest
             'middle_name' => 'nullable|string|max:255', 
             'last_name' => 'required|string|max:255',    
             'email' => 'required|email|unique:users,email',  
-            'role' => 'required|in:admin,global_admin',  
+            'role' => 'required|in:admin,global_admin,customer',  
+            'password' => 'required|string|min:8|confirmed',
         ];
     }
 
@@ -41,7 +42,11 @@ class CreateUserRequest extends FormRequest
             'email.unique' => 'This email has already been taken.',
             
             'role.required' => 'The role field is required.',
-            'role.in' => 'The role must be either admin or global_admin.',
+            'role.in' => 'The role must be either admin, global_admin, or customer.',
+            'password.required' => 'The password field is required.',
+            'password.string' => 'Please enter a valid password using letters, numbers, or symbols.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ];
     }
 
@@ -52,6 +57,7 @@ class CreateUserRequest extends FormRequest
             'middle_name' => ucwords($this->middle_name),
             'last_name' => ucwords($this->last_name),
             'email' => strtolower($this->email),
+            
         ]);
     }
 }

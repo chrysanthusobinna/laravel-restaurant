@@ -629,7 +629,7 @@
 .banner_content2 h2 {
 	font-size: 58px;
 }
-.cart_box {
+.account_box {
 	width: 400px;
 	right: -400px;
 }
@@ -1089,7 +1089,7 @@ p {
 	top: 6px;
 }
 .navbar .attr-nav li .search_trigger i,
-.navbar .navbar-nav > li > .nav-link.cart_trigger i {
+.navbar .navbar-nav > li > .nav-link.account_trigger i {
 	font-size: 18px;
 }
 .banner_content h2 {
@@ -1277,7 +1277,7 @@ footer .widget_title,
 	margin-top: 20px;
 	padding: 20px;
 }
-.cart_box {
+.account_box {
 	width: 320px;
 	right: -320px;
 }
@@ -1389,7 +1389,7 @@ footer .widget_title,
 .contact_detail > li, .header_list > li {
 	padding: 2px 10px 2px 0;
 }
-.navbar-nav .dropdown-menu.cart_box.show {
+.navbar-nav .dropdown-menu.account_box.show {
 	right: -50px;
 	width: 310px;
 }
@@ -1437,7 +1437,7 @@ footer .widget_title,
 .cart-product-quantity {
 	margin: 0px 10px 7px 0;
 }
-.cart_box {
+.account_box {
 	width: 280px;
 	right: -280px;
 }

@@ -13,7 +13,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Controllers\Traits\AdminViewSharedDataTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
-class UserController extends Controller
+class UserAdminController extends Controller
 {
 
     use AdminViewSharedDataTrait;

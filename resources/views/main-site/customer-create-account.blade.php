@@ -71,12 +71,15 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 @endpush
 
 
-@section('title', 'Blog')
+@section('title', 'Create Account')
 
 
 @section('header')
@@ -93,16 +96,16 @@
 @section('content')
 
  <!-- START SECTION BREADCRUMB -->
-<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/blog_bg.jpg">
+<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/checkout_bg.jpg">
     <div class="container"><!-- STRART CONTAINER -->
         <div class="row">
             <div class="col-sm-12">
                 <div class="page-title">
-            		<h1>Blog</h1>
+            		<h1>Create Account</h1>
                 </div>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Blog</li>
+                    <li class="breadcrumb-item active">Create Account</li>
                 </ol>
             </div>
         </div>
@@ -110,72 +113,77 @@
 </div>
 <!-- END SECTION BREADCRUMB -->
 
-    <!-- START SECTION BLOG-->
-    <div class="section">
-        <div class="container">
 
+<!-- START SECTION SHOP -->
+<div class="section">
+	<div class="container">
+        @include('partials.message-bag')
 
-            <form action="{{ route('blogs') }}" method="GET" class="mb-5">
-
-                <div class="form-group">
-                    <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search blogs..." value="{{ request('search') }}">
-                      <div class="input-group-append">
-                        <button type="submit" class="btn btn-sm btn-danger"  ><i class="linearicons-magnifier"></i> Search</button>
-                      </div>
-                    </div>
-                  </div>
-      
-                  @if (request('search'))
-                  <div class="alert alert-info mt-3">
-                    <strong>Search Results:</strong>
-                    We found <strong>{{ $blogs->total() }}</strong> 
-                    {{ $blogs->total() === 1 ? 'result' : 'results' }} for your query 
-                    <em>"{{ request('search') }}"</em>.
-                    <hr/>
-                    <a href="{{ route('blogs') }}" class="btn-sm btn btn-light">Return to Blogs</a>
-                </div>
-              @endif
-                  
-            </form>
- 
+        <form method="post" action="{{ route('customer.account.store') }}">
+        @csrf
+        <div class="row justify-content-center">
+        <div class="col-12 col-lg-6 mx-auto">
+            <div class="order_review">
             <div class="row">
-                @forelse($blogs as $blog)
-                    <div class="d-flex col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
-                        <div class="blog_post blog_style1 box_shadow1">
-                            <div class="blog_img">
-                                <a href="{{ route('blog.view', $blog->id) }}">
-                                    <img src="{{ asset('storage/' . $blog->image) }}" alt="blog_small_img1">
-                                </a>
-                                <span class="post_date">
-                                    <strong>{{ $blog->created_at->format('d') }}</strong> {{ $blog->created_at->format('M') }}
-                                </span>
-                            </div>
-                            <div class="blog_content">
-                                <div class="blog_text">
-                                    <h5 class="blog_title"><a href="#">{{ $blog->name }}</a></h5>
-                                    <p>{{ Str::limit(strip_tags($blog->content), 50) }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    @if(!request('search'))
-                        <div class="col-12">                   
-                            <div class="alert alert-warning text-center" role="alert">
-                                No blogs found.
-                            </div>
-                        </div>
-                    @endif
-                @endforelse
-            </div>
+                <!-- Name -->
+                <div class="form-group col-md-12">
+                <input class="form-control" required type="text" name="name" value="{{ old('name') }}" placeholder="Name *">
+                </div>
 
-            {{ $blogs->links('vendor.pagination.custom') }}
-           
-            
+                <!-- Email -->
+                <div class="form-group col-md-12">
+                <input class="form-control" required type="email" name="email" value="{{ old('email') }}" placeholder="Email Address *">
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group col-md-12">
+                <input class="form-control" required type="tel" name="phone_number" value="{{ old('phone_number') }}" placeholder="Phone Number *">
+                </div>
+
+                <!-- Address -->
+                <div class="form-group col-md-12">
+                <input class="form-control" required type="text" name="address" value="{{ old('address') }}" placeholder="Address *">
+                </div>
+
+                <!-- City -->
+                <div class="form-group col-md-6">
+                <input class="form-control" required type="text" name="city" value="{{ old('city') }}" placeholder="City / Town *">
+                </div>
+
+                <!-- State -->
+                <div class="form-group col-md-6">
+                <input class="form-control" required type="text" name="state" value="{{ old('state') }}" placeholder="State *">
+                </div>
+
+                <!-- County (Optional) -->
+                <div class="form-group col-md-6">
+                <input class="form-control" type="text" name="county" value="{{ old('county') }}" placeholder="County (Optional)">
+                </div>
+
+                <!-- Postcode -->
+                <div class="form-group col-md-6">
+                <input class="form-control" required type="text" name="postcode" value="{{ old('postcode') }}" placeholder="Postcode / ZIP *">
+                </div>
+
+                <!-- Submission -->
+                <div class="form-group mb-0 mt-2 col-md-12">
+                <button type="submit" class="btn btn-default btn-block">Create Account</button>
+                </div>
+
+                <!-- Login Link -->
+                <div class="form-group mb-0 mt-2 col-md-12">
+                If you have an account? <a href="#">Login here</a>
+                </div>
+            </div>
+            </div>
         </div>
-    </div> 
-    <!-- END SECTION BLOG-->
+        </div>
+
+        </form>
+    </div>
+</div>
+<!-- END SECTION SHOP -->
+ 
 @endsection
 
 

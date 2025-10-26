@@ -94,7 +94,7 @@
         </div>
         <div class="card-footer">
             <button type="button" onclick="window.location='{{ route('admin.myprofile.edit') }}'" class="btn btn-info">Edit My Profile</button>
-            <button type="button" onclick="window.location='{{ route('admin.index') }}'" class="btn btn-primary float-right">Dashboard</button>
+            <button type="button" onclick="window.location='{{ route('admin.dashboard') }}'" class="btn btn-primary float-right">Dashboard</button>
         </div>
     </div>
 

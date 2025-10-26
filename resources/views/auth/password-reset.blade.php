@@ -71,12 +71,26 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ 
+    <script>
+        $(document).ready(function() {
+            $('.toggle-password').on('click', function() {
+                const targetInput = $($(this).data('target'));
+                const type = targetInput.attr('type') === 'password' ? 'text' : 'password';
+                targetInput.attr('type', type);
+                $(this).toggleClass('fa-eye fa-eye-slash');
+            });
+        });
+    </script>
+    
 
 @endpush
 
 
-@section('title', 'Blog')
+@section('title', 'Create Account')
 
 
 @section('header')
@@ -89,95 +103,93 @@
     <!-- END HEADER -->
 @endsection
 
-
 @section('content')
 
- <!-- START SECTION BREADCRUMB -->
-<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/blog_bg.jpg">
-    <div class="container"><!-- STRART CONTAINER -->
+<!-- START SECTION BREADCRUMB -->
+<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/checkout_bg.jpg">
+    <div class="container">
         <div class="row">
             <div class="col-sm-12">
                 <div class="page-title">
-            		<h1>Blog</h1>
+                    <h1>Reset Password</h1>
                 </div>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Blog</li>
+                    <li class="breadcrumb-item active">Reset Password</li>
                 </ol>
             </div>
         </div>
-    </div><!-- END CONTAINER-->
+    </div>
 </div>
 <!-- END SECTION BREADCRUMB -->
 
-    <!-- START SECTION BLOG-->
-    <div class="section">
-        <div class="container">
-
-
-            <form action="{{ route('blogs') }}" method="GET" class="mb-5">
-
-                <div class="form-group">
-                    <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search blogs..." value="{{ request('search') }}">
-                      <div class="input-group-append">
-                        <button type="submit" class="btn btn-sm btn-danger"  ><i class="linearicons-magnifier"></i> Search</button>
-                      </div>
+<!-- START SECTION RESET FORM -->
+<div class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6 mx-auto">
+                <div class="order_review">
+                    <div class="text-center mb-4">
+                        <h4>Reset Your Password</h4>
+                        <h6 class="font-weight-light">Enter your new password below.</h6>
                     </div>
-                  </div>
-      
-                  @if (request('search'))
-                  <div class="alert alert-info mt-3">
-                    <strong>Search Results:</strong>
-                    We found <strong>{{ $blogs->total() }}</strong> 
-                    {{ $blogs->total() === 1 ? 'result' : 'results' }} for your query 
-                    <em>"{{ request('search') }}"</em>.
-                    <hr/>
-                    <a href="{{ route('blogs') }}" class="btn-sm btn btn-light">Return to Blogs</a>
-                </div>
-              @endif
-                  
-            </form>
- 
-            <div class="row">
-                @forelse($blogs as $blog)
-                    <div class="d-flex col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
-                        <div class="blog_post blog_style1 box_shadow1">
-                            <div class="blog_img">
-                                <a href="{{ route('blog.view', $blog->id) }}">
-                                    <img src="{{ asset('storage/' . $blog->image) }}" alt="blog_small_img1">
-                                </a>
-                                <span class="post_date">
-                                    <strong>{{ $blog->created_at->format('d') }}</strong> {{ $blog->created_at->format('M') }}
-                                </span>
-                            </div>
-                            <div class="blog_content">
-                                <div class="blog_text">
-                                    <h5 class="blog_title"><a href="#">{{ $blog->name }}</a></h5>
-                                    <p>{{ Str::limit(strip_tags($blog->content), 50) }}</p>
+
+                    @include('partials.message-bag')
+
+                    <form method="POST" action="{{ route('password.update') }}">
+                        @csrf
+                        <input type="hidden" name="token" value="{{ $token }}">
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{ $email }}" required>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-group position-relative">
+                            <label for="password">New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-eye toggle-password" data-target="#password" style="cursor:pointer;"></i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @empty
-                    @if(!request('search'))
-                        <div class="col-12">                   
-                            <div class="alert alert-warning text-center" role="alert">
-                                No blogs found.
+
+                        <!-- Confirm Password -->
+                        <div class="form-group position-relative">
+                            <label for="password_confirmation">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-eye toggle-password" data-target="#password_confirmation" style="cursor:pointer;"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    @endif
-                @endforelse
+
+                        <!-- Submit Button -->
+                        <div class="form-group mt-3 mb-2">
+                            <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
+                        </div>
+
+                        <!-- Back to Login -->
+                        <div class="form-group mt-2">
+                            <a class="btn btn-outline-secondary btn-block" href="{{ route('auth.login') }}">Back to Login</a>
+                        </div>
+                    </form>
+
+                </div>
             </div>
-
-            {{ $blogs->links('vendor.pagination.custom') }}
-           
-            
         </div>
-    </div> 
-    <!-- END SECTION BLOG-->
+    </div>
+</div>
+<!-- END SECTION RESET FORM -->
+
+
+
 @endsection
-
-
-
- 

@@ -1,6 +1,6 @@
  
 <!-- START FOOTER -->
-<footer class="footer_dark pattern_top background_bg overlay_bg_80" data-img-src="assets/images/footer_bg.jpg">
+<footer class="footer_dark pattern_top background_bg overlay_bg_80" data-img-src="/assets/images/footer_bg.jpg">
 	<div class="footer_top">
         <div class="container">
             <div class="row">

@@ -71,12 +71,25 @@
     <script src="/assets/js/mdtimepicker.min.js"></script>
     <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
+
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.toggle-password').on('click', function() {
+                const input = $('#password');
+                const icon = $(this);
+                const type = input.attr('type') === 'password' ? 'text' : 'password';
+                input.attr('type', type);
+                icon.toggleClass('fa-eye fa-eye-slash');
+            });
+        });
+    </script>
 
 @endpush
 
 
-@section('title', 'Blog')
+@section('title', 'Create Account')
 
 
 @section('header')
@@ -88,96 +101,51 @@
     </header>
     <!-- END HEADER -->
 @endsection
+ @section('content')
 
-
-@section('content')
-
- <!-- START SECTION BREADCRUMB -->
-<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/blog_bg.jpg">
-    <div class="container"><!-- STRART CONTAINER -->
+<!-- START SECTION BREADCRUMB -->
+<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/checkout_bg.jpg">
+    <div class="container">
         <div class="row">
             <div class="col-sm-12">
                 <div class="page-title">
-            		<h1>Blog</h1>
+                    <h1>Activate Account</h1>
                 </div>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Blog</li>
+                    <li class="breadcrumb-item active">Activation</li>
                 </ol>
             </div>
         </div>
-    </div><!-- END CONTAINER-->
+    </div>
 </div>
 <!-- END SECTION BREADCRUMB -->
 
-    <!-- START SECTION BLOG-->
-    <div class="section">
-        <div class="container">
+<!-- START SECTION ACTIVATION -->
+<div class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6 mx-auto">
+                <div class="order_review text-center">
+                    <h4 class="mb-3">Activation Link Sent</h4>
 
+                    <p>An activation link has been sent to your email: <strong>{{ $email }}</strong>.</p>
+                    <p>Please check your inbox and follow the instructions to activate your account.</p>
 
-            <form action="{{ route('blogs') }}" method="GET" class="mb-5">
+                    <p>If you haven’t received the email within a few minutes, you can resend the link below:</p>
 
-                <div class="form-group">
-                    <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search blogs..." value="{{ request('search') }}">
-                      <div class="input-group-append">
-                        <button type="submit" class="btn btn-sm btn-danger"  ><i class="linearicons-magnifier"></i> Search</button>
-                      </div>
-                    </div>
-                  </div>
-      
-                  @if (request('search'))
-                  <div class="alert alert-info mt-3">
-                    <strong>Search Results:</strong>
-                    We found <strong>{{ $blogs->total() }}</strong> 
-                    {{ $blogs->total() === 1 ? 'result' : 'results' }} for your query 
-                    <em>"{{ request('search') }}"</em>.
-                    <hr/>
-                    <a href="{{ route('blogs') }}" class="btn-sm btn btn-light">Return to Blogs</a>
+                    <hr class="my-4"/>
+
+                    <form id="resend-form" action="{{ route('admin.activate.link.request') }}" method="GET">
+                        <button id="resend-button" class="btn btn-primary btn-block" type="submit">Resend Activation Link</button>
+                    </form>
+
+                    <p id="countdown-message" class="mt-3 text-muted"></p>
                 </div>
-              @endif
-                  
-            </form>
- 
-            <div class="row">
-                @forelse($blogs as $blog)
-                    <div class="d-flex col-lg-4 col-md-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
-                        <div class="blog_post blog_style1 box_shadow1">
-                            <div class="blog_img">
-                                <a href="{{ route('blog.view', $blog->id) }}">
-                                    <img src="{{ asset('storage/' . $blog->image) }}" alt="blog_small_img1">
-                                </a>
-                                <span class="post_date">
-                                    <strong>{{ $blog->created_at->format('d') }}</strong> {{ $blog->created_at->format('M') }}
-                                </span>
-                            </div>
-                            <div class="blog_content">
-                                <div class="blog_text">
-                                    <h5 class="blog_title"><a href="#">{{ $blog->name }}</a></h5>
-                                    <p>{{ Str::limit(strip_tags($blog->content), 50) }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    @if(!request('search'))
-                        <div class="col-12">                   
-                            <div class="alert alert-warning text-center" role="alert">
-                                No blogs found.
-                            </div>
-                        </div>
-                    @endif
-                @endforelse
             </div>
-
-            {{ $blogs->links('vendor.pagination.custom') }}
-           
-            
         </div>
-    </div> 
-    <!-- END SECTION BLOG-->
+    </div>
+</div>
+<!-- END SECTION ACTIVATION -->
+
 @endsection
-
-
-
- 
