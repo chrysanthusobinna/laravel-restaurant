@@ -296,22 +296,38 @@
         <div class="row" id="checkout">
             <div class="col-lg-8">
 
-            	<div class="cart_totals">
-             
+                <div class="cart_totals">
                     <div class="table-responsive">
-
                         <table class="table">
                             <tbody>
                                 <tr>
                                     <td class="cart_total_label">Cart Subtotal</td>
-                                    <td class="cart_total_amount" id="cart-subtotal">{!! $site_settings->currency_symbol !!}0.00</td>
+                                    <td class="cart_total_amount" id="cart-subtotal">
+                                        {!! $site_settings->currency_symbol !!}0.00
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <a href="{{ route('customer.checkout') }}" class="btn btn-default">Proceed To CheckOut</a>
 
+                    @php
+                        $user = Auth::user();
+                        $isCustomer = $user && ($user->role === 'customer');
+                    @endphp
+
+                    @if($isCustomer)
+                        <a href="{{ route('customer.checkout.details') }}" class="btn btn-default w-100">Proceed To CheckOut</a>
+                    @else
+                        <div class="alert alert-warning mt-3 mb-3">
+                            You need to log in or register to complete your order.
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{{ route('auth.login') }}" class="btn btn-default">Login</a>
+                            <a href="{{ route('customer.account.create') }}" class="btn btn-default">Register</a>
+                        </div>
+                    @endif
                 </div>
+
             </div>
         </div>
         <div class="row" id="empty-cart">

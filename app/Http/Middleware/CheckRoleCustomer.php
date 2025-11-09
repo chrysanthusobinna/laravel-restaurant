@@ -15,6 +15,6 @@ class CheckRoleCustomer
         }
 
         // If user is not authorized, redirect or abort
-        return redirect()->route('customer.index')->with('error', 'You do not have permission to access this page.');
+        return redirect()->route('customer.account')->with('error', 'You do not have permission to access this page.');
     }
 }

@@ -212,7 +212,7 @@ class AuthController extends Controller
     {
         return in_array($user->role, ['admin', 'global_admin']) 
             ? 'admin.dashboard' 
-            : 'customer.dashboard';
+            : 'home';
     }
 
       // Handle logout

@@ -47,5 +47,11 @@ class User extends Authenticatable implements CanResetPassword
     {
         return $this->hasMany(Order::class, 'updated_by_user_id');
     }
+    
+    // Relationship: user can have many addresses
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
 
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\MainSite\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\GeneralSettingsController;
@@ -38,9 +39,7 @@ Route::post('cart/remove', [MainSiteController::class, 'removeFromCart'])->name(
 Route::get('cart/view', [MainSiteController::class, 'getCart'])->name('customer.cart.view');
 Route::post('cart/clear', [MainSiteController::class, 'clearCart'])->name('customer.cart.clear');
 Route::post('cart/update', [MainSiteController::class, 'updateCartQuantity'])->name('customer.cart.update');
-Route::get('checkout/', [MainSiteController::class, 'checkout'])->name('customer.checkout');
 
-Route::post('proccess-checkout/', [MainSiteController::class, 'proccessCheckout'])->name('customer.proccess.checkout');
 Route::get('getcart-totalitems/', [MainSiteController::class, 'getTotalItems'])->name('customer.getcart.totalitems');
 
  //stripe payment routes
@@ -91,11 +90,48 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-//Customer Dashboard routes
+// Customer Dashboard routes
 Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function () {
+    
+    Route::get('/', [CustomerController::class, 'account'])->name('customer.account');
+
+    // Profile edit and update
+    Route::get('/edit-profile', [CustomerController::class, 'editAccount'])->name('customer.edit.profile');
+    Route::put('/update-profile', [CustomerController::class, 'updateAccount'])->name('customer.update.profile');
+ 
+    // Change password
+    Route::get('/change-password', [CustomerController::class, 'showChangePasswordForm'])->name('customer.change.password');
+    Route::post('/change-password', [CustomerController::class, 'changePassword'])->name('customer.change.password.post');
+
+    Route::get('checkout/', [CheckoutController::class, 'checkout'])->name('customer.checkout');
+    Route::post('proccess-checkout/', [CheckoutController::class, 'proccessCheckout'])->name('customer.proccess.checkout');
 
 
-     Route::get('/', [CustomerController::class, 'index'])->name('customer.dashboard');
+
+    // Step 1: Customer details (review)
+    Route::get('/checkout/details', [CheckoutController::class, 'details'])->name('customer.checkout.details');
+    Route::post('/checkout/details', [CheckoutController::class, 'detailsPost'])->name('customer.checkout.details.post');
+
+    // Step 2: Fulfilment (pickup or delivery)
+    Route::get('/checkout/fulfilment', [CheckoutController::class, 'fulfilment'])->name('customer.checkout.fulfilment');
+    Route::post('/checkout/fulfilment', [CheckoutController::class, 'fulfilmentPost'])->name('customer.checkout.fulfilment.post');
+
+    // Step 3a: Pickup location
+    Route::get('/checkout/pickup', [CheckoutController::class, 'pickup'])->name('customer.checkout.pickup');
+    Route::post('/checkout/pickup', [CheckoutController::class, 'pickupPost'])->name('customer.checkout.pickup.post');
+
+    // Step 3b: Delivery address
+    Route::get('/checkout/delivery', [CheckoutController::class, 'delivery'])->name('customer.checkout.delivery');
+    Route::post('/checkout/delivery', [CheckoutController::class, 'deliveryPost'])->name('customer.checkout.delivery.post');
+
+    // Step 4: Payment & review
+    Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('customer.checkout.payment');
+    Route::post('/checkout/payment', [CheckoutController::class, 'paymentPost'])->name('customer.checkout.payment.post');
+
+    // Step 5: Confirmation
+    Route::get('/checkout/complete/{order}', [CheckoutController::class, 'complete'])->name('customer.checkout.complete');
+
+
 
 });
 

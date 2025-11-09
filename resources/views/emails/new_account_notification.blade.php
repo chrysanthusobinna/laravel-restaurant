@@ -125,7 +125,7 @@
             </tr>
             <tr>
                 <th>Login Link</th>
-                <td><a href="{{ route('admin.login') }}">{{ route('admin.login') }}</a></td>
+                <td><a href="{{ route('auth.login') }}">{{ route('auth.login') }}</a></td>
             </tr>
         </table>
 

@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Controllers\Traits\CartTrait;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 
@@ -24,12 +27,87 @@ class CustomerController extends Controller
     {
         $this->shareMainSiteViewData();
     }
-    
-    // Show the customer dashboard
-    public function dashboard()
+
+    // Show the customer account
+    public function account()
     {
-        return view('customer.dashboard');
+        $user = Auth::User();  
+        return view('customer.account', compact('user'));
     }
+
+
+
+
+        public function editAccount()
+    {
+        $user = Auth::User();  
+        return view('customer.edit-account', compact('user'));
+    }
+
+    public function updateAccount(UpdateProfileRequest $request)
+    {
+        $user = Auth::User();
+        $validated = $request->validated();
+    
+        $user->first_name = $validated['first_name'];
+        $user->middle_name = $validated['middle_name']; // Optional, so it can be null
+        $user->last_name = $validated['last_name'];        
+        $user->email = $validated['email'];
+        $user->phone_number = $validated['phone_number'];
+        $user->address = $validated['address'];
+    
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old profile photo if exists
+            if ($user->profile_picture) {
+                Storage::delete('profile-picture/' . $user->profile_picture);
+            }
+    
+            // Store new profile photo
+            $photoPath = $request->file('profile_photo')->store('profile-picture', 'public');
+            $user->profile_picture = basename($photoPath);
+        }
+    
+        // Save the updated user data
+        $user->save();
+    
+        // Return success message
+        return redirect()->route('customer.account')->with('success', 'Profile updated successfully.');
+    }
+    
+
+    public function showChangePasswordForm()
+    {
+        $user = Auth::User();
+
+        return view('customer.change-password', compact('user'));
+    }
+
+    
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::User();
+
+        // Check if the current password matches the user's password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+        }
+
+        // Update the password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        // Send password changed notification email
+        Mail::to($user->email)->send(new PasswordChangedNotification($user));
+
+        return redirect()->route('admin.dashboard')->with('success', 'Your password has been successfully updated.');
+    }    
+
 
     // Show the account creation form
     public function create()

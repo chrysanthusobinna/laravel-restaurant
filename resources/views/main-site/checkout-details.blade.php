@@ -105,61 +105,90 @@
 
 @section('content')
 
- 
+<!-- START SECTION SHOP -->
+<div class="section">
+    <div class="container">
 
-    <!-- START SECTION SHOP -->
-    <div class="section">
-        <div class="container">
-        
+        <form method="post" action="{{ route('customer.checkout.details.post') }}">
+            @csrf
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-6 mx-auto">
+                    <div class="order_review">
+                        <h4 class="mb-4">Confirm Your Details</h4>
+                        <hr>
+                        @include('partials.message-bag')
 
-            <form method="post" action="{{ route('auth.login.process') }}">
-                @csrf
-                <div class="row justify-content-center">
-                    <div class="col-12 col-lg-6 mx-auto">
-                        <div class="order_review">
-                            <h4 class="mb-4">Login to Your Account</h4>
-                            @include('partials.message-bag')
-                            
-                            <div class="row">
-
-                                <!-- Email -->
-                                <div class="form-group col-md-12">
-                                    <label for="email">Email Address</label>
-                                    <input id="email" class="form-control" required type="email" name="email" value="{{ old('email') }}">
-                                </div>
-
-                                <!-- Password -->
-                                <div class="form-group col-md-12 position-relative">
-                                    <label for="password">Password</label>
-                                    <div class="input-group">
-                                        <input id="password" class="form-control" required type="password" name="password">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">
-                                                <i class="fas fa-eye toggle-password" style="cursor:pointer;"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Submission -->
-                                <div class="form-group mb-0 mt-2 col-md-12">
-                                    <button type="submit" class="btn btn-default btn-block">Login</button>
-                                </div>
-
-                                <!-- Login Link -->
-                                <div class="form-group mb-0 mt-2 col-md-12">
-                                    <p class="text-center">Don't have an account? <a href="{{ route('customer.account.create') }}">Create an Account</a></p>
-                                    <p class="text-center">Forgot password? <a href="{{ route('auth.password.request') }}">Reset here</a></p>
-                                </div>
-
+                        <div class="row">
+                            <!-- Full Name (read-only) -->
+                            <div class="form-group col-md-12">
+                                <label for="name">Full Name</label>
+                                <input
+                                    id="name"
+                                    class="form-control"
+                                    type="text"
+                                    name="name"
+                                    value="{{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) }}"
+                                    readonly
+                                >
                             </div>
+
+                            <!-- Email (read-only) -->
+                            <div class="form-group col-md-12">
+                                <label for="email">Email Address</label>
+                                <input
+                                    id="email"
+                                    class="form-control"
+                                    type="email"
+                                    name="email"
+                                    value="{{ $user->email }}"
+                                    readonly
+                                >
+                            </div>
+
+                            <!-- Phone (read-only) -->
+                            <div class="form-group col-md-12">
+                                <label for="phone_number">Phone Number</label>
+                                <input
+                                    id="phone_number"
+                                    class="form-control"
+                                    type="tel"
+                                    name="phone_number"
+                                    value="{{ $user->phone_number }}"
+                                    readonly
+                                >
+                            </div>
+
+                            <!-- Note to update -->
+                            <div class="form-group col-md-12">
+                                <small class="text-muted">
+                                    If these details are incorrect, please
+                                    <a href="{{ route('customer.edit.profile') }}">click here to update your details</a>.
+                                </small>
+                            </div>
+
+                            <!-- Confirm checkbox -->
+                            <div class="form-group col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirm_details" name="confirm" value="1" required>
+                                    <label class="form-check-label" for="confirm_details">
+                                        I confirm these details are correct
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="form-group col-md-12">
+                                <button type="submit" class="btn btn-default btn-block">Continue</button>
+                            </div>
+                        
                         </div>
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
-    <!-- END SECTION SHOP -->
+            </div>
+        </form>
 
- 
+    </div>
+</div>
+<!-- END SECTION SHOP -->
+
 @endsection

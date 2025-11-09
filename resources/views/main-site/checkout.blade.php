@@ -124,22 +124,57 @@
     
         <div class="row">
         	<div class="col-lg-6">
+
+
+<!-- Customer Info -->
+<div class="row">
+    <!-- Name -->
+    <div class="form-group col-md-12">
+        <label for="name" class="form-label">Full Name</label>
+        <input
+            id="name"
+            class="form-control"
+            type="text"
+            name="name"
+            value="{{ $user->first_name . ' ' . $user->last_name }}"
+            readonly
+        >
+    </div>
+
+    <!-- Email -->
+    <div class="form-group col-md-12">
+        <label for="email" class="form-label">Email Address</label>
+        <input
+            id="email"
+            class="form-control"
+            type="email"
+            name="email"
+            value="{{ $user->email }}"
+            readonly
+        >
+    </div>
+
+    <!-- Phone Number -->
+    <div class="form-group col-md-12">
+        <label for="phone_number" class="form-label">Phone Number</label>
+        <input
+            id="phone_number"
+            class="form-control"
+            type="tel"
+            name="phone_number"
+            value="{{ $user->phone_number }}"
+            readonly
+        >
+    </div>
+
+    <!-- Edit button -->
+    <div class="form-group col-md-12 mt-3">
+        <a href="" class="btn btn-default w-100">Edit My Details</a>
+    </div>
+</div>
+
                 <div  class="row">
 
-                    <!-- Name -->
-                    <div class="form-group col-md-12">
-                        <input class="form-control" required type="text" name="name" value="{{ old('name') }}" placeholder="Name *">
-                    </div>
-
-                    <!-- Email -->
-                    <div class="form-group col-md-12">
-                        <input class="form-control" required type="email" name="email" value="{{ old('email') }}" placeholder="Email Address *">
-                    </div>
-
-                    <!-- Phone Number -->
-                    <div class="form-group col-md-12">
-                        <input class="form-control" required type="tel" name="phone_number" value="{{ old('phone_number') }}" placeholder="Phone Number *">
-                    </div>
 
                     <!-- Address -->
                     <div class="form-group col-md-12">

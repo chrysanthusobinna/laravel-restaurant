@@ -22,17 +22,21 @@
             <a class="nav-link account_trigger" href="#"><i class="linearicons-user"></i></a>
         </li>
 
-        @auth
-            @if (Auth::user()->role === 'customer')
-                <li>
-                    <a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}">
-                        <i class="linearicons-cart"></i>
-                        <span class="cart_count" id="cart_count">{{ $customer_total_cart_items }}</span>
-                    </a>
-                </li>
-            @endif
-        @endauth
+        @php
+            $user = Auth::user();
+            $showCart = !$user || $user->role === 'customer'; // show for guest or customer
+        @endphp
+
+        @if ($showCart)
+            <li>
+                <a class="nav-link {{ Request::routeIs('cart') ? 'active' : '' }}" href="{{ route('customer.cart') }}">
+                    <i class="linearicons-cart"></i>
+                    <span class="cart_count" id="cart_count">{{ $customer_total_cart_items ?? 0 }}</span>
+                </a>
+            </li>
+        @endif
     </ul>
+
 
     @if($firstRestaurantPhoneNumber)  
     <div class="header_btn d-sm-block d-none">

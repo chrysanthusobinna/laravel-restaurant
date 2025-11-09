@@ -167,7 +167,7 @@
                                 type="button"  class="{{ $quantity==0 ? '':'d-none' }} btn btn-default rounded-0 add-to-cart"  >Add To Cart</button>
 
 
-                                <button onclick="window.location.href='{{ route('customer.checkout') }}'" type="button" class="{{ $quantity == 0 ? 'd-none' : '' }} btn checkout-btn btn-secondary rounded-0">Proceed To CheckOut</button>
+                                <button onclick="window.location.href='{{ route('customer.checkout.details') }}'" type="button" class="{{ $quantity == 0 ? 'd-none' : '' }} btn checkout-btn btn-secondary rounded-0">Proceed To CheckOut</button>
 
                         </div>
                     </div>
