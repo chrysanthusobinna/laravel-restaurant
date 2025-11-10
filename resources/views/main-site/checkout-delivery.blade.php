@@ -1,16 +1,14 @@
 @extends('layouts.main-site')
 
 @push('styles')
-    
-    
     <!-- Animation CSS -->
-    <link rel="stylesheet" href="/assets/css/animate.css">	
+    <link rel="stylesheet" href="/assets/css/animate.css">
     <!-- Latest Bootstrap min CSS -->
     <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css?family=Kaushan+Script&amp;display=swap" rel="stylesheet"> 
-    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:100,100i,300,300i,400,400i,600,600i,700,700i&amp;display=swap" rel="stylesheet"> 
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&amp;display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Kaushan+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:100,100i,300,300i,400,400i,600,600i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&display=swap" rel="stylesheet">
     <!-- Icon Font CSS -->
     <link rel="stylesheet" href="/assets/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/ionicons.min.css">
@@ -35,288 +33,226 @@
     <link rel="stylesheet" href="/assets/css/responsive.css">
     <link id="layoutstyle" rel="stylesheet" href="/assets/color/theme-red.css">
 
-
     <style>
-    /* Ensure page can scroll even if something left it locked */
-    html, body { overflow-y: auto !important; height: auto !important; }
-    .modal-backdrop, .offcanvas-backdrop { display: none !important; }
+      /* Ensure page can scroll even if something left it locked */
+      html, body { overflow-y: auto !important; height: auto !important; }
+      .section { padding-top: 30px; padding-bottom: 40px; }
 
-    /* Account for fixed header */
-    .section { padding-top: 30px; padding-bottom: 40px; }
+      /* Cards */
+      .choice-grid{ display:grid; gap:12px; }
+      .option-card{
+          border:1px solid #e9ecef; border-radius:12px; padding:14px 16px; cursor:pointer;
+          transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+          background:#fff; position:relative;
+      }
+      .option-card:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(0,0,0,.06) }
+      .option-card.active{
+          border-color:#ff3b53; background:linear-gradient(0deg, rgba(255,59,83,.07), rgba(255,59,83,.07)), #fff;
+          box-shadow:0 10px 26px rgba(255,59,83,.12);
+      }
+      .option-title{ font-weight:800; margin:0; }
+      .option-sub{ color:#6c757d; margin:2px 0 0 0; font-size:.925rem; }
+      .checkmark{
+          position:absolute; right:12px; top:12px; width:24px; height:24px; border-radius:50%;
+          border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff;
+          background:#fff;
+      }
+      .option-card.active .checkmark{ border-color:#ff3b53; background:#ff3b53; }
 
-    /* Cards */
-    .choice-grid{ display:grid; gap:12px; }
-    .option-card{
-        border:1px solid #e9ecef; border-radius:12px; padding:14px 16px; cursor:pointer;
-        transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
-        background:#fff; position:relative;
-    }
-    .option-card:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(0,0,0,.06) }
-    .option-card.active{
-        border-color:#ff3b53; background:linear-gradient(0deg, rgba(255,59,83,.07), rgba(255,59,83,.07)), #fff;
-        box-shadow:0 10px 26px rgba(255,59,83,.12);
-    }
-    .option-title{ font-weight:800; margin:0; }
-    .option-sub{ color:#6c757d; margin:2px 0 0 0; font-size:.925rem; }
-    .checkmark{
-        position:absolute; right:12px; top:12px; width:24px; height:24px; border-radius:50%;
-        border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff;
-        background:#fff;
-    }
-    .option-card.active .checkmark{ border-color:#ff3b53; background:#ff3b53; }
-
-    .addr-card { border:1px solid #eef0f3; border-radius:12px; padding:12px 14px; background:#fff; }
-    .addr-badge { font-size:.75rem; border:1px solid #eef0f3; border-radius:999px; padding:.15rem .5rem; background:#f8f9fb; }
-    .muted { color:#6c757d; }
+      .addr-card { border:1px solid #eef0f3; border-radius:12px; padding:12px 14px; background:#fff; }
+      .addr-badge { font-size:.75rem; border:1px solid #eef0f3; border-radius:999px; padding:.15rem .5rem; background:#f8f9fb; }
+      .muted { color:#6c757d; }
+      .fieldset { border:1px dashed #e9ecef; border-radius:12px; padding:14px; background:#fff; }
+      .fieldset legend { font-size:.95rem; font-weight:700; padding:0 6px; width:auto; }
     </style>
-
 @endpush
 
 @push('scripts')
- 
-    <!-- Latest jQuery --> 
-    <script src="/assets/js/jquery-1.12.4.min.js"></script> 
+    <!-- jQuery -->
+    <script src="/assets/js/jquery-1.12.4.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
 
-    <!-- Popper.js (required for Bootstrap 4 modals) -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
-            crossorigin="anonymous"></script>
-
-    <!-- Latest compiled and minified Bootstrap --> 
-    <script src="/assets/bootstrap/js/bootstrap.min.js"></script> 
-
-    <!-- owl-carousel min js  --> 
-    <script src="/assets/owlcarousel/js/owl.carousel.min.js"></script> 
-    <!-- magnific-popup min js  --> 
-    <script src="/assets/js/magnific-popup.min.js"></script> 
-    <!-- waypoints min js  --> 
-    <script src="/assets/js/waypoints.min.js"></script> 
-    <!-- parallax js  --> 
-    <script src="/assets/js/parallax.js"></script> 
-    <!-- countdown js  --> 
-    <script src="/assets/js/jquery.countdown.min.js"></script> 
-    <!-- jquery.countTo js  -->
+    <!-- Your other vendor scripts (unchanged) -->
+    <script src="/assets/owlcarousel/js/owl.carousel.min.js"></script>
+    <script src="/assets/js/magnific-popup.min.js"></script>
+    <script src="/assets/js/waypoints.min.js"></script>
+    <script src="/assets/js/parallax.js"></script>
+    <script src="/assets/js/jquery.countdown.min.js"></script>
     <script src="/assets/js/jquery.countTo.js"></script>
-    <!-- imagesloaded js --> 
     <script src="/assets/js/imagesloaded.pkgd.min.js"></script>
-    <!-- isotope min js --> 
     <script src="/assets/js/isotope.min.js"></script>
-    <!-- jquery.appear js  -->
     <script src="/assets/js/jquery.appear.js"></script>
-    <!-- jquery.dd.min js -->
     <script src="/assets/js/jquery.dd.min.js"></script>
-    <!-- slick js -->
     <script src="/assets/js/slick.min.js"></script>
-    <!-- DatePicker js -->
     <script src="/assets/js/datepicker.min.js"></script>
-    <!-- TimePicker js -->
     <script src="/assets/js/mdtimepicker.min.js"></script>
-    <!-- scripts js --> 
     <script src="/assets/js/scripts.js"></script>
 
- <script>
-  // FIX: unlock scroll if a plugin left it locked
-  (function () {
-    const unlock = () => {
-      document.documentElement.style.overflowY = 'auto';
-      document.body.style.overflowY = 'auto';
-      document.body.classList.remove('modal-open','offcanvas-open','overflow-hidden');
-      document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop')
-        .forEach(el => el.parentNode && el.parentNode.removeChild(el));
-    };
-    document.addEventListener('DOMContentLoaded', unlock);
-    window.addEventListener('load', unlock);
-  })();
+    <script>
+      // ---- Helpers for option cards ----
+      function activateCard(groupSelector, card) {
+        document.querySelectorAll(groupSelector+' .option-card').forEach(c=>{
+          c.classList.remove('active'); c.setAttribute('aria-pressed','false');
+          const cm = c.querySelector('.checkmark'); if (cm) cm.innerHTML='';
+        });
+        card.classList.add('active'); card.setAttribute('aria-pressed','true');
+        const cm = card.querySelector('.checkmark'); if (cm) cm.innerHTML='&#10003;';
+      }
 
-  // ---- Helpers for option cards ----
-  function activateCard(groupSelector, card) {
-    document.querySelectorAll(groupSelector+' .option-card').forEach(c=>{
-      c.classList.remove('active'); c.setAttribute('aria-pressed','false');
-      const cm = c.querySelector('.checkmark'); if (cm) cm.innerHTML='';
-    });
-    card.classList.add('active'); card.setAttribute('aria-pressed','true');
-    const cm = card.querySelector('.checkmark'); if (cm) cm.innerHTML='&#10003;';
-  }
+      document.addEventListener('DOMContentLoaded', function(){
+        // Delivery mode (saved/new)
+        const deliveryModeField = document.getElementById('deliveryModeField');
+        const hasSaved = document.querySelectorAll('.delivery-saved-item').length > 0;
+        const defaultDeliveryMode = deliveryModeField.value || (hasSaved ? 'saved' : 'new');
 
-  document.addEventListener('DOMContentLoaded', function(){
-    // Delivery mode (saved/new)
-    const deliveryModeField = document.getElementById('deliveryModeField');
-    const hasSaved = document.querySelectorAll('.delivery-saved-item').length > 0;
-    const defaultDeliveryMode = deliveryModeField.value || (hasSaved ? 'saved' : 'new');
+        const setDeliveryMode = (mode) => {
+          deliveryModeField.value = mode;
+          activateCard('#deliveryModeGroup', document.querySelector(`#deliveryModeGroup .option-card[data-value="${mode}"]`));
+          document.getElementById('delivery_saved_block').classList.toggle('d-none', mode !== 'saved');
+          document.getElementById('delivery_new_block').classList.toggle('d-none', mode !== 'new');
+        };
 
-    const setDeliveryMode = (mode) => {
-      deliveryModeField.value = mode;
-      activateCard('#deliveryModeGroup', document.querySelector(`#deliveryModeGroup .option-card[data-value="${mode}"]`));
-      document.getElementById('delivery_saved_block').classList.toggle('d-none', mode !== 'saved');
-      document.getElementById('delivery_new_block').classList.toggle('d-none', mode !== 'new');
-    };
+        document.querySelectorAll('#deliveryModeGroup .option-card').forEach(card=>{
+          card.addEventListener('click', ()=> setDeliveryMode(card.getAttribute('data-value')));
+          card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setDeliveryMode(card.getAttribute('data-value')); }});
+        });
+        setDeliveryMode(defaultDeliveryMode);
 
-    document.querySelectorAll('#deliveryModeGroup .option-card').forEach(card=>{
-      card.addEventListener('click', ()=> setDeliveryMode(card.getAttribute('data-value')));
-      card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setDeliveryMode(card.getAttribute('data-value')); }});
-    });
-    setDeliveryMode(defaultDeliveryMode);
+        // Billing same switch
+        const billingSame = document.getElementById('billing_same');
+        const billingBlock = document.getElementById('billing_block');
+        const toggleBilling = () => billingBlock.classList.toggle('d-none', billingSame.checked);
+        billingSame.addEventListener('change', toggleBilling);
+        toggleBilling();
 
-    // Billing same switch
-    const billingSame = document.getElementById('billing_same');
-    const billingBlock = document.getElementById('billing_block');
-    const toggleBilling = () => billingBlock.classList.toggle('d-none', billingSame.checked);
-    billingSame.addEventListener('change', toggleBilling);
-    toggleBilling();
+        // Billing mode (saved/new)
+        const billingModeField = document.getElementById('billingModeField');
+        const hasSavedBilling = document.querySelectorAll('.billing-saved-item').length > 0;
+        const defaultBillingMode = billingModeField.value || (hasSavedBilling ? 'saved' : 'new');
 
-    // Billing mode (saved/new)
-    const billingModeField = document.getElementById('billingModeField');
-    const hasSavedBilling = document.querySelectorAll('.billing-saved-item').length > 0;
-    const defaultBillingMode = billingModeField.value || (hasSavedBilling ? 'saved' : 'new');
+        const setBillingMode = (mode) => {
+          billingModeField.value = mode;
+          activateCard('#billingModeGroup', document.querySelector(`#billingModeGroup .option-card[data-value="${mode}"]`));
+          document.getElementById('billing_saved_block').classList.toggle('d-none', mode !== 'saved');
+          document.getElementById('billing_new_block').classList.toggle('d-none', mode !== 'new');
+        };
 
-    const setBillingMode = (mode) => {
-      billingModeField.value = mode;
-      activateCard('#billingModeGroup', document.querySelector(`#billingModeGroup .option-card[data-value="${mode}"]`));
-      document.getElementById('billing_saved_block').classList.toggle('d-none', mode !== 'saved');
-      document.getElementById('billing_new_block').classList.toggle('d-none', mode !== 'new');
-    };
+        document.querySelectorAll('#billingModeGroup .option-card').forEach(card=>{
+          card.addEventListener('click', ()=> setBillingMode(card.getAttribute('data-value')));
+          card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setBillingMode(card.getAttribute('data-value')); }});
+        });
+        setBillingMode(defaultBillingMode);
 
-    document.querySelectorAll('#billingModeGroup .option-card').forEach(card=>{
-      card.addEventListener('click', ()=> setBillingMode(card.getAttribute('data-value')));
-      card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setBillingMode(card.getAttribute('data-value')); }});
-    });
-    setBillingMode(defaultBillingMode);
+        // Toggle inline new-address fieldsets (no modals)
+        document.querySelectorAll('[data-toggle-inline]').forEach(btn=>{
+          btn.addEventListener('click', function(){
+            const target = document.querySelector(this.getAttribute('data-toggle-inline'));
+            if (!target) return;
+            target.classList.toggle('d-none');
 
-    // Modal trigger fallback (works on Bootstrap 4 or 5)
-    document.querySelectorAll('[data-bs-target]').forEach(btn => {
-      btn.addEventListener('click', function(e){
-        const id = this.getAttribute('data-bs-target');
-        const el = document.querySelector(id);
+            // Focus the search input if present
+            const si = target.querySelector('input[data-places-search]');
+            if (si) setTimeout(()=> si.focus(), 10);
+          });
+        });
+      });
+
+      // ---- Google Places helpers ----
+      function setupAutocomplete(inputId, mappingPrefix) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        // Prevent Enter from submitting the page while typing address
+        input.addEventListener('keydown', function(e){ if (e.key === 'Enter') e.preventDefault(); });
+
+        const ac = new google.maps.places.Autocomplete(input, {
+          types: ['geocode'],
+          fields: ['address_components', 'geometry', 'formatted_address']
+        });
+
+        ac.addListener('place_changed', function () {
+          const place = ac.getPlace();
+          if (!place || !place.address_components) return;
+
+          const comps = place.address_components;
+          const get = type => {
+            const c = comps.find(x => x.types.includes(type));
+            return c ? c.long_name : '';
+          };
+
+          const streetNumber = get('street_number');
+          const route = get('route');
+          const line1 = [streetNumber, route].filter(Boolean).join(' ');
+
+          document.getElementById(mappingPrefix + '_line1').value = line1;
+          // line2 left for Apt/Suite manual entry
+          document.getElementById(mappingPrefix + '_city').value   = get('locality') || get('postal_town') || get('sublocality') || '';
+          document.getElementById(mappingPrefix + '_state').value  = get('administrative_area_level_1');
+          document.getElementById(mappingPrefix + '_postal').value = get('postal_code');
+          document.getElementById(mappingPrefix + '_country').value= get('country');
+        });
+      }
+
+      // Safe guard to avoid inputs being forced disabled by other scripts
+      function protectPlacesInput(id){
+        const el = document.getElementById(id);
         if (!el) return;
-        if (window.bootstrap && window.bootstrap.Modal) {
-          new bootstrap.Modal(el).show();
-        } else if (window.jQuery && $(el).modal) {
-          $(el).modal('show');
+        function unlockOnce(){
+          if (el.disabled) el.disabled = false;
+          if (el.readOnly) el.readOnly = false;
+          if (el.classList.contains('disabled')) el.classList.remove('disabled');
+          if (el.hasAttribute('aria-disabled')) el.removeAttribute('aria-disabled');
         }
-      });
-    });
-
-    // Autofocus inputs when modal shows
-    const focusOnShow = (modalId, inputId) => {
-      const el = document.getElementById(modalId);
-      if (!el) return;
-      el.addEventListener('shown.bs.modal', () => {
-        const inp = document.getElementById(inputId);
-        inp && inp.focus();
-      });
-    };
-    focusOnShow('deliveryAddressModal', 'del_autocomplete');
-    focusOnShow('billingAddressModal', 'bill_autocomplete');
-
-    // Save Delivery modal → hidden fields + preview
-    document.getElementById('saveDeliveryModal').addEventListener('click', function(){
-      ['line1','line2','city','state','postal','country','formatted','lat','lng'].forEach(k=>{
-        document.getElementById('del_'+k).value = document.getElementById('del_m_'+k).value;
-      });
-      const line = document.getElementById('del_m_line1').value + (document.getElementById('del_m_line2').value ? ', '+document.getElementById('del_m_line2').value : '');
-      const meta = document.getElementById('del_m_city').value + ', ' + document.getElementById('del_m_state').value + ' ' + document.getElementById('del_m_postal').value + ', ' + document.getElementById('del_m_country').value;
-      document.getElementById('delivery_preview_line').textContent = line;
-      document.getElementById('delivery_preview_meta').textContent = meta;
-      document.getElementById('delivery_new_preview').classList.remove('d-none');
-
-      // Close (BS5 or BS4)
-      const m = document.getElementById('deliveryAddressModal');
-      if (window.bootstrap && window.bootstrap.Modal) {
-        bootstrap.Modal.getInstance(m)?.hide();
-      } else if (window.jQuery && $(m).modal) {
-        $(m).modal('hide');
+        let debounceTimer=null;
+        const obs = new MutationObserver(muts=>{
+          let needs=false;
+          for(const m of muts){
+            if(['disabled','readonly','aria-disabled','class'].includes(m.attributeName)){
+              if (el.disabled || el.readOnly || el.classList.contains('disabled') || el.hasAttribute('aria-disabled')) { needs = true; break; }
+            }
+          }
+          if(!needs) return;
+          obs.disconnect(); unlockOnce();
+          clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']}),120);
+        });
+        obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']});
+        ['focus','input','click'].forEach(evt=> el.addEventListener(evt, ()=>{ if(unlockOnce()){ obs.disconnect(); clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']}),120);} }, true));
       }
-    });
 
-    // Save Billing modal → hidden fields + preview
-    document.getElementById('saveBillingModal').addEventListener('click', function(){
-      ['line1','line2','city','state','postal','country','formatted','lat','lng'].forEach(k=>{
-        document.getElementById('bill_'+k).value = document.getElementById('bill_m_'+k).value;
-      });
-      const line = document.getElementById('bill_m_line1').value + (document.getElementById('bill_m_line2').value ? ', '+document.getElementById('bill_m_line2').value : '');
-      const meta = document.getElementById('bill_m_city').value + ', ' + document.getElementById('bill_m_state').value + ' ' + document.getElementById('bill_m_postal').value + ', ' + document.getElementById('bill_m_country').value;
-      document.getElementById('billing_preview_line').textContent = line;
-      document.getElementById('billing_preview_meta').textContent = meta;
-      document.getElementById('billing_new_preview').classList.remove('d-none');
+      function initCheckoutDeliveryLookups() {
+        // delivery new
+        setupAutocomplete('del_autocomplete', 'del');
+        protectPlacesInput('del_autocomplete');
 
-      const m = document.getElementById('billingAddressModal');
-      if (window.bootstrap && window.bootstrap.Modal) {
-        bootstrap.Modal.getInstance(m)?.hide();
-      } else if (window.jQuery && $(m).modal) {
-        $(m).modal('hide');
+        // billing new
+        setupAutocomplete('bill_autocomplete', 'bill');
+        protectPlacesInput('bill_autocomplete');
       }
-    });
-  });
+      window.initCheckoutDeliveryLookups = initCheckoutDeliveryLookups;
+    </script>
 
-  // ---- Google Places helpers ----
-  function setupAutocomplete(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    const ac = new google.maps.places.Autocomplete(input, {
-      types: ['geocode'],
-      fields: ['address_components', 'geometry', 'formatted_address']
-    });
-    ac.addListener('place_changed', function () {
-      const place = ac.getPlace();
-      if (!place || !place.address_components) return;
-
-      const comps = place.address_components;
-      const get = type => {
-        const c = comps.find(x => x.types.includes(type));
-        return c ? c.long_name : '';
-      };
-
-      const prefix = inputId.startsWith('del_') ? 'del' : 'bill';
-      const streetNumber = get('street_number');
-      const route = get('route');
-      const line1 = [streetNumber, route].filter(Boolean).join(' ');
-
-      document.getElementById(prefix + '_m_line1').value = line1;
-      document.getElementById(prefix + '_m_city').value = get('locality') || get('postal_town') || get('sublocality') || '';
-      document.getElementById(prefix + '_m_state').value = get('administrative_area_level_1');
-      document.getElementById(prefix + '_m_postal').value = get('postal_code');
-      document.getElementById(prefix + '_m_country').value = get('country');
-      document.getElementById(prefix + '_m_formatted').value = place.formatted_address;
-
-      if (place.geometry && place.geometry.location) {
-        document.getElementById(prefix + '_m_lat').value = place.geometry.location.lat();
-        document.getElementById(prefix + '_m_lng').value = place.geometry.location.lng();
-      }
-    });
-  }
-
-  function initCheckoutDeliveryLookups() {
-    setupAutocomplete('del_autocomplete');
-    setupAutocomplete('bill_autocomplete');
-  }
-  window.initCheckoutDeliveryLookups = initCheckoutDeliveryLookups;
-</script>
-
-{{-- Google Maps (Places) – replace with your key --}}
-<script src="https://maps.googleapis.com/maps/api/js?key=API_KEY&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
-
+    {{-- Google Maps (Places) – replace with your key --}}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
 @endpush
-
 
 @section('title', 'Create Account')
 
-
 @section('header')
-    <!-- START HEADER -->
-        <header class="header_wrap fixed-top header_with_topbar light_skin main_menu_uppercase">
-        <div class="container">
-            @include('partials.nav')
-        </div>
-    </header>
-    <!-- END HEADER -->
+  <!-- START HEADER -->
+  <header class="header_wrap fixed-top header_with_topbar light_skin main_menu_uppercase">
+    <div class="container">
+      @include('partials.nav')
+    </div>
+  </header>
+  <!-- END HEADER -->
 @endsection
-
 
 @section('content')
 <!-- START SECTION SHOP -->
 <div class="section">
   <div class="container">
-    <form method="POST" action=" {{ route('customer.checkout.delivery.post') }}">
+    <form method="POST" action="{{ route('customer.checkout.delivery.post') }}">
       @csrf
       <div class="row justify-content-center">
         <div class="col-12 col-lg-6 mx-auto">
@@ -342,7 +278,7 @@
               </div>
             </div>
 
-            {{-- Saved addresses --}}
+            {{-- ===== Saved addresses ===== --}}
             <div id="delivery_saved_block" class="mt-3 {{ $hasSaved ? '' : 'd-none' }}">
               @if($hasSaved)
                 <div class="list-group mb-3">
@@ -364,9 +300,8 @@
                         </div>
                       </div>
                       <div class="d-flex gap-2">
-                        <a href="" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <a href="" class="btn btn-sm btn-outline-danger">Delete</a>
-                      </div>
+                         <a href="#" class="btn btn-sm btn-outline-danger"> <i class="fas fa-times"></i></a>
+                       </div>
                     </label>
                   @endforeach
                 </div>
@@ -374,38 +309,52 @@
                 <div class="alert alert-info">You have no saved addresses yet.</div>
               @endif
 
-              <button type="button"
-                      class="btn btn-outline-primary"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deliveryAddressModal">
-                Search & Add New Address
-              </button>
+  
             </div>
 
-            {{-- New delivery address (via modal; shows preview) --}}
+            {{-- ===== New delivery address (inline) ===== --}}
             <div id="delivery_new_block" class="mt-3 {{ $hasSaved ? 'd-none' : '' }}">
-              <button type="button"
-                      class="btn btn-outline-primary"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deliveryAddressModal">
-                Search & Add New Address
-              </button>
+              <div id="delivery_new_inline" class="fieldset">
+                <legend>New Delivery Address</legend>
 
-              <div id="delivery_new_preview" class="addr-card mt-3 d-none">
-                <div class="fw-semibold" id="delivery_preview_line"></div>
-                <small class="muted" id="delivery_preview_meta"></small>
+                <label class="form-label">Search address</label>
+                <input type="text"
+                       id="del_autocomplete"
+                       class="form-control mb-3"
+                       placeholder="Start typing address..."
+                       data-places-search
+                       autocomplete="off" spellcheck="false">
+
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Street</label>
+                        <input id="del_line1" name="new[line1]" class="form-control" value="{{ old('new.line1') }}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Apt / Suite</label>
+                        <input id="del_line2" name="new[line2]" class="form-control" value="{{ old('new.line2') }}">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">City</label>
+                        <input id="del_city" name="new[city]" class="form-control" value="{{ old('new.city') }}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">State / Province</label>
+                        <input id="del_state" name="new[state]" class="form-control" value="{{ old('new.state') }}">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">Postal Code</label>
+                        <input id="del_postal" name="new[postal_code]" class="form-control" value="{{ old('new.postal_code') }}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Country</label>
+                        <input id="del_country" name="new[country]" class="form-control" value="{{ old('new.country') }}">
+                      </div>
+                    </div>
+
               </div>
-
-              {{-- Hidden fields for new delivery address --}}
-              <input type="hidden" name="new[line1]" id="del_line1" value="{{ old('new.line1') }}">
-              <input type="hidden" name="new[line2]" id="del_line2" value="{{ old('new.line2') }}">
-              <input type="hidden" name="new[city]" id="del_city" value="{{ old('new.city') }}">
-              <input type="hidden" name="new[state]" id="del_state" value="{{ old('new.state') }}">
-              <input type="hidden" name="new[postal_code]" id="del_postal" value="{{ old('new.postal_code') }}">
-              <input type="hidden" name="new[country]" id="del_country" value="{{ old('new.country') }}">
-              <input type="hidden" name="new[formatted_address]" id="del_formatted" value="{{ old('new.formatted_address') }}">
-              <input type="hidden" name="new[lat]" id="del_lat" value="{{ old('new.lat') }}">
-              <input type="hidden" name="new[lng]" id="del_lng" value="{{ old('new.lng') }}">
             </div>
 
             {{-- Billing same as delivery --}}
@@ -454,8 +403,7 @@
                           </div>
                         </div>
                         <div class="d-flex gap-2">
-                          <a href="" class="btn btn-sm btn-outline-secondary">Edit</a>
-                          <a href="" class="btn btn-sm btn-outline-danger">Delete</a>
+                          <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></a>
                         </div>
                       </label>
                     @endforeach
@@ -463,38 +411,51 @@
                 @else
                   <div class="alert alert-info">You have no saved addresses yet.</div>
                 @endif
-
-                <button type="button"
-                        class="btn btn-outline-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#billingAddressModal">
-                  Search & Add New Address
-                </button>
+ 
               </div>
 
               <div id="billing_new_block" class="mt-3 {{ $hasSaved ? 'd-none' : '' }}">
-                <button type="button"
-                        class="btn btn-outline-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#billingAddressModal">
-                  Search & Add New Address
-                </button>
+                <div id="billing_new_inline" class="fieldset">
+                  <legend>New Billing Address</legend>
 
-                <div id="billing_new_preview" class="addr-card mt-3 d-none">
-                  <div class="fw-semibold" id="billing_preview_line"></div>
-                  <small class="muted" id="billing_preview_meta"></small>
+                  <label class="form-label">Search address</label>
+                  <input type="text"
+                         id="bill_autocomplete"
+                         class="form-control mb-3"
+                         placeholder="Start typing address..."
+                         data-places-search
+                         autocomplete="off" spellcheck="false">
+
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label class="form-label">Street</label>
+                            <input id="bill_line1" name="billing[new][line1]" class="form-control" value="{{ old('billing.new.line1') }}">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Apt / Suite</label>
+                            <input id="bill_line2" name="billing[new][line2]" class="form-control" value="{{ old('billing.new.line2') }}">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">City</label>
+                            <input id="bill_city" name="billing[new][city]" class="form-control" value="{{ old('billing.new.city') }}">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">State / Province</label>
+                            <input id="bill_state" name="billing[new][state]" class="form-control" value="{{ old('billing.new.state') }}">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">Postal Code</label>
+                            <input id="bill_postal" name="billing[new][postal_code]" class="form-control" value="{{ old('billing.new.postal_code') }}">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Country</label>
+                            <input id="bill_country" name="billing[new][country]" class="form-control" value="{{ old('billing.new.country') }}">
+                          </div>
+                        </div>
+
                 </div>
-
-                {{-- Hidden fields for new billing address --}}
-                <input type="hidden" name="billing[new][line1]" id="bill_line1" value="{{ old('billing.new.line1') }}">
-                <input type="hidden" name="billing[new][line2]" id="bill_line2" value="{{ old('billing.new.line2') }}">
-                <input type="hidden" name="billing[new][city]" id="bill_city" value="{{ old('billing.new.city') }}">
-                <input type="hidden" name="billing[new][state]" id="bill_state" value="{{ old('billing.new.state') }}">
-                <input type="hidden" name="billing[new][postal_code]" id="bill_postal" value="{{ old('billing.new.postal_code') }}">
-                <input type="hidden" name="billing[new][country]" id="bill_country" value="{{ old('billing.new.country') }}">
-                <input type="hidden" name="billing[new][formatted_address]" id="bill_formatted" value="{{ old('billing.new.formatted_address') }}">
-                <input type="hidden" name="billing[new][lat]" id="bill_lat" value="{{ old('billing.new.lat') }}">
-                <input type="hidden" name="billing[new][lng]" id="bill_lng" value="{{ old('billing.new.lng') }}">
               </div>
             </div>
 
@@ -505,6 +466,7 @@
             <div class="form-group col-md-12 p-0">
               <a href="{{ route('customer.checkout.fulfilment') }}" class="btn btn-default btn-block">Back</a>
             </div>
+
           </div>
         </div>
       </div>
@@ -512,104 +474,4 @@
   </div>
 </div>
 <!-- END SECTION SHOP -->
-
-{{-- ===== Delivery Modal ===== --}}
-<div class="modal fade" id="deliveryAddressModal" tabindex="-1" aria-labelledby="deliveryAddressModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="deliveryAddressModalLabel">Search & Add Delivery Address</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label">Search address</label>
-        <input type="text" id="del_autocomplete" class="form-control mb-3" placeholder="Start typing address...">
-
-        <div class="row g-3">
-          <div class="col-md-8">
-            <label class="form-label">Street</label>
-            <input id="del_m_line1" class="form-control" value="">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Apt / Suite</label>
-            <input id="del_m_line2" class="form-control" value="">
-          </div>
-          <div class="col-md-5">
-            <label class="form-label">City</label>
-            <input id="del_m_city" class="form-control" value="">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">State / Province</label>
-            <input id="del_m_state" class="form-control" value="">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Postal Code</label>
-            <input id="del_m_postal" class="form-control" value="">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Country</label>
-            <input id="del_m_country" class="form-control" value="">
-          </div>
-          <input type="hidden" id="del_m_formatted">
-          <input type="hidden" id="del_m_lat">
-          <input type="hidden" id="del_m_lng">
-        </div>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="saveDeliveryModal" class="btn btn-primary">Use this address</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-{{-- ===== Billing Modal ===== --}}
-<div class="modal fade" id="billingAddressModal" tabindex="-1" aria-labelledby="billingAddressModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="billingAddressModalLabel">Search & Add Billing Address</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label">Search address</label>
-        <input type="text" id="bill_autocomplete" class="form-control mb-3" placeholder="Start typing address...">
-
-        <div class="row g-3">
-          <div class="col-md-8">
-            <label class="form-label">Street</label>
-            <input id="bill_m_line1" class="form-control" value="">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Apt / Suite</label>
-            <input id="bill_m_line2" class="form-control" value="">
-          </div>
-          <div class="col-md-5">
-            <label class="form-label">City</label>
-            <input id="bill_m_city" class="form-control" value="">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">State / Province</label>
-            <input id="bill_m_state" class="form-control" value="">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Postal Code</label>
-            <input id="bill_m_postal" class="form-control" value="">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Country</label>
-            <input id="bill_m_country" class="form-control" value="">
-          </div>
-          <input type="hidden" id="bill_m_formatted">
-          <input type="hidden" id="bill_m_lat">
-          <input type="hidden" id="bill_m_lng">
-        </div>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="saveBillingModal" class="btn btn-primary">Use this address</button>
-      </div>
-    </div>
-  </div>
-</div>
 @endsection
