@@ -17,6 +17,7 @@ use App\Http\Controllers\MainSite\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Customer\AddressController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
@@ -103,7 +104,6 @@ Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function 
     Route::get('/change-password', [CustomerController::class, 'showChangePasswordForm'])->name('customer.change.password');
     Route::post('/change-password', [CustomerController::class, 'changePassword'])->name('customer.change.password.post');
 
-    Route::get('checkout/', [CheckoutController::class, 'checkout'])->name('customer.checkout');
     Route::post('proccess-checkout/', [CheckoutController::class, 'proccessCheckout'])->name('customer.proccess.checkout');
 
 
@@ -116,6 +116,9 @@ Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function 
     Route::get('/checkout/fulfilment', [CheckoutController::class, 'fulfilment'])->name('customer.checkout.fulfilment');
     Route::post('/checkout/fulfilment', [CheckoutController::class, 'fulfilmentPost'])->name('customer.checkout.fulfilment.post');
 
+
+    Route::delete('/address/{id}', [AddressController::class, 'destroy'])->name('customer.address.destroy');
+
     // Step 3a: Pickup location
     Route::get('/checkout/pickup', [CheckoutController::class, 'pickup'])->name('customer.checkout.pickup');
     Route::post('/checkout/pickup', [CheckoutController::class, 'pickupPost'])->name('customer.checkout.pickup.post');
@@ -123,6 +126,9 @@ Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function 
     // Step 3b: Delivery address
     Route::get('/checkout/delivery', [CheckoutController::class, 'delivery'])->name('customer.checkout.delivery');
     Route::post('/checkout/delivery', [CheckoutController::class, 'deliveryPost'])->name('customer.checkout.delivery.post');
+
+    // step 4: order review
+    Route::get('/checkout/review', [CheckoutController::class, 'review'])->name('customer.checkout.review');
 
     // Step 4: Payment & review
     Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('customer.checkout.payment');

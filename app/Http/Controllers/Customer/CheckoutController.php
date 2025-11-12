@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Customer;
 
 use App\Models\Address;
 use Illuminate\Http\Request;
+use App\Models\OrderSettings;
+use App\Helpers\DistanceHelper;
+use Illuminate\Validation\Rule;
 use App\Models\RestaurantAddress;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
 use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
@@ -107,61 +111,172 @@ class CheckoutController extends Controller
         return view('main-site.checkout-delivery', compact('addresses'));
     }
 
-    public function deliveryPost(Request $request)
-    {
-        // Either saved address id OR new address fields (UI will handle; validate both)
-        $request->validate([
-            'mode'               => 'required|in:saved,new',
-            'saved_address_id'   => 'required_if:mode,saved|nullable|exists:addresses,id',
-            'new.line1'          => 'required_if:mode,new|nullable|string|max:255',
-            'new.city'           => 'required_if:mode,new|nullable|string|max:150',
-            'new.state'          => 'nullable|string|max:150',
-            'new.postal_code'    => 'required_if:mode,new|nullable|string|max:30',
-            'new.country'        => 'required_if:mode,new|nullable|string|max:150',
-            'billing_same'       => 'nullable|boolean',
+public function deliveryPost(Request $request)
+{
+    $user = Auth::user();
 
-            // If billing is different:
-            'billing.mode'               => 'nullable|in:saved,new',
-            'billing.saved_address_id'   => 'required_if:billing.mode,saved|nullable|exists:addresses,id',
-            'billing.new.line1'          => 'required_if:billing.mode,new|nullable|string|max:255',
-            'billing.new.city'           => 'required_if:billing.mode,new|nullable|string|max:150',
-            'billing.new.state'          => 'nullable|string|max:150',
-            'billing.new.postal_code'    => 'required_if:billing.mode,new|nullable|string|max:30',
-            'billing.new.country'        => 'required_if:billing.mode,new|nullable|string|max:150',
-        ]);
+    // ---- Base validation ----
+    $v = Validator::make($request->all(), [
+        'mode' => ['required', Rule::in(['saved','new'])],
 
-        $data = session(self::SESSION_KEY, []);
-        $data['delivery'] = [
-            'mode' => $request->mode,
-            'saved_address_id' => $request->saved_address_id,
-            'new' => $request->input('new'),
-            'billing_same' => (bool) $request->billing_same,
-            'billing' => $request->input('billing'),
-        ];
-        session([self::SESSION_KEY => $data]);
+        'saved_address_id' => [
+            'nullable','integer',
+            Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
+        ],
 
-        return redirect()->route('checkout.payment');
+        // Delivery "new" fields
+        'new.line1'       => ['nullable','string','max:255'],
+        'new.line2'       => ['nullable','string','max:255'],
+        'new.city'        => ['nullable','string','max:150'],
+        'new.state'       => ['nullable','string','max:150'],
+        'new.postal_code' => ['nullable','string','max:30'],
+        'new.country'     => ['nullable','string','max:150'],
+
+        'billing_same' => ['nullable','boolean'],
+
+        // Billing branch
+        'billing.mode' => ['nullable', Rule::in(['saved','new'])],
+        'billing.saved_address_id' => [
+            'nullable','integer',
+            Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
+        ],
+        'billing.new.line1'       => ['nullable','string','max:255'],
+        'billing.new.line2'       => ['nullable','string','max:255'],
+        'billing.new.city'        => ['nullable','string','max:150'],
+        'billing.new.state'       => ['nullable','string','max:150'],
+        'billing.new.postal_code' => ['nullable','string','max:30'],
+        'billing.new.country'     => ['nullable','string','max:150'],
+    ]);
+
+    // ---- Conditional validation ----
+    $v->sometimes('saved_address_id', 'required', fn($input) => $input->mode === 'saved');
+    foreach (['new.line1','new.city','new.postal_code','new.country'] as $f) {
+        $v->sometimes($f, 'required', fn($input) => $input->mode === 'new');
     }
 
+    $v->sometimes('billing.mode', 'required', fn($input) => !filter_var($input->billing_same, FILTER_VALIDATE_BOOL));
+    $v->sometimes('billing.saved_address_id', 'required', function($input){
+        return !filter_var($input->billing_same, FILTER_VALIDATE_BOOL)
+               && data_get($input, 'billing.mode') === 'saved';
+    });
+    foreach (['billing.new.line1','billing.new.city','billing.new.postal_code','billing.new.country'] as $f) {
+        $v->sometimes($f, 'required', function($input){
+            return !filter_var($input->billing_same, FILTER_VALIDATE_BOOL)
+                   && data_get($input, 'billing.mode') === 'new';
+        });
+    }
+
+    $v->validate();
+
+    // ---- Create or resolve addresses ----
+    $billingSame = $request->boolean('billing_same');
+    $deliveryAddressId = null;
+    $billingAddressId  = null;
+
+    // DELIVERY
+    if ($request->mode === 'saved') {
+        $deliveryAddressId = (int) $request->saved_address_id;
+    } else {
+        $delivery = $user->addresses()->create([
+            'label'       => 'delivery',
+            'street'      => trim(($request->input('new.line1') ?? '') . ($request->filled('new.line2') ? ', '.$request->input('new.line2') : '')),
+            'city'        => $request->input('new.city'),
+            'state'       => $request->input('new.state'),
+            'postal_code' => $request->input('new.postal_code'),
+            'country'     => $request->input('new.country'),
+            'is_default'  => false,
+        ]);
+        $deliveryAddressId = $delivery->id;
+    }
+
+    // BILLING
+    if ($billingSame) {
+        $billingAddressId = $deliveryAddressId;
+    } else {
+        $billingMode = data_get($request, 'billing.mode');
+        if ($billingMode === 'saved') {
+            $billingAddressId = (int) data_get($request, 'billing.saved_address_id');
+        } else {
+            $billing = $user->addresses()->create([
+                'label'       => 'billing',
+                'street'      => trim((data_get($request, 'billing.new.line1') ?? '') . (data_get($request, 'billing.new.line2') ? ', '.data_get($request, 'billing.new.line2') : '')),
+                'city'        => data_get($request, 'billing.new.city'),
+                'state'       => data_get($request, 'billing.new.state'),
+                'postal_code' => data_get($request, 'billing.new.postal_code'),
+                'country'     => data_get($request, 'billing.new.country'),
+                'is_default'  => false,
+            ]);
+            $billingAddressId = $billing->id;
+        }
+    }
+
+    // ---- Store only IDs in session ----
+    $data = session(self::SESSION_KEY, []);
+    $data['addresses'] = [
+        'delivery_address_id' => $deliveryAddressId,
+        'billing_address_id'  => $billingAddressId,
+        'billing_same'        => $billingSame,
+    ];
+    session([self::SESSION_KEY => $data]);
+
+    return redirect()->route('customer.checkout.review');
+}
+
+ 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public function checkout()
+    /** Step 4: Review */
+    public function review()
     {
-         $user = Auth::User();
+        $user = Auth::User();
+
+        $order_settings = OrderSettings::first();
+
+        if (!$order_settings) {
+            // OrderSettings has no data
+            return redirect()->route('home')->withErrors('No order settings found.');
+        }
+
+
+        $price_per_mile =   $order_settings->price_per_mile;
+        $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
+
+        $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
+
+        $delivery_address_id = session(self::SESSION_KEY)['addresses']['delivery_address_id'] ?? null;
+
+        $delivery_address   = $user->addresses()->find($delivery_address_id);
+        
+        $single_line_address = $delivery_address->full_address;
+
+
+        // Call the DistanceHelper to get the distance
+        $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);  
+
+ 
+        // Check if there's an error
+        if (isset($distanceData['error'])) {
+            return back()->withErrors($distanceData['error']);
+        }
+
+        $distance_in_miles= $distanceData['value_in_miles'];
+
+        if ($distance_in_miles > $distance_limit_in_miles) {
+            $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
+            return back()->withErrors($error_message)->withInput();
+        }
+        
+        $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
+
+
+     
+
+
+
+
+
+
+
         // Check if the session contains the cart key
         if (!session()->has($this->cartkey)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
@@ -180,9 +295,12 @@ class CheckoutController extends Controller
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
-        return view('main-site.checkout', compact('user', 'cart', 'subtotal'));
+        return view('main-site.checkout-review', compact('user', 'cart', 'delivery_fee', 'subtotal'));
     }
     
+
+
+
     public function proccessCheckout(CustomerDetailsRequest $request)
     {
         // Check if the session contains the cart key
@@ -191,9 +309,9 @@ class CheckoutController extends Controller
         }
 
 
-        $order_settings = OrderSettings::firstOrNew();
+        $order_settings = OrderSettings::first();
 
-        if (!$order_settings->exists) {
+        if (!$order_settings) {
             // OrderSettings has no data
             return redirect()->route('home')->withErrors('No order settings found.');
         }
@@ -236,7 +354,7 @@ class CheckoutController extends Controller
 
     }
     
-        /** Helpers */
+    /** Helpers */
     private function guardStep(string $key, $value = null): void
     {
         $data = session(self::SESSION_KEY, []);
@@ -247,5 +365,7 @@ class CheckoutController extends Controller
             redirect()->route('customer.checkout.fulfilment')->send();
         }
     }
+
+
 
 }

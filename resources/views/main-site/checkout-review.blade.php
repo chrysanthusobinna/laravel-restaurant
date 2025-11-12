@@ -237,6 +237,14 @@
                                     <th>Cart Subtotal</th>
                                     <td class="product-subtotal">{!! $site_settings->currency_symbol !!}{{ number_format($subtotal, 2) }}</td>
                                 </tr>
+                                <tr>
+                                    <th>Delivery Fee</th>
+                                    <td class="product-subtotal">{!! $site_settings->currency_symbol !!}{{ number_format($delivery_fee, 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Order Total</th>
+                                    <td class="product-subtotal"><strong>{!! $site_settings->currency_symbol !!}{{ number_format($subtotal + $delivery_fee, 2) }}</strong></td>
+                                </tr>
                             </tfoot>
                         </table>
                     </div>

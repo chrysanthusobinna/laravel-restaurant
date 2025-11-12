@@ -234,6 +234,54 @@
 
     {{-- Google Maps (Places) – replace with your key --}}
     <script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
+
+
+    <script>
+    let addressToDeleteId = null;
+    let addressDeleteButton = null;
+
+    // Step 1: When user clicks delete
+    $(document).on('click', '.delete-address-btn', function (e) {
+        e.preventDefault();
+
+        addressToDeleteId = $(this).data('id');
+        addressDeleteButton = $(this);
+        const addressText = $(this).data('address') || '';
+
+        $('#addressToDelete').text(addressText);
+        $('#confirmDeleteModal').modal('show');
+    });
+
+    // Step 2: When user confirms deletion in modal
+    $('#confirmDeleteBtn').on('click', function () {
+        if (!addressToDeleteId) return;
+
+        const button = addressDeleteButton;
+        $(this).prop('disabled', true).text('Deleting...');
+
+        $.ajax({
+            url: `/customer/address/${addressToDeleteId}`,
+            type: 'DELETE',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function (response) {
+                $('#confirmDeleteModal').modal('hide');
+                $('#confirmDeleteBtn').prop('disabled', false).html('<i class="fas fa-trash-alt me-1"></i> Delete');
+
+                if (response.success) {
+                    button.closest('label').fadeOut(300, function() { $(this).remove(); });
+                } else {
+                    alert(response.message || 'Failed to delete address.');
+                }
+            },
+            error: function () {
+                $('#confirmDeleteModal').modal('hide');
+                $('#confirmDeleteBtn').prop('disabled', false).html('<i class="fas fa-trash-alt me-1"></i> Delete');
+                alert('Error deleting address. Please try again.');
+            }
+        });
+    });
+    </script>
+
 @endpush
 
 @section('title', 'Create Account')
@@ -300,8 +348,14 @@
                         </div>
                       </div>
                       <div class="d-flex gap-2">
-                         <a href="#" class="btn btn-sm btn-outline-danger"> <i class="fas fa-times"></i></a>
-                       </div>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-address-btn"
+                                data-id="{{ $addr->id }}"
+                                data-address="{{ $addr->street ?? '' }}, {{ $addr->city ?? '' }}">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+
                     </label>
                   @endforeach
                 </div>
@@ -403,7 +457,12 @@
                           </div>
                         </div>
                         <div class="d-flex gap-2">
-                          <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></a>
+                                                  <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-address-btn"
+                                data-id="{{ $addr->id }}"
+                                data-address="{{ $addr->street ?? '' }}, {{ $addr->city ?? '' }}">
+                          <i class="fas fa-times"></i>
+                        </button>
                         </div>
                       </label>
                     @endforeach
@@ -474,4 +533,35 @@
   </div>
 </div>
 <!-- END SECTION SHOP -->
+
+
+
+
+
+
+
+
+
+<!-- Delete Address Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-1">Are you sure you want to delete this address?</p>
+        <small class="text-muted" id="addressToDelete"></small>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+          <i class="fas fa-trash-alt me-1"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
