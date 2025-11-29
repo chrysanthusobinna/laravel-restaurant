@@ -91,73 +91,110 @@
     </header>
     <!-- END HEADER -->
 @endsection
- 
-
 
 @section('content')
 
- 
+<!-- START SECTION BREADCRUMB -->
+<div class="breadcrumb_section background_bg overlay_bg_50 page_title_light" data-img-src="/assets/images/checkout_bg.jpg">
+    <div class="container"><!-- STRART CONTAINER -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title">
+                    <h1>Checkout</h1>
+                </div>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item active">Checkout</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- END CONTAINER-->
+</div>
+<!-- END SECTION BREADCRUMB -->
+
+<form method="post" action="{{ route('customer.proccess.checkout') }}">
+    @csrf <!-- CSRF Token for Security -->
 
     <!-- START SECTION SHOP -->
     <div class="section">
         <div class="container">
-        
+            @include('partials.message-bag')
 
-            <form method="post" action="{{ route('customer.proccess.checkout') }}">
-            @csrf  
-                <div class="row justify-content-center">
-                    <div class="col-12 col-lg-6 mx-auto">
-                    <div class="order_review">
-                        <div class="heading_s1">
-                            <h4>Your Orders</h4>
+            <div class="row">
+                <div class="col-lg-6">
+
+                    <!-- Customer Info -->
+                    <div class="row">
+                        <!-- Name -->
+                        <div class="form-group col-md-12">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input
+                                id="name"
+                                class="form-control"
+                                type="text"
+                                name="name"
+                                value="{{ $user->first_name . ' ' . $user->last_name }}"
+                                readonly
+                            >
                         </div>
 
-                        <div class="table-responsive order_table">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($cart as $item)
-                                        <tr>
-                                            <td>{{ $item['name'] }} <span class="product-qty">x {{ $item['quantity'] }}</span></td>
-                                            <td>{!! $site_settings->currency_symbol !!}{{ number_format($item['price'] * $item['quantity'], 2) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>Cart Subtotal</th>
-                                        <td class="product-subtotal">{!! $site_settings->currency_symbol !!}{{ number_format($subtotal, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Delivery Fee</th>
-                                        <td class="product-subtotal">{!! $site_settings->currency_symbol !!}{{ number_format($delivery_fee, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Order Total</th>
-                                        <td class="product-subtotal"><strong>{!! $site_settings->currency_symbol !!}{{ number_format($subtotal + $delivery_fee, 2) }}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                        <!-- Email -->
+                        <div class="form-group col-md-12">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input
+                                id="email"
+                                class="form-control"
+                                type="email"
+                                name="email"
+                                value="{{ $user->email }}"
+                                readonly
+                            >
                         </div>
 
-                        <div class="payment_method">
-                            <div class="heading_s1">
-                                <h4>Payment</h4>
-                            </div>
-                            <div class="payment_option">
-                                <div class="custome-radio">
-                                    <input class="form-check-input" type="radio" name="payment_option" id="exampleRadios5" value="option5" checked="">
-                                    <label class="form-check-label" for="exampleRadios5">Stripe Payment</label>
-                                </div>
-                            </div>
+                        <!-- Phone Number -->
+                        <div class="form-group col-md-12">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input
+                                id="phone_number"
+                                class="form-control"
+                                type="tel"
+                                name="phone_number"
+                                value="{{ $user->phone_number }}"
+                                readonly
+                            >
                         </div>
-                    <div class="row mb-3">
- 
+
+                        <!-- Edit button -->
+                        <div class="form-group col-md-12 mt-3">
+                            <a href="" class="btn btn-default w-100">Edit My Details</a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Address -->
+                        <div class="form-group col-md-12">
+                            <input class="form-control" required type="text" name="address" value="{{ old('address') }}" placeholder="Address *">
+                        </div>
+
+                        <!-- City -->
+                        <div class="form-group col-md-6">
+                            <input class="form-control" required type="text" name="city" value="{{ old('city') }}" placeholder="City / Town *">
+                        </div>
+
+                        <!-- State -->
+                        <div class="form-group col-md-6">
+                            <input class="form-control" required type="text" name="state" value="{{ old('state') }}" placeholder="State *">
+                        </div>
+
+                        <!-- County (Optional) -->
+                        <div class="form-group col-md-6">
+                            <input class="form-control" type="text" name="county" value="{{ old('county') }}" placeholder="County (Optional)">
+                        </div>
+
+                        <!-- Postcode -->
+                        <div class="form-group col-md-6">
+                            <input class="form-control" required type="text" name="postcode" value="{{ old('postcode') }}" placeholder="Postcode / ZIP *">
+                        </div>
 
                         <!-- Additional Information -->
                         <div class="form-group mb-0 mt-2 col-md-12">
@@ -167,22 +204,15 @@
                             <textarea rows="4" class="form-control" name="additional_info" placeholder="e.g., allergies or any other information you want to provide">{{ old('additional_info') }}</textarea>
                         </div> 
                     </div>
-                        <div class="row">
-                            <div class="col-6 text-start">
-                                <button onclick="window.history.back()" type="button" class="btn btn-secondary btn-block">Back</button>
-                            </div>
-                            <div class="col-6 text-end">
-                                <button type="submit" class="btn btn-default btn-block">Place Order</button>
-                            </div>
-                        </div>
-
-                    </div>
-                    </div>
                 </div>
-            </form>
+
+                <div class="col-lg-6">
+
+                </div>
+            </div>
         </div>
     </div>
     <!-- END SECTION SHOP -->
+</form>
 
- 
 @endsection

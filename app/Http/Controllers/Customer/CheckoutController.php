@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Models\Order;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
@@ -228,132 +229,175 @@ public function deliveryPost(Request $request)
     /** Step 4: Review */
     public function review()
     {
-        $user = Auth::User();
+        $user = Auth::user();
 
         $order_settings = OrderSettings::first();
 
         if (!$order_settings) {
-            // OrderSettings has no data
             return redirect()->route('home')->withErrors('No order settings found.');
         }
 
-
-        $price_per_mile =   $order_settings->price_per_mile;
+        $price_per_mile          = $order_settings->price_per_mile;
         $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
 
         $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
 
-        $delivery_address_id = session(self::SESSION_KEY)['addresses']['delivery_address_id'] ?? null;
+        $sessionData = session(self::SESSION_KEY, []);
+        $delivery_address_id = $sessionData['addresses']['delivery_address_id'] ?? null;
 
-        $delivery_address   = $user->addresses()->find($delivery_address_id);
-        
+        if (!$delivery_address_id) {
+            return redirect()->route('customer.checkout.delivery')
+                ->withErrors('Please choose a delivery address first.');
+        }
+
+        $delivery_address = $user->addresses()->find($delivery_address_id);
+
+        if (!$delivery_address) {
+            return redirect()->route('customer.checkout.delivery')
+                ->withErrors('Selected delivery address was not found.');
+        }
+
         $single_line_address = $delivery_address->full_address;
 
+        // Distance
+        $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);
 
-        // Call the DistanceHelper to get the distance
-        $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);  
-
- 
-        // Check if there's an error
         if (isset($distanceData['error'])) {
             return back()->withErrors($distanceData['error']);
         }
 
-        $distance_in_miles= $distanceData['value_in_miles'];
+        $distance_in_miles = $distanceData['value_in_miles'];
 
         if ($distance_in_miles > $distance_limit_in_miles) {
             $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
             return back()->withErrors($error_message)->withInput();
         }
-        
+
+        // Delivery fee
         $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
 
+        // 🔹 Save delivery pricing into the same checkout session
+        $sessionData['delivery'] = [
+            'distance_miles' => $distance_in_miles,
+            'delivery_fee'   => $delivery_fee,
+            'price_per_mile' => $price_per_mile,
+        ];
+        session([self::SESSION_KEY => $sessionData]);
 
-     
-
-
-
-
-
-
-
-        // Check if the session contains the cart key
+        // Cart checks
         if (!session()->has($this->cartkey)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
-    
-        // Fetch the cart from the session
+
         $cart = session()->get($this->cartkey, []);
-    
-        // Check if the cart is empty
+
         if (empty($cart)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
-    
-        // Calculate the subtotal
-        $subtotal = array_reduce($cart, function($carry, $item) {
+
+        $subtotal = array_reduce($cart, function ($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
         return view('main-site.checkout-review', compact('user', 'cart', 'delivery_fee', 'subtotal'));
     }
+
     
 
 
-
-    public function proccessCheckout(CustomerDetailsRequest $request)
+    public function proccessCheckout(request $request)
     {
-        // Check if the session contains the cart key
+        $user = Auth::user();
+
+        // 1) Ensure there is still a cart
         if (!session()->has($this->cartkey)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
+        $cart = session()->get($this->cartkey, []);
 
-        $order_settings = OrderSettings::first();
-
-        if (!$order_settings) {
-            // OrderSettings has no data
-            return redirect()->route('home')->withErrors('No order settings found.');
-        }
-        $price_per_mile =   $order_settings->price_per_mile;
-        $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
-
-        $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
-        $delivery_address   = $request->address . ' ' . $request->city . ' ' . $request->state . ' ' . $request->postcode;
-
-        // Call the DistanceHelper to get the distance
-        $distanceData = DistanceHelper::getDistance($restaurant_address, $delivery_address);
-
-        // Check if there's an error
-        if (isset($distanceData['error'])) {
-            return back()->withErrors($distanceData['error']);
+        if (empty($cart)) {
+            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
-        $distance_in_miles= $distanceData['value_in_miles'];
+        // 2) Pull checkout session data
+        $checkout = session(self::SESSION_KEY, []);
 
-        if ($distance_in_miles > $distance_limit_in_miles) {
-            $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
-            return back()->withErrors($error_message)->withInput();
-        }
-        
-        $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
+        $fulfilment       = $checkout['fulfilment']      ?? 'delivery'; // 'pickup' or 'delivery'
+        $addresses        = $checkout['addresses']       ?? [];
+        $deliverySession  = $checkout['delivery']        ?? [];
 
-        // Store delivery_fee , price_per_mile and distance_in_miles in  session 
-        session()->put('delivery_details', [ 'delivery_fee' => $delivery_fee, 'distance_in_miles' => $distance_in_miles,  'price_per_mile' => $price_per_mile, ]);
+        $deliveryAddressId = $addresses['delivery_address_id'] ?? null;
+        $billingAddressId  = $addresses['billing_address_id']  ?? null;
 
-        // Store the validated data in the session
-        Session::put('customer_details', $request->validated());
+        $delivery_fee    = $deliverySession['delivery_fee']    ?? 0;
+        $distance_miles  = $deliverySession['distance_miles']  ?? null;
+        $price_per_mile  = $deliverySession['price_per_mile']  ?? null;
 
-        // Generate a unique 7-digit order number and store in session
+        // 3) Recalculate subtotal
+        $subtotal = array_reduce($cart, function ($carry, $item) {
+            return $carry + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        $total = $subtotal + $delivery_fee;
+
+        // 4) Generate order number
         $order_no = $this->generateOrderNumber();
-        session(['order_no' => $order_no]);
 
+        // 5) Create order for logged-in customer
+        // Make sure you have in User model: public function orders() { return $this->hasMany(Order::class, 'user_id'); }
+        $order = Order::create([
+            'user_id'            => $user->id,
+            'order_no'           => $order_no,
+            'order_type'         => 'online',          // e.g. 'pickup' or 'delivery'  'online'
+            'created_by_user_id' => null,
+            'updated_by_user_id' => null,
+            'total_price'        => $total,
+            'status'             => 'pending',
+            'status_online_pay'  => 'unpaid',
+            'session_id'         => null,
+            'payment_method'     => 'STRIPE',             // or from form input if you have one
+            'additional_info'    => $request->input('additional_info'),                 // or $request->input('additional_info')
+            'delivery_fee'       => $delivery_fee,
+            'delivery_distance'  => $distance_miles,
+            'price_per_mile'     => $price_per_mile,
+            'delivery_address_id'=> $deliveryAddressId,
+            'billing_address_id' => $billingAddressId,
+        ]);
 
-        // redirect to payment route
-        return redirect()->route('payment');
-
-    }
+        // 6) Attach cart items to the order (adapt fields to your OrderItem schema)
+     
+        foreach ($cart as $item) {
+            $order->orderItems()->create([
+                'menu_name' => $item['name'],           
+                'quantity'  => $item['quantity'] ?? '',  
+                'subtotal'  => $item['price'] * ($item['quantity'] ?? 1),  
+            ]);
+        }
     
+
+
+       
+        // // Create order items using the relationship
+        // foreach ($cart_items as $cart_item) {
+        //     $order->orderItems()->create([
+        //         'menu_name' => $cart_item['name'],  
+        //         'quantity' => $cart_item['quantity'],
+        //         'subtotal' => $cart_item['price'] * $cart_item['quantity'],
+        //     ]);
+        // }
+       
+
+
+        // 7) Optionally clear checkout session (keep cart until payment succeeds, up to you)
+        // session()->forget(self::SESSION_KEY);
+
+        // 8) Redirect to payment route with the order number (or ID)
+        // Adjust parameter name to match your route definition.
+        return redirect()->route('menu')->with('success', 'Order placed successfully. Your order number is ' . $order_no);
+        
+    }
+
     /** Helpers */
     private function guardStep(string $key, $value = null): void
     {

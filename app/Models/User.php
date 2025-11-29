@@ -54,4 +54,14 @@ class User extends Authenticatable implements CanResetPassword
         return $this->hasMany(Address::class);
     }
 
+    public function customerOrders()
+    {
+        if ($this->role !== 'customer') {
+            return collect(); // return empty collection
+        }
+
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+
 }
