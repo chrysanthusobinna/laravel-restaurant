@@ -34,149 +34,149 @@ class PaymentController extends Controller
     
 
 
-     public function payment()
-    {
+    //  public function payment()
+    // {
 
-        //run all required session checks
-        $this->runAllChecks();
+    //     //run all required session checks
+    //     $this->runAllChecks();
 
-        // Retrieve customer details from the session
-        $customerDetails = Session::get('customer_details', []);
+    //     // Retrieve customer details from the session
+    //     $customerDetails = Session::get('customer_details', []);
 
-        // Retrieve cart items from session
-        $cart_items = session()->get('customer', []);
+    //     // Retrieve cart items from session
+    //     $cart_items = session()->get('customer', []);
 
     
-        // Retrieve Delivery Details from the session
-        $deliveryDetails = session('delivery_details');
-        $delivery_fee = $deliveryDetails['delivery_fee'];
-        $delivery_distance = $deliveryDetails['distance_in_miles'];
-        $price_per_mile= $deliveryDetails['price_per_mile'];
+    //     // Retrieve Delivery Details from the session
+    //     $deliveryDetails = session('delivery_details');
+    //     $delivery_fee = $deliveryDetails['delivery_fee'];
+    //     $delivery_distance = $deliveryDetails['distance_in_miles'];
+    //     $price_per_mile= $deliveryDetails['price_per_mile'];
               
               
-        // Retrieve order no. from session
-        $order_no = session('order_no');
+    //     // Retrieve order no. from session
+    //     $order_no = session('order_no');
 
  
-        if (Order::where('order_no', $order_no)->exists()) {
-            return redirect() ->route('menu')->withErrors('The order number already exists. Please try again.');
-        }
+    //     if (Order::where('order_no', $order_no)->exists()) {
+    //         return redirect() ->route('menu')->withErrors('The order number already exists. Please try again.');
+    //     }
 
-        //Get Site Settings
-        $site_settings  =   SiteSetting::latest()->first();
-        $currency_code  =   strtolower($site_settings->currency_code);
+    //     //Get Site Settings
+    //     $site_settings  =   SiteSetting::latest()->first();
+    //     $currency_code  =   strtolower($site_settings->currency_code);
 
 
-        // Initialize the line_items array
-        $line_items = [];
+    //     // Initialize the line_items array
+    //     $line_items = [];
 
-        // Loop through the cart items to populate line_items
-        foreach ($cart_items as $cart_item) {
-            $line_items[] = [
-                'price_data' => [
-                    'currency' => $currency_code,
-                    'product_data' => [
-                        'name' => $cart_item['name'],
-                    ],
-                    'unit_amount' => $cart_item['price'] * 100, // Convert price to cents
-                ],
-                'quantity' => $cart_item['quantity'],
-            ];
-        }
+    //     // Loop through the cart items to populate line_items
+    //     foreach ($cart_items as $cart_item) {
+    //         $line_items[] = [
+    //             'price_data' => [
+    //                 'currency' => $currency_code,
+    //                 'product_data' => [
+    //                     'name' => $cart_item['name'],
+    //                 ],
+    //                 'unit_amount' => $cart_item['price'] * 100, // Convert price to cents
+    //             ],
+    //             'quantity' => $cart_item['quantity'],
+    //         ];
+    //     }
  
 
-        // Add delivery fee in the line_items
-        if (isset($delivery_fee)) {
-            $line_items[] = [
-                'price_data' => [
-                    'currency' => $currency_code,
-                    'product_data' => [
-                        'name' => 'Delivery Fee',
-                    ],
-                    'unit_amount' => $delivery_fee * 100, // Convert to cents
-                ],
-                'quantity' => 1, 
-            ];
-        }
+    //     // Add delivery fee in the line_items
+    //     if (isset($delivery_fee)) {
+    //         $line_items[] = [
+    //             'price_data' => [
+    //                 'currency' => $currency_code,
+    //                 'product_data' => [
+    //                     'name' => 'Delivery Fee',
+    //                 ],
+    //                 'unit_amount' => $delivery_fee * 100, // Convert to cents
+    //             ],
+    //             'quantity' => 1, 
+    //         ];
+    //     }
 
-        // Set Stripe secret key
-        Stripe::setApiKey(config('services.stripe.secret'));
+    //     // Set Stripe secret key
+    //     Stripe::setApiKey(config('services.stripe.secret'));
 
-        try {
+    //     try {
  
-            // Create a Stripe Checkout session
-            $checkout_session = \Stripe\Checkout\Session::create([
-                'line_items' => $line_items,
-                'mode' => 'payment',
-                'customer_email' => $customerDetails['email'],
-                'metadata' => [
-                    'order_no' => $order_no,
-                    'name' => $customerDetails['name'],
-                    'phone' => $customerDetails['phone_number'],
-                    'address' => $customerDetails['address'],
-                    'city' => $customerDetails['city'],
-                    'state' => $customerDetails['state'],
-                    'postcode' => $customerDetails['postcode'],
-                ],
+    //         // Create a Stripe Checkout session
+    //         $checkout_session = \Stripe\Checkout\Session::create([
+    //             'line_items' => $line_items,
+    //             'mode' => 'payment',
+    //             'customer_email' => $customerDetails['email'],
+    //             'metadata' => [
+    //                 'order_no' => $order_no,
+    //                 'name' => $customerDetails['name'],
+    //                 'phone' => $customerDetails['phone_number'],
+    //                 'address' => $customerDetails['address'],
+    //                 'city' => $customerDetails['city'],
+    //                 'state' => $customerDetails['state'],
+    //                 'postcode' => $customerDetails['postcode'],
+    //             ],
 
-                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('payment.cancel'),
-            ]);
+    //             'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+    //             'cancel_url' => route('payment.cancel'),
+    //         ]);
 
-            //PREPARE TO CREATE ORDER
+    //         //PREPARE TO CREATE ORDER
  
-            $totalPrice = array_reduce($cart_items, function ($carry, $item) {
-                return $carry + ($item['price'] * $item['quantity']);
-            }, 0);
+    //         $totalPrice = array_reduce($cart_items, function ($carry, $item) {
+    //             return $carry + ($item['price'] * $item['quantity']);
+    //         }, 0);
 
 
-            // Create the customer
-            $customer = Customer::create([
-                'name' =>  $customerDetails['name'],
-                'email' =>  $customerDetails['email'] ,
-                'phone_number' => $customerDetails['phone_number'],
-                'address' => $customerDetails['address'] . " ".$customerDetails['city']." ".$customerDetails['state']." ".$customerDetails['postcode'],
-            ]);
+    //         // Create the customer
+    //         $customer = Customer::create([
+    //             'name' =>  $customerDetails['name'],
+    //             'email' =>  $customerDetails['email'] ,
+    //             'phone_number' => $customerDetails['phone_number'],
+    //             'address' => $customerDetails['address'] . " ".$customerDetails['city']." ".$customerDetails['state']." ".$customerDetails['postcode'],
+    //         ]);
    
-            // Create a new order
-            $order = Order::create([
-                'customer_id' => $customer->id,
-                'order_no' => $order_no,
-                'order_type' => 'online',
-                'created_by_user_id' => null,
-                'updated_by_user_id' => null,
-                'total_price' => $totalPrice,
-                'status' => 'pending',
-                'status_online_pay' => 'unpaid',
-                'session_id' => $checkout_session->id,
-                'payment_method' => "STRIPE",
-                'additional_info' => $customerDetails['additional_info'],
-                'delivery_fee' => $delivery_fee,
-                'delivery_distance' => $delivery_distance,
-                'price_per_mile' => $price_per_mile,
+    //         // Create a new order
+    //         $order = Order::create([
+    //             'customer_id' => $customer->id,
+    //             'order_no' => $order_no,
+    //             'order_type' => 'online',
+    //             'created_by_user_id' => null,
+    //             'updated_by_user_id' => null,
+    //             'total_price' => $totalPrice,
+    //             'status' => 'pending',
+    //             'status_online_pay' => 'unpaid',
+    //             'session_id' => $checkout_session->id,
+    //             'payment_method' => "STRIPE",
+    //             'additional_info' => $customerDetails['additional_info'],
+    //             'delivery_fee' => $delivery_fee,
+    //             'delivery_distance' => $delivery_distance,
+    //             'price_per_mile' => $price_per_mile,
                 
-            ]);
+    //         ]);
 
-            if ($order) {
-                // Create order items using the relationship
-                foreach ($cart_items as $cart_item) {
-                    $order->orderItems()->create([
-                        'menu_name' => $cart_item['name'],  
-                        'quantity' => $cart_item['quantity'],
-                        'subtotal' => $cart_item['price'] * $cart_item['quantity'],
-                    ]);
-                }
-            }
+    //         if ($order) {
+    //             // Create order items using the relationship
+    //             foreach ($cart_items as $cart_item) {
+    //                 $order->orderItems()->create([
+    //                     'menu_name' => $cart_item['name'],  
+    //                     'quantity' => $cart_item['quantity'],
+    //                     'subtotal' => $cart_item['price'] * $cart_item['quantity'],
+    //                 ]);
+    //             }
+    //         }
             
 
-            // Redirect the user to the Stripe Checkout session URL
-            return redirect($checkout_session->url);
+    //         // Redirect the user to the Stripe Checkout session URL
+    //         return redirect($checkout_session->url);
 
-        } catch (Exception $e) {
-            $error_msg  =  $e->getMessage();
-            return redirect()->route('menu')->withErrors($error_msg);            
-        }
-    }
+    //     } catch (Exception $e) {
+    //         $error_msg  =  $e->getMessage();
+    //         return redirect()->route('menu')->withErrors($error_msg);            
+    //     }
+    // }
 
     public function paymentCancel()
     {
@@ -195,8 +195,7 @@ class PaymentController extends Controller
         // Retrieve the session ID from the request
         $session_id = $request->query('session_id');
 
-        // Retrieve the order number from the session
-        $order_no = session('order_no');
+ 
 
         if ($session_id) {
             try {
@@ -204,13 +203,18 @@ class PaymentController extends Controller
                     // Retrieve the checkout session
                     $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
 
-                    $order = Order::with(['orderItems', 'customer'])->where('session_id', $checkout_session->id)->first();
+                    $order_no = $checkout_session->metadata->order_no;
+
+                    $order = Order::with(['orderItems', 'customer'])->where('order_no', $order_no)->first();
+                    $order->session_id = $session_id;
+                    $order->save();
                     
                     if (!$order) {
                         throw new NotFoundHttpException();
                         // return redirect()->route('menu')->withErrors('Order verification failed');
 
                     }
+                   
 
                     if ($order->status_online_pay === 'unpaid') {
                         $order->status_online_pay = 'paid';
@@ -220,7 +224,7 @@ class PaymentController extends Controller
                         try {
                             Mail::to($order->customer->email)->send(new OrderEmail(
                                 $order->orderItems,
-                                $order->customer->name,
+                                $order->customer->first_name,
                                 $order->customer->email,
                                 $order->order_no,
                                 $order->delivery_fee,
@@ -266,29 +270,29 @@ class PaymentController extends Controller
 
     
     // Check if a session key exists and the cart is not empty, otherwise redirect with an error message
-    protected function checkCart()
-    {
+    // protected function checkCart()
+    // {
  
-        if (!session()->has($this->cartkey) || empty(session()->get($this->cartkey))) {
-            return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.')->send();
-        }
-    }
+    //     if (!session()->has($this->cartkey) || empty(session()->get($this->cartkey))) {
+    //         return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.')->send();
+    //     }
+    // }
 
-    // Check if a session customer_details exists, otherwise redirect with an error message
-    protected function checkCustomerDetails()
-    {
-        if (!session()->has('customer_details')) {
-            return redirect()->route('menu')->withErrors('We could not retrieve your customer details. Please try again or contact support if the issue persists.')->send();
-        }
-    }
+    // // Check if a session customer_details exists, otherwise redirect with an error message
+    // protected function checkCustomerDetails()
+    // {
+    //     if (!session()->has('customer_details')) {
+    //         return redirect()->route('menu')->withErrors('We could not retrieve your customer details. Please try again or contact support if the issue persists.')->send();
+    //     }
+    // }
 
-    // Check if a session delivery_details exists, otherwise redirect with an error message
-    protected function checkDeliveryDetails()
-    {
-        if (!session()->has('delivery_details')) {
-            return redirect()->route('menu')->withErrors('We could not retrieve your delivery details. Please try again or contact support if the issue persists.')->send();
-        }
-    }
+    // // Check if a session delivery_details exists, otherwise redirect with an error message
+    // protected function checkDeliveryDetails()
+    // {
+    //     if (!session()->has('delivery_details')) {
+    //         return redirect()->route('menu')->withErrors('We could not retrieve your delivery details. Please try again or contact support if the issue persists.')->send();
+    //     }
+    // }
 
     // Check if a session order_no exists, otherwise redirect with an error message
     protected function checkOrderNo()
@@ -366,10 +370,10 @@ class PaymentController extends Controller
     // Call all checks at once
     protected function runAllChecks()
     {
-        $this->checkCart();
-        $this->checkCustomerDetails();
-        $this->checkDeliveryDetails();
-        $this->checkOrderNo();
+        // $this->checkCart();
+        // $this->checkCustomerDetails();
+        // $this->checkDeliveryDetails();
+        // $this->checkOrderNo();
     }
 
     protected function clearOrderSession()

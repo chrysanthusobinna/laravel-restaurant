@@ -25,13 +25,13 @@ class Order extends Model
         'delivery_distance',
         'price_per_mile',
         'delivery_address_id',
-        'billing_address_id',
+        'pickup_address_id',
     ];
 
     // Customer who placed the order
     public function customer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Delivery address
@@ -40,10 +40,10 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'delivery_address_id');
     }
 
-    // Billing address
-    public function billingAddress()
+    // Pickup address
+    public function pickupAddress()
     {
-        return $this->belongsTo(Address::class, 'billing_address_id');
+        return $this->belongsTo(RestaurantAddress::class, 'pickup_address_id');
     }
 
     // User who created the order
@@ -70,7 +70,4 @@ class Order extends Model
         $this->orderItems()->delete();
         $this->delete();
     }
-
- 
-
 }

@@ -82,7 +82,6 @@
     <script src="/assets/js/jquery.countTo.js"></script>
     <script src="/assets/js/imagesloaded.pkgd.min.js"></script>
     <script src="/assets/js/isotope.min.js"></script>
-    <script src="/assets/js/jquery.appear.js"></script>
     <script src="/assets/js/jquery.dd.min.js"></script>
     <script src="/assets/js/slick.min.js"></script>
     <script src="/assets/js/datepicker.min.js"></script>
@@ -118,31 +117,6 @@
           card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setDeliveryMode(card.getAttribute('data-value')); }});
         });
         setDeliveryMode(defaultDeliveryMode);
-
-        // Billing same switch
-        const billingSame = document.getElementById('billing_same');
-        const billingBlock = document.getElementById('billing_block');
-        const toggleBilling = () => billingBlock.classList.toggle('d-none', billingSame.checked);
-        billingSame.addEventListener('change', toggleBilling);
-        toggleBilling();
-
-        // Billing mode (saved/new)
-        const billingModeField = document.getElementById('billingModeField');
-        const hasSavedBilling = document.querySelectorAll('.billing-saved-item').length > 0;
-        const defaultBillingMode = billingModeField.value || (hasSavedBilling ? 'saved' : 'new');
-
-        const setBillingMode = (mode) => {
-          billingModeField.value = mode;
-          activateCard('#billingModeGroup', document.querySelector(`#billingModeGroup .option-card[data-value="${mode}"]`));
-          document.getElementById('billing_saved_block').classList.toggle('d-none', mode !== 'saved');
-          document.getElementById('billing_new_block').classList.toggle('d-none', mode !== 'new');
-        };
-
-        document.querySelectorAll('#billingModeGroup .option-card').forEach(card=>{
-          card.addEventListener('click', ()=> setBillingMode(card.getAttribute('data-value')));
-          card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setBillingMode(card.getAttribute('data-value')); }});
-        });
-        setBillingMode(defaultBillingMode);
 
         // Toggle inline new-address fieldsets (no modals)
         document.querySelectorAll('[data-toggle-inline]').forEach(btn=>{
@@ -199,10 +173,12 @@
         const el = document.getElementById(id);
         if (!el) return;
         function unlockOnce(){
-          if (el.disabled) el.disabled = false;
-          if (el.readOnly) el.readOnly = false;
-          if (el.classList.contains('disabled')) el.classList.remove('disabled');
-          if (el.hasAttribute('aria-disabled')) el.removeAttribute('aria-disabled');
+          let changed = false;
+          if (el.disabled) { el.disabled = false; changed = true; }
+          if (el.readOnly) { el.readOnly = false; changed = true; }
+          if (el.classList.contains('disabled')) { el.classList.remove('disabled'); changed = true; }
+          if (el.hasAttribute('aria-disabled')) { el.removeAttribute('aria-disabled'); changed = true; }
+          return changed;
         }
         let debounceTimer=null;
         const obs = new MutationObserver(muts=>{
@@ -224,17 +200,12 @@
         // delivery new
         setupAutocomplete('del_autocomplete', 'del');
         protectPlacesInput('del_autocomplete');
-
-        // billing new
-        setupAutocomplete('bill_autocomplete', 'bill');
-        protectPlacesInput('bill_autocomplete');
       }
       window.initCheckoutDeliveryLookups = initCheckoutDeliveryLookups;
     </script>
 
     {{-- Google Maps (Places) – replace with your key --}}
     <script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
-
 
     <script>
     let addressToDeleteId = null;
@@ -355,15 +326,12 @@
                           <i class="fas fa-times"></i>
                         </button>
                       </div>
-
                     </label>
                   @endforeach
                 </div>
               @else
                 <div class="alert alert-info">You have no saved addresses yet.</div>
               @endif
-
-  
             </div>
 
             {{-- ===== New delivery address (inline) ===== --}}
@@ -379,142 +347,35 @@
                        data-places-search
                        autocomplete="off" spellcheck="false">
 
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="form-label">Street</label>
-                        <input id="del_line1" name="new[line1]" class="form-control" value="{{ old('new.line1') }}">
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label">Apt / Suite</label>
-                        <input id="del_line2" name="new[line2]" class="form-control" value="{{ old('new.line2') }}">
-                      </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label">City</label>
-                        <input id="del_city" name="new[city]" class="form-control" value="{{ old('new.city') }}">
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label">State / Province</label>
-                        <input id="del_state" name="new[state]" class="form-control" value="{{ old('new.state') }}">
-                      </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label">Postal Code</label>
-                        <input id="del_postal" name="new[postal_code]" class="form-control" value="{{ old('new.postal_code') }}">
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label">Country</label>
-                        <input id="del_country" name="new[country]" class="form-control" value="{{ old('new.country') }}">
-                      </div>
-                    </div>
-
-              </div>
-            </div>
-
-            {{-- Billing same as delivery --}}
-            <div class="form-check form-switch mt-4">
-              <input class="form-check-input" type="checkbox" id="billing_same" name="billing_same" value="1" {{ old('billing_same', 1) ? 'checked' : '' }}>
-              <label class="form-check-label" for="billing_same">Billing address is the same as delivery</label>
-            </div>
-
-            {{-- ===== Billing block (revealed if unchecked) ===== --}}
-            <div id="billing_block" class="mt-3 d-none">
-              <h4 class="mb-3">Billing Address</h4>
-
-              <input type="hidden" name="billing[mode]" id="billingModeField" value="{{ old('billing.mode', $hasSaved ? 'saved' : 'new') }}">
-
-              <div id="billingModeGroup" class="choice-grid">
-                <div class="option-card" data-value="saved" tabindex="0" role="button" aria-pressed="false">
-                  <div class="checkmark"></div>
-                  <h6 class="option-title">Use a Saved Address</h6>
-                  <p class="option-sub">Pick from your address book.</p>
-                </div>
-                <div class="option-card" data-value="new" tabindex="0" role="button" aria-pressed="false">
-                  <div class="checkmark"></div>
-                  <h6 class="option-title">Add a New Address</h6>
-                  <p class="option-sub">Search and add a new address.</p>
-                </div>
-              </div>
-
-              <div id="billing_saved_block" class="mt-3 {{ $hasSaved ? '' : 'd-none' }}">
-                @if($hasSaved)
-                  <div class="list-group mb-3">
-                    @foreach($addresses as $addr)
-                      <label class="list-group-item d-flex justify-content-between align-items-start billing-saved-item">
-                        <div class="form-check">
-                          <input class="form-check-input me-2"
-                                 type="radio" name="billing[saved_address_id]"
-                                 value="{{ $addr->id }}"
-                                 {{ old('billing.saved_address_id') == $addr->id ? 'checked' : '' }}>
-                          <div>
-                            <div class="fw-semibold">
-                              {{ $addr->street ?? '' }}{{ $addr->street && $addr->city ? ', ' : '' }}{{ $addr->city ?? '' }} {{ $addr->postal_code ?? '' }}
-                            </div>
-                            <small class="muted">
-                              {{ $addr->state ?? '' }}{{ ($addr->state && $addr->country) ? ', ' : '' }}{{ $addr->country ?? '' }}
-                              @if(!empty($addr->label)) <span class="addr-badge ms-2">{{ ucfirst($addr->label) }}</span> @endif
-                            </small>
-                          </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                                                  <button type="button"
-                                class="btn btn-sm btn-outline-danger delete-address-btn"
-                                data-id="{{ $addr->id }}"
-                                data-address="{{ $addr->street ?? '' }}, {{ $addr->city ?? '' }}">
-                          <i class="fas fa-times"></i>
-                        </button>
-                        </div>
-                      </label>
-                    @endforeach
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Street</label>
+                    <input id="del_line1" name="new[line1]" class="form-control" value="{{ old('new.line1') }}">
                   </div>
-                @else
-                  <div class="alert alert-info">You have no saved addresses yet.</div>
-                @endif
- 
-              </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Apt / Suite</label>
+                    <input id="del_line2" name="new[line2]" class="form-control" value="{{ old('new.line2') }}">
+                  </div>
 
-              <div id="billing_new_block" class="mt-3 {{ $hasSaved ? 'd-none' : '' }}">
-                <div id="billing_new_inline" class="fieldset">
-                  <legend>New Billing Address</legend>
+                  <div class="col-md-6">
+                    <label class="form-label">City</label>
+                    <input id="del_city" name="new[city]" class="form-control" value="{{ old('new.city') }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">State / Province</label>
+                    <input id="del_state" name="new[state]" class="form-control" value="{{ old('new.state') }}">
+                  </div>
 
-                  <label class="form-label">Search address</label>
-                  <input type="text"
-                         id="bill_autocomplete"
-                         class="form-control mb-3"
-                         placeholder="Start typing address..."
-                         data-places-search
-                         autocomplete="off" spellcheck="false">
-
-                        <div class="row g-3">
-                          <div class="col-md-6">
-                            <label class="form-label">Street</label>
-                            <input id="bill_line1" name="billing[new][line1]" class="form-control" value="{{ old('billing.new.line1') }}">
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label">Apt / Suite</label>
-                            <input id="bill_line2" name="billing[new][line2]" class="form-control" value="{{ old('billing.new.line2') }}">
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label">City</label>
-                            <input id="bill_city" name="billing[new][city]" class="form-control" value="{{ old('billing.new.city') }}">
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label">State / Province</label>
-                            <input id="bill_state" name="billing[new][state]" class="form-control" value="{{ old('billing.new.state') }}">
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label">Postal Code</label>
-                            <input id="bill_postal" name="billing[new][postal_code]" class="form-control" value="{{ old('billing.new.postal_code') }}">
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label">Country</label>
-                            <input id="bill_country" name="billing[new][country]" class="form-control" value="{{ old('billing.new.country') }}">
-                          </div>
-                        </div>
-
+                  <div class="col-md-6">
+                    <label class="form-label">Postal Code</label>
+                    <input id="del_postal" name="new[postal_code]" class="form-control" value="{{ old('new.postal_code') }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    <input id="del_country" name="new[country]" class="form-control" value="{{ old('new.country') }}">
+                  </div>
                 </div>
+
               </div>
             </div>
 
@@ -533,14 +394,6 @@
   </div>
 </div>
 <!-- END SECTION SHOP -->
-
-
-
-
-
-
-
-
 
 <!-- Delete Address Confirmation Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">

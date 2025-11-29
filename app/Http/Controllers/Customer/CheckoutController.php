@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Customer;
 
+use Stripe\Stripe;
 use App\Models\Order;
 use App\Models\Address;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
 use App\Helpers\DistanceHelper;
@@ -18,11 +20,9 @@ use App\Http\Controllers\Traits\MainSiteViewSharedDataTrait;
 
 class CheckoutController extends Controller
 {
-    //
     use CartTrait;
     use MainSiteViewSharedDataTrait;
     use OrderNumberGeneratorTrait;
-
 
     public function __construct()
     {
@@ -40,16 +40,18 @@ class CheckoutController extends Controller
 
     public function detailsPost(Request $request)
     {
-        // Optionally confirm the user confirms their details
+        // confirm the user confirms their details
         $request->validate(['confirm' => 'required|accepted']);
 
+        $order_no = $this->generateOrderNumber();
         $data = session(self::SESSION_KEY, []);
         $data['customer_confirmed'] = true;
+        $data['order_no'] = $order_no;
+
         session([self::SESSION_KEY => $data]);
 
         return redirect()->route('customer.checkout.fulfilment');
     }
-
 
     /** Step 2: Fulfilment choice */
     public function fulfilment()
@@ -58,8 +60,6 @@ class CheckoutController extends Controller
         $user = Auth::user();
         return view('main-site.checkout-fulfilment', compact('user'));
     }
-
-
 
     public function fulfilmentPost(Request $request)
     {
@@ -76,11 +76,6 @@ class CheckoutController extends Controller
             : redirect()->route('customer.checkout.delivery');
     }
 
-
-
-
-
-
     /** Step 3a: Pickup */
     public function pickup()
     {
@@ -94,14 +89,24 @@ class CheckoutController extends Controller
         return view('main-site.checkout-pickup', compact('pickupLocations'));
     }
 
+    /* step 3a: Pickup POST */
     public function pickupPost(Request $request)
     {
         $request->validate(['pickup_location_id' => 'required']);
+
         $data = session(self::SESSION_KEY, []);
+
+        // Remove all delivery-specific session data
+        unset($data['addresses']);
+
+        // Save pickup location
         $data['pickup_location_id'] = $request->pickup_location_id;
+
         session([self::SESSION_KEY => $data]);
-        return redirect()->route('checkout.payment');
+
+        return redirect()->route('customer.checkout.review');
     }
+
 
     /** Step 3b: Delivery */
     public function delivery()
@@ -112,200 +117,150 @@ class CheckoutController extends Controller
         return view('main-site.checkout-delivery', compact('addresses'));
     }
 
-public function deliveryPost(Request $request)
-{
-    $user = Auth::user();
+    public function deliveryPost(Request $request)
+    {
+        $user = Auth::user();
 
-    // ---- Base validation ----
-    $v = Validator::make($request->all(), [
-        'mode' => ['required', Rule::in(['saved','new'])],
+        // ---- Base validation ----
+        $v = Validator::make($request->all(), [
+            'mode' => ['required', Rule::in(['saved','new'])],
 
-        'saved_address_id' => [
-            'nullable','integer',
-            Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
-        ],
+            'saved_address_id' => [
+                'nullable','integer',
+                Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
+            ],
 
-        // Delivery "new" fields
-        'new.line1'       => ['nullable','string','max:255'],
-        'new.line2'       => ['nullable','string','max:255'],
-        'new.city'        => ['nullable','string','max:150'],
-        'new.state'       => ['nullable','string','max:150'],
-        'new.postal_code' => ['nullable','string','max:30'],
-        'new.country'     => ['nullable','string','max:150'],
-
-        'billing_same' => ['nullable','boolean'],
-
-        // Billing branch
-        'billing.mode' => ['nullable', Rule::in(['saved','new'])],
-        'billing.saved_address_id' => [
-            'nullable','integer',
-            Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
-        ],
-        'billing.new.line1'       => ['nullable','string','max:255'],
-        'billing.new.line2'       => ['nullable','string','max:255'],
-        'billing.new.city'        => ['nullable','string','max:150'],
-        'billing.new.state'       => ['nullable','string','max:150'],
-        'billing.new.postal_code' => ['nullable','string','max:30'],
-        'billing.new.country'     => ['nullable','string','max:150'],
-    ]);
-
-    // ---- Conditional validation ----
-    $v->sometimes('saved_address_id', 'required', fn($input) => $input->mode === 'saved');
-    foreach (['new.line1','new.city','new.postal_code','new.country'] as $f) {
-        $v->sometimes($f, 'required', fn($input) => $input->mode === 'new');
-    }
-
-    $v->sometimes('billing.mode', 'required', fn($input) => !filter_var($input->billing_same, FILTER_VALIDATE_BOOL));
-    $v->sometimes('billing.saved_address_id', 'required', function($input){
-        return !filter_var($input->billing_same, FILTER_VALIDATE_BOOL)
-               && data_get($input, 'billing.mode') === 'saved';
-    });
-    foreach (['billing.new.line1','billing.new.city','billing.new.postal_code','billing.new.country'] as $f) {
-        $v->sometimes($f, 'required', function($input){
-            return !filter_var($input->billing_same, FILTER_VALIDATE_BOOL)
-                   && data_get($input, 'billing.mode') === 'new';
-        });
-    }
-
-    $v->validate();
-
-    // ---- Create or resolve addresses ----
-    $billingSame = $request->boolean('billing_same');
-    $deliveryAddressId = null;
-    $billingAddressId  = null;
-
-    // DELIVERY
-    if ($request->mode === 'saved') {
-        $deliveryAddressId = (int) $request->saved_address_id;
-    } else {
-        $delivery = $user->addresses()->create([
-            'label'       => 'delivery',
-            'street'      => trim(($request->input('new.line1') ?? '') . ($request->filled('new.line2') ? ', '.$request->input('new.line2') : '')),
-            'city'        => $request->input('new.city'),
-            'state'       => $request->input('new.state'),
-            'postal_code' => $request->input('new.postal_code'),
-            'country'     => $request->input('new.country'),
-            'is_default'  => false,
+            // Delivery "new" fields
+            'new.line1'       => ['nullable','string','max:255'],
+            'new.line2'       => ['nullable','string','max:255'],
+            'new.city'        => ['nullable','string','max:150'],
+            'new.state'       => ['nullable','string','max:150'],
+            'new.postal_code' => ['nullable','string','max:30'],
+            'new.country'     => ['nullable','string','max:150'],
         ]);
-        $deliveryAddressId = $delivery->id;
-    }
 
-    // BILLING
-    if ($billingSame) {
-        $billingAddressId = $deliveryAddressId;
-    } else {
-        $billingMode = data_get($request, 'billing.mode');
-        if ($billingMode === 'saved') {
-            $billingAddressId = (int) data_get($request, 'billing.saved_address_id');
+        // ---- Conditional validation ----
+        $v->sometimes('saved_address_id', 'required', fn($input) => $input->mode === 'saved');
+        foreach (['new.line1','new.city','new.postal_code','new.country'] as $f) {
+            $v->sometimes($f, 'required', fn($input) => $input->mode === 'new');
+        }
+
+        $v->validate();
+
+        // ---- Create or resolve delivery address ----
+        $deliveryAddressId = null;
+
+        if ($request->mode === 'saved') {
+            $deliveryAddressId = (int) $request->saved_address_id;
         } else {
-            $billing = $user->addresses()->create([
-                'label'       => 'billing',
-                'street'      => trim((data_get($request, 'billing.new.line1') ?? '') . (data_get($request, 'billing.new.line2') ? ', '.data_get($request, 'billing.new.line2') : '')),
-                'city'        => data_get($request, 'billing.new.city'),
-                'state'       => data_get($request, 'billing.new.state'),
-                'postal_code' => data_get($request, 'billing.new.postal_code'),
-                'country'     => data_get($request, 'billing.new.country'),
+            $delivery = $user->addresses()->create([
+                'label'       => 'delivery',
+                'street'      => trim(($request->input('new.line1') ?? '') . ($request->filled('new.line2') ? ', '.$request->input('new.line2') : '')),
+                'city'        => $request->input('new.city'),
+                'state'       => $request->input('new.state'),
+                'postal_code' => $request->input('new.postal_code'),
+                'country'     => $request->input('new.country'),
                 'is_default'  => false,
             ]);
-            $billingAddressId = $billing->id;
+            $deliveryAddressId = $delivery->id;
         }
+
+        // ---- Store only delivery ID in session ----
+        $data = session(self::SESSION_KEY, []);
+        $data['addresses'] = [
+            'delivery_address_id' => $deliveryAddressId,
+        ];
+        session([self::SESSION_KEY => $data]);
+
+        return redirect()->route('customer.checkout.review');
     }
-
-    // ---- Store only IDs in session ----
-    $data = session(self::SESSION_KEY, []);
-    $data['addresses'] = [
-        'delivery_address_id' => $deliveryAddressId,
-        'billing_address_id'  => $billingAddressId,
-        'billing_same'        => $billingSame,
-    ];
-    session([self::SESSION_KEY => $data]);
-
-    return redirect()->route('customer.checkout.review');
-}
-
- 
-
 
     /** Step 4: Review */
     public function review()
     {
         $user = Auth::user();
 
-        $order_settings = OrderSettings::first();
-
-        if (!$order_settings) {
-            return redirect()->route('home')->withErrors('No order settings found.');
-        }
-
-        $price_per_mile          = $order_settings->price_per_mile;
-        $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
-
-        $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
-
-        $sessionData = session(self::SESSION_KEY, []);
-        $delivery_address_id = $sessionData['addresses']['delivery_address_id'] ?? null;
-
-        if (!$delivery_address_id) {
-            return redirect()->route('customer.checkout.delivery')
-                ->withErrors('Please choose a delivery address first.');
-        }
-
-        $delivery_address = $user->addresses()->find($delivery_address_id);
-
-        if (!$delivery_address) {
-            return redirect()->route('customer.checkout.delivery')
-                ->withErrors('Selected delivery address was not found.');
-        }
-
-        $single_line_address = $delivery_address->full_address;
-
-        // Distance
-        $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);
-
-        if (isset($distanceData['error'])) {
-            return back()->withErrors($distanceData['error']);
-        }
-
-        $distance_in_miles = $distanceData['value_in_miles'];
-
-        if ($distance_in_miles > $distance_limit_in_miles) {
-            $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
-            return back()->withErrors($error_message)->withInput();
-        }
-
-        // Delivery fee
-        $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
-
-        // 🔹 Save delivery pricing into the same checkout session
-        $sessionData['delivery'] = [
-            'distance_miles' => $distance_in_miles,
-            'delivery_fee'   => $delivery_fee,
-            'price_per_mile' => $price_per_mile,
-        ];
-        session([self::SESSION_KEY => $sessionData]);
 
         // Cart checks
         if (!session()->has($this->cartkey)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
-        $cart = session()->get($this->cartkey, []);
+        $cart_items = session()->get($this->cartkey, []);
 
-        if (empty($cart)) {
+        if (empty($cart_items)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
+        
+        $order_settings = OrderSettings::first();
+        $delivery_fee = 0;
 
-        $subtotal = array_reduce($cart, function ($carry, $item) {
+        if (!$order_settings) {
+            return redirect()->route('home')->withErrors('No order settings found.');
+        }
+
+        $sessionData = session(self::SESSION_KEY, []);
+
+        if (isset($sessionData['addresses']['delivery_address_id'])) {
+           
+
+            $price_per_mile          = $order_settings->price_per_mile;
+            $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
+
+            $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
+
+            
+            $delivery_address_id = $sessionData['addresses']['delivery_address_id'] ?? null;
+
+            if (!$delivery_address_id) {
+                return redirect()->route('customer.checkout.delivery')
+                    ->withErrors('Please choose a delivery address first.');
+            }
+
+            $delivery_address = $user->addresses()->find($delivery_address_id);
+
+            if (!$delivery_address) {
+                return redirect()->route('customer.checkout.delivery')
+                    ->withErrors('Selected delivery address was not found.');
+            }
+
+            $single_line_address = $delivery_address->full_address;
+
+            // Distance
+            $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);
+
+            if (isset($distanceData['error'])) {
+                return back()->withErrors($distanceData['error']);
+            }
+
+            $distance_in_miles = $distanceData['value_in_miles'];
+
+            if ($distance_in_miles > $distance_limit_in_miles) {
+                $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
+                return back()->withErrors($error_message)->withInput();
+            }
+
+            // Delivery fee
+            $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
+
+            // 🔹 Save delivery pricing into the same checkout session
+            $sessionData['delivery'] = [
+                'distance_miles' => $distance_in_miles,
+                'delivery_fee'   => $delivery_fee,
+                'price_per_mile' => $price_per_mile,
+            ];
+            session([self::SESSION_KEY => $sessionData]);
+
+        }
+
+        $subtotal = array_reduce($cart_items, function ($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
-        return view('main-site.checkout-review', compact('user', 'cart', 'delivery_fee', 'subtotal'));
+        return view('main-site.checkout-review', compact('user', 'cart_items', 'delivery_fee', 'subtotal'));
     }
 
-    
-
-
-    public function proccessCheckout(request $request)
+    public function proccessCheckout(Request $request)
     {
         $user = Auth::user();
 
@@ -314,9 +269,9 @@ public function deliveryPost(Request $request)
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
-        $cart = session()->get($this->cartkey, []);
+        $cart_items = session()->get($this->cartkey, []);
 
-        if (empty($cart)) {
+        if (empty($cart_items)) {
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
 
@@ -326,76 +281,112 @@ public function deliveryPost(Request $request)
         $fulfilment       = $checkout['fulfilment']      ?? 'delivery'; // 'pickup' or 'delivery'
         $addresses        = $checkout['addresses']       ?? [];
         $deliverySession  = $checkout['delivery']        ?? [];
+        $order_no         = $checkout['order_no']        ?? null;
 
         $deliveryAddressId = $addresses['delivery_address_id'] ?? null;
-        $billingAddressId  = $addresses['billing_address_id']  ?? null;
+        $pickupLocationId =  $checkout['pickup_location_id'] ?? null;
 
         $delivery_fee    = $deliverySession['delivery_fee']    ?? 0;
         $distance_miles  = $deliverySession['distance_miles']  ?? null;
         $price_per_mile  = $deliverySession['price_per_mile']  ?? null;
 
         // 3) Recalculate subtotal
-        $subtotal = array_reduce($cart, function ($carry, $item) {
+        $subtotal = array_reduce($cart_items, function ($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
         $total = $subtotal + $delivery_fee;
 
-        // 4) Generate order number
-        $order_no = $this->generateOrderNumber();
+        $order = Order::updateOrCreate(
+            ['order_no' => $order_no],
+            [
+                'user_id'            => $user->id,
+                'order_type'         => 'online',
+                'created_by_user_id' => null,
+                'updated_by_user_id' => null,
+                'total_price'        => $total,
+                'status'             => 'pending',
+                'status_online_pay'  => 'unpaid',
+                'session_id'         => null,
+                'payment_method'     => 'STRIPE',
+                'additional_info'    => $request->input('additional_info'),
+                'delivery_fee'       => $delivery_fee,
+                'delivery_distance'  => $distance_miles,
+                'price_per_mile'     => $price_per_mile,
+                'delivery_address_id'=> $deliveryAddressId,
+                'pickup_address_id'  => $pickupLocationId,
+                
+                
+            ]
+        );
 
-        // 5) Create order for logged-in customer
-        // Make sure you have in User model: public function orders() { return $this->hasMany(Order::class, 'user_id'); }
-        $order = Order::create([
-            'user_id'            => $user->id,
-            'order_no'           => $order_no,
-            'order_type'         => 'online',          // e.g. 'pickup' or 'delivery'  'online'
-            'created_by_user_id' => null,
-            'updated_by_user_id' => null,
-            'total_price'        => $total,
-            'status'             => 'pending',
-            'status_online_pay'  => 'unpaid',
-            'session_id'         => null,
-            'payment_method'     => 'STRIPE',             // or from form input if you have one
-            'additional_info'    => $request->input('additional_info'),                 // or $request->input('additional_info')
-            'delivery_fee'       => $delivery_fee,
-            'delivery_distance'  => $distance_miles,
-            'price_per_mile'     => $price_per_mile,
-            'delivery_address_id'=> $deliveryAddressId,
-            'billing_address_id' => $billingAddressId,
-        ]);
-
-        // 6) Attach cart items to the order (adapt fields to your OrderItem schema)
-     
-        foreach ($cart as $item) {
+        // 6) Attach cart items to the order
+        foreach ($cart_items as $item) {
             $order->orderItems()->create([
-                'menu_name' => $item['name'],           
-                'quantity'  => $item['quantity'] ?? '',  
-                'subtotal'  => $item['price'] * ($item['quantity'] ?? 1),  
+                'menu_name' => $item['name'],
+                'quantity'  => $item['quantity'] ?? '',
+                'subtotal'  => $item['price'] * ($item['quantity'] ?? 1),
             ]);
         }
-    
 
+        // Get Site Settings
+        $site_settings  = SiteSetting::latest()->first();
+        $currency_code  = strtolower($site_settings->currency_code);
 
-       
-        // // Create order items using the relationship
-        // foreach ($cart_items as $cart_item) {
-        //     $order->orderItems()->create([
-        //         'menu_name' => $cart_item['name'],  
-        //         'quantity' => $cart_item['quantity'],
-        //         'subtotal' => $cart_item['price'] * $cart_item['quantity'],
-        //     ]);
-        // }
-       
+        // Initialize the line_items array
+        $line_items = [];
 
+        // Loop through the cart items to populate line_items
+        foreach ($cart_items as $cart_item) {
+            $line_items[] = [
+                'price_data' => [
+                    'currency' => $currency_code,
+                    'product_data' => [
+                        'name' => $cart_item['name'],
+                    ],
+                    'unit_amount' => $cart_item['price'] * 100, // Convert price to cents
+                ],
+                'quantity' => $cart_item['quantity'],
+            ];
+        }
 
-        // 7) Optionally clear checkout session (keep cart until payment succeeds, up to you)
-        // session()->forget(self::SESSION_KEY);
+        // Add delivery fee in the line_items
+        if (isset($delivery_fee)) {
+            $line_items[] = [
+                'price_data' => [
+                    'currency' => $currency_code,
+                    'product_data' => [
+                        'name' => 'Delivery Fee',
+                    ],
+                    'unit_amount' => $delivery_fee * 100, // Convert to cents
+                ],
+                'quantity' => 1,
+            ];
+        }
 
-        // 8) Redirect to payment route with the order number (or ID)
-        // Adjust parameter name to match your route definition.
-        return redirect()->route('menu')->with('success', 'Order placed successfully. Your order number is ' . $order_no);
-        
+        // Set Stripe secret key
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            // Create a Stripe Checkout session
+            $checkout_session = \Stripe\Checkout\Session::create([
+                'line_items' => $line_items,
+                'mode' => 'payment',
+                'customer_email' => $user->email,
+                'metadata' => [
+                    'order_no' => $order->order_no,
+                ],
+                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('payment.cancel'),
+            ]);
+
+            // Redirect the user to the Stripe Checkout session URL
+            return redirect($checkout_session->url);
+
+        } catch (\Exception $e) {
+            $error_msg  =  $e->getMessage();
+            return redirect()->route('menu')->withErrors($error_msg);
+        }
     }
 
     /** Helpers */
@@ -409,7 +400,4 @@ public function deliveryPost(Request $request)
             redirect()->route('customer.checkout.fulfilment')->send();
         }
     }
-
-
-
 }
