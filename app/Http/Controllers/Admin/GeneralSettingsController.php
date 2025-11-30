@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Country;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
@@ -45,10 +46,11 @@ class GeneralSettingsController extends Controller
             'currency_symbol' => config('site.currency_symbol'),
             'currency_code' => config('site.currency_code'),
         ]);
+        $countries = Country::orderBy('name')->get();
 
 
 
-        return view('admin.general-settings', compact('addresses', 'phoneNumbers', 'workingHours','socialMediaHandles','script','order_settings'));
+        return view('admin.general-settings', compact('addresses', 'phoneNumbers', 'workingHours','socialMediaHandles','script','order_settings', 'countries'));
     }
 
     // Restaurant Phone Number CRUD
@@ -221,20 +223,18 @@ class GeneralSettingsController extends Controller
     public function siteSettings(Request $request)
     {
         $validated = $request->validate([
-            'country' => 'required|string|max:255',
-            'currency_symbol' => 'required|string|max:10',
-            'currency_code' => 'required|string|max:10',
+            'country_id' => 'required|exists:countries,id',
         ]);
 
+        $country = Country::findOrFail($validated['country_id']);
+
         $siteSetting = SiteSetting::firstOrNew();
-        $siteSetting->currency_symbol = $this->sanitizeHtmlContent($validated['currency_symbol']);
-        $siteSetting->currency_code = $validated['currency_code'];
-        $siteSetting->country = $validated['country'];
+        $siteSetting->country         = $country->name;
+        $siteSetting->currency_symbol = $this->sanitizeHtmlContent($country->currency_symbol);
+        $siteSetting->currency_code   = $country->currency_code;
         $siteSetting->save();
 
-         return redirect()->back()->with('success', 'Site settings saved successfully!');
-
+        return redirect()->back()->with('success', 'Site settings saved successfully!');
     }
- 
     
 }

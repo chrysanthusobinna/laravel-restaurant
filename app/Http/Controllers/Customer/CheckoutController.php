@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 use App\Models\RestaurantAddress;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Traits\CartTrait;
 use App\Http\Controllers\Traits\OrderNumberGeneratorTrait;
@@ -24,9 +25,24 @@ class CheckoutController extends Controller
     use MainSiteViewSharedDataTrait;
     use OrderNumberGeneratorTrait;
 
+    protected $provider;
+    protected $stripeSecret;
+    protected $paystackSecret;
+    protected $currencyCode;
+
+
     public function __construct()
     {
         $this->shareMainSiteViewData();
+
+        $this->provider      = config('payments.provider');
+        $this->stripeSecret  = config('payments.stripe.secret');
+        $this->paystackSecret= config('payments.paystack.secret');  
+
+        // Get Site Settings
+        $site_settings  = SiteSetting::latest()->first();
+        $this->currencyCode  = strtolower($site_settings->currency_code);
+        
     }
 
     // Session key for wizard data
@@ -82,7 +98,7 @@ class CheckoutController extends Controller
         // Ensure customer has completed the previous step
         $this->guardStep('fulfilment', 'pickup');
 
-        // Fetch pickup locations (all restaurant addresses)
+        // Fetch pickup locations  
         $pickupLocations = RestaurantAddress::all(['id', 'address']);
 
         // Send them to the view
@@ -262,6 +278,8 @@ class CheckoutController extends Controller
 
     public function proccessCheckout(Request $request)
     {
+   
+
         $user = Auth::user();
 
         // 1) Ensure there is still a cart
@@ -329,9 +347,7 @@ class CheckoutController extends Controller
             ]);
         }
 
-        // Get Site Settings
-        $site_settings  = SiteSetting::latest()->first();
-        $currency_code  = strtolower($site_settings->currency_code);
+
 
         // Initialize the line_items array
         $line_items = [];
@@ -340,7 +356,7 @@ class CheckoutController extends Controller
         foreach ($cart_items as $cart_item) {
             $line_items[] = [
                 'price_data' => [
-                    'currency' => $currency_code,
+                    'currency' => $this->currencyCode,
                     'product_data' => [
                         'name' => $cart_item['name'],
                     ],
@@ -354,7 +370,7 @@ class CheckoutController extends Controller
         if (isset($delivery_fee)) {
             $line_items[] = [
                 'price_data' => [
-                    'currency' => $currency_code,
+                    'currency' => $this->currencyCode,
                     'product_data' => [
                         'name' => 'Delivery Fee',
                     ],
@@ -364,29 +380,19 @@ class CheckoutController extends Controller
             ];
         }
 
-        // Set Stripe secret key
-        Stripe::setApiKey(config('services.stripe.secret'));
 
-        try {
-            // Create a Stripe Checkout session
-            $checkout_session = \Stripe\Checkout\Session::create([
-                'line_items' => $line_items,
-                'mode' => 'payment',
-                'customer_email' => $user->email,
-                'metadata' => [
-                    'order_no' => $order->order_no,
-                ],
-                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('payment.cancel'),
-            ]);
 
-            // Redirect the user to the Stripe Checkout session URL
-            return redirect($checkout_session->url);
-
-        } catch (\Exception $e) {
-            $error_msg  =  $e->getMessage();
-            return redirect()->route('menu')->withErrors($error_msg);
+        if ($this->provider === 'stripe') {
+            return $this->processStripePayment($order, $line_items, $user);
         }
+
+        if ($this->provider === 'paystack') {
+            return $this->processPaystackPayment($order, $total, $user);
+        }
+
+
+
+
     }
 
     /** Helpers */
@@ -400,4 +406,63 @@ class CheckoutController extends Controller
             redirect()->route('customer.checkout.fulfilment')->send();
         }
     }
+
+
+
+
+
+
+    private function processStripePayment($order, $line_items, $user)
+    {
+        Stripe::setApiKey($this->stripeSecret);
+
+        $checkout_session = \Stripe\Checkout\Session::create([
+            'line_items' => $line_items,
+            'mode' => 'payment',
+            'customer_email' => $user->email,
+            'metadata' => [
+                'order_no' => $order->order_no,
+            ],
+            'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('payment.cancel'),
+        ]);
+
+        return redirect($checkout_session->url);
+    }
+
+
+
+    private function processPaystackPayment($order, $amount, $user)
+    {
+         $amountSmallestUnit = (int) round($amount * 100);
+
+        $response = Http::withToken($this->paystackSecret)
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email'        => $user->email,
+                'amount'       => $amountSmallestUnit,
+                'currency'     => strtoupper($this->currencyCode),
+                'metadata'     => [
+                    'order_no' => $order->order_no,
+                ],
+                'callback_url' => route('payment.success'),
+            ]);
+
+              
+        if (! $response->successful()) {
+            return back()->withErrors('Unable to contact Paystack. Please try again.');
+        }
+
+        $data = $response->json();
+
+        if (empty($data['status']) || empty($data['data']['authorization_url'])) {
+            return back()->withErrors($data['message'] ?? 'Payment initialization failed.');
+        }
+
+        // Redirect customer to Paystack checkout page
+        return redirect($data['data']['authorization_url']);
+    }
+
+
+
+
 }

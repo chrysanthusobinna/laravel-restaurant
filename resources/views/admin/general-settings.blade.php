@@ -145,57 +145,7 @@
     });
 </script>
 
-
-
- <script>
-    $(document).ready(function () {
-        $('#country').on('change', function () {
-            // Get the selected country
-            var country = $(this).val();
-
-            // Ensure a country is selected
-            if (!country) return;
-
-            // API URL
-            var apiUrl = "https://www.getcountrycurrency.com/api/country-currency/" + encodeURIComponent(country);
-
-            // Make AJAX request to fetch currency details
-            $.ajax({
-                url: apiUrl,
-                method: "GET",
-                dataType: "json",
-                success: function (data) {
-                    // Check if data contains expected fields
-                    if (data.currency_name && data.currency_code && data.currency_symbol) {
-                        // Decode the HTML entity for the currency symbol
-                        var parser = new DOMParser();
-                        var decodedSymbol = parser.parseFromString(data.currency_symbol, 'text/html').body.textContent;
-                        
-
-                        // Populate the fields with currency details
-                        $('#decoded_symbol').val(decodedSymbol);
-                        $('#currency_code').val(data.currency_code);
-                        $('#currency_symbol').val(data.currency_symbol);
-
-                    } else {
-                        alert("Currency details not found for the selected country.");
-                        $('#currency_code, #currency_symbol, #decoded_symbol').val("");
-
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error fetching currency details:", error);
-                    alert("An error occurred while fetching currency details.");
-                    $('#currency_code, #currency_symbol, #decoded_symbol').val("");
-
-                }
-            });
-        });
-    });
-
- </script>
  
-
 
 @endpush
 
@@ -465,82 +415,113 @@
         </div>
         <div class="col-lg-6 d-flex grid-margin stretch-card">
  
-            <div class="card">
-                <div class="card-header">
-                    Other Settings
-                </div>
-                     <form action="{{ route('site-settings.save') }}" method="POST" style="display: contents;">
-                    @csrf
-                    <input value="{{ $site_settings->currency_symbol ?? '' }}" required type="hidden" id="currency_symbol" name="currency_symbol" class="form-control">
-            
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <tbody>
-                                <!-- Country Selection -->
-                                <tr>
-                                    <td><strong>Country</strong></td>
-                                    <td>
-                                        <select required class="form-control" id="country" name="country">
-                                            <option value="" disabled {{ is_null($site_settings->country) ? 'selected' : '' }}>Select a country</option>
-                                            @php
-                                                $countries = [
-                                                    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia",
-                                                    "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
-                                                    "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria",
-                                                    "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad",
-                                                    "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", "Croatia", "Cuba", "Cyprus",
-                                                    "Czechia (Czech Republic)", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt",
-                                                    "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini (fmr. \"Swaziland\")", "Ethiopia", "Fiji",
-                                                    "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala",
-                                                    "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "India", "Indonesia",
-                                                    "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
-                                                    "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania",
-                                                    "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania",
-                                                    "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique",
-                                                    "Myanmar (formerly Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger",
-                                                    "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine State", "Panama",
-                                                    "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia",
-                                                    "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
-                                                    "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
-                                                    "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain",
-                                                    "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", "Tanzania", "Thailand",
-                                                    "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda",
-                                                    "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu",
-                                                    "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-                                                ];
-                                            @endphp
-                                            @foreach ($countries as $country)
-                                                <option value="{{ $country }}" {{ $site_settings->country == $country ? 'selected' : '' }}>
-                                                    {{ $country }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        
-                                    </td>
-                                </tr>
-            
-                                <!-- Currency Details -->
-                                <tr>
-                                    <td><strong>Currency Symbol</strong></td>
-                                    <td>
-                                        <input value="{!! $site_settings->currency_symbol ?? '' !!}" required type="text" id="decoded_symbol" class="form-control" placeholder="Currency Symbol" readonly>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Currency Code</strong></td>
-                                    <td>
-                                        <input value="{{ $site_settings->currency_code ?? '' }}" required type="text" id="currency_code" name="currency_code" class="form-control" placeholder="Currency Code" readonly>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
-            </div>
-            
+<div class="card">
+    <div class="card-header">
+        Other Settings
+    </div>
+
+    <form action="{{ route('site-settings.save') }}" method="POST" style="display: contents;">
+        @csrf
+
+        {{-- Hidden actual symbol that will be saved (set from selected country server-side anyway) --}}
+        <input type="hidden" id="currency_symbol" name="currency_symbol">
+
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tbody>
+                    {{-- Country Selection --}}
+                    <tr>
+                        <td><strong>Country</strong></td>
+                        <td>
+                            <select required class="form-control" id="country_id" name="country_id">
+                                <option value="" disabled {{ empty($site_settings?->country) ? 'selected' : '' }}>
+                                    Select a country
+                                </option>
+
+                                @foreach ($countries as $country)
+                                    <option
+                                        value="{{ $country->id }}"
+                                        data-currency-symbol="{{ $country->currency_symbol }}"
+                                        data-currency-code="{{ $country->currency_code }}"
+                                        {{ $site_settings?->country === $country->name ? 'selected' : '' }}
+                                    >
+                                        {{ $country->name }} ({{ $country->currency_code }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+                    </tr>
+
+                    {{-- Currency Details (display only) --}}
+                    <tr>
+                        <td><strong>Currency Symbol</strong></td>
+                        <td>
+                            <input
+                                value="{!! $site_settings->currency_symbol ?? '' !!}"
+                                type="text"
+                                id="decoded_symbol"
+                                class="form-control"
+                                placeholder="Currency Symbol"
+                                readonly
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Currency Code</strong></td>
+                        <td>
+                            <input
+                                value="{{ $site_settings->currency_code ?? '' }}"
+                                type="text"
+                                id="currency_code"
+                                class="form-control"
+                                placeholder="Currency Code"
+                                readonly
+                            >
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</div>
+
+@push('scripts')
+<script>
+    (function() {
+        function updateCurrencyFields() {
+            const select = document.getElementById('country_id');
+            const option = select.options[select.selectedIndex];
+
+            if (!option) return;
+
+            const symbol = option.getAttribute('data-currency-symbol') || '';
+            const code   = option.getAttribute('data-currency-code') || '';
+
+            document.getElementById('decoded_symbol').value = symbol;
+            document.getElementById('currency_code').value  = code;
+
+            // keep hidden symbol in sync (if you still want it in request)
+            const hiddenSymbol = document.getElementById('currency_symbol');
+            if (hiddenSymbol) hiddenSymbol.value = symbol;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('country_id');
+            if (!select) return;
+
+            select.addEventListener('change', updateCurrencyFields);
+
+            // initialize on load
+            updateCurrencyFields();
+        });
+    })();
+</script>
+@endpush
+
    
         </div>
       </div>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aeb1705c369d8d24a5fba0c0d541a28a",
+    "content-hash": "59a74b7767cd699a5312ad9abca1b5dd",
     "packages": [
         {
             "name": "brick/math",
@@ -641,46 +641,6 @@
                 }
             ],
             "time": "2023-10-12T05:21:21+00:00"
-        },
-        {
-            "name": "getcountrycurrency/country-currency-api",
-            "version": "v1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/chrysanthusobinna/php-country-currency-api-client.git",
-                "reference": "a62d130be59ec79a68e9851b83730d82c5d4660e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/chrysanthusobinna/php-country-currency-api-client/zipball/a62d130be59ec79a68e9851b83730d82c5d4660e",
-                "reference": "a62d130be59ec79a68e9851b83730d82c5d4660e",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "getcountrycurrency\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Chrysanthus Obinna Chiagwah",
-                    "email": "chrysanthusobinna@gmail.com"
-                }
-            ],
-            "description": "A simple PHP library for fetching country currency details.",
-            "support": {
-                "issues": "https://github.com/chrysanthusobinna/php-country-currency-api-client/issues",
-                "source": "https://github.com/chrysanthusobinna/php-country-currency-api-client/tree/v1.0.0"
-            },
-            "time": "2024-12-10T21:23:18+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -8365,12 +8325,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

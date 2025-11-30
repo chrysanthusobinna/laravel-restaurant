@@ -13,6 +13,7 @@ use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Helpers\TwilioHelper;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Models\RestaurantPhoneNumber;
 use Illuminate\Support\Facades\Session;
@@ -25,158 +26,23 @@ class PaymentController extends Controller
     use CartTrait;
     use MainSiteViewSharedDataTrait;
 
+
+    protected $provider;
+    protected $stripeSecret;
+    protected $paystackSecret;
+
     public function __construct()
     {
         $this->shareMainSiteViewData();
 
+        $this->provider      = config('payments.provider');
+        $this->stripeSecret  = config('payments.stripe.secret');
+        $this->paystackSecret= config('payments.paystack.secret');  
+
     }
 
     
-
-
-    //  public function payment()
-    // {
-
-    //     //run all required session checks
-    //     $this->runAllChecks();
-
-    //     // Retrieve customer details from the session
-    //     $customerDetails = Session::get('customer_details', []);
-
-    //     // Retrieve cart items from session
-    //     $cart_items = session()->get('customer', []);
-
-    
-    //     // Retrieve Delivery Details from the session
-    //     $deliveryDetails = session('delivery_details');
-    //     $delivery_fee = $deliveryDetails['delivery_fee'];
-    //     $delivery_distance = $deliveryDetails['distance_in_miles'];
-    //     $price_per_mile= $deliveryDetails['price_per_mile'];
-              
-              
-    //     // Retrieve order no. from session
-    //     $order_no = session('order_no');
-
  
-    //     if (Order::where('order_no', $order_no)->exists()) {
-    //         return redirect() ->route('menu')->withErrors('The order number already exists. Please try again.');
-    //     }
-
-    //     //Get Site Settings
-    //     $site_settings  =   SiteSetting::latest()->first();
-    //     $currency_code  =   strtolower($site_settings->currency_code);
-
-
-    //     // Initialize the line_items array
-    //     $line_items = [];
-
-    //     // Loop through the cart items to populate line_items
-    //     foreach ($cart_items as $cart_item) {
-    //         $line_items[] = [
-    //             'price_data' => [
-    //                 'currency' => $currency_code,
-    //                 'product_data' => [
-    //                     'name' => $cart_item['name'],
-    //                 ],
-    //                 'unit_amount' => $cart_item['price'] * 100, // Convert price to cents
-    //             ],
-    //             'quantity' => $cart_item['quantity'],
-    //         ];
-    //     }
- 
-
-    //     // Add delivery fee in the line_items
-    //     if (isset($delivery_fee)) {
-    //         $line_items[] = [
-    //             'price_data' => [
-    //                 'currency' => $currency_code,
-    //                 'product_data' => [
-    //                     'name' => 'Delivery Fee',
-    //                 ],
-    //                 'unit_amount' => $delivery_fee * 100, // Convert to cents
-    //             ],
-    //             'quantity' => 1, 
-    //         ];
-    //     }
-
-    //     // Set Stripe secret key
-    //     Stripe::setApiKey(config('services.stripe.secret'));
-
-    //     try {
- 
-    //         // Create a Stripe Checkout session
-    //         $checkout_session = \Stripe\Checkout\Session::create([
-    //             'line_items' => $line_items,
-    //             'mode' => 'payment',
-    //             'customer_email' => $customerDetails['email'],
-    //             'metadata' => [
-    //                 'order_no' => $order_no,
-    //                 'name' => $customerDetails['name'],
-    //                 'phone' => $customerDetails['phone_number'],
-    //                 'address' => $customerDetails['address'],
-    //                 'city' => $customerDetails['city'],
-    //                 'state' => $customerDetails['state'],
-    //                 'postcode' => $customerDetails['postcode'],
-    //             ],
-
-    //             'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-    //             'cancel_url' => route('payment.cancel'),
-    //         ]);
-
-    //         //PREPARE TO CREATE ORDER
- 
-    //         $totalPrice = array_reduce($cart_items, function ($carry, $item) {
-    //             return $carry + ($item['price'] * $item['quantity']);
-    //         }, 0);
-
-
-    //         // Create the customer
-    //         $customer = Customer::create([
-    //             'name' =>  $customerDetails['name'],
-    //             'email' =>  $customerDetails['email'] ,
-    //             'phone_number' => $customerDetails['phone_number'],
-    //             'address' => $customerDetails['address'] . " ".$customerDetails['city']." ".$customerDetails['state']." ".$customerDetails['postcode'],
-    //         ]);
-   
-    //         // Create a new order
-    //         $order = Order::create([
-    //             'customer_id' => $customer->id,
-    //             'order_no' => $order_no,
-    //             'order_type' => 'online',
-    //             'created_by_user_id' => null,
-    //             'updated_by_user_id' => null,
-    //             'total_price' => $totalPrice,
-    //             'status' => 'pending',
-    //             'status_online_pay' => 'unpaid',
-    //             'session_id' => $checkout_session->id,
-    //             'payment_method' => "STRIPE",
-    //             'additional_info' => $customerDetails['additional_info'],
-    //             'delivery_fee' => $delivery_fee,
-    //             'delivery_distance' => $delivery_distance,
-    //             'price_per_mile' => $price_per_mile,
-                
-    //         ]);
-
-    //         if ($order) {
-    //             // Create order items using the relationship
-    //             foreach ($cart_items as $cart_item) {
-    //                 $order->orderItems()->create([
-    //                     'menu_name' => $cart_item['name'],  
-    //                     'quantity' => $cart_item['quantity'],
-    //                     'subtotal' => $cart_item['price'] * $cart_item['quantity'],
-    //                 ]);
-    //             }
-    //         }
-            
-
-    //         // Redirect the user to the Stripe Checkout session URL
-    //         return redirect($checkout_session->url);
-
-    //     } catch (Exception $e) {
-    //         $error_msg  =  $e->getMessage();
-    //         return redirect()->route('menu')->withErrors($error_msg);            
-    //     }
-    // }
 
     public function paymentCancel()
     {
@@ -184,91 +50,258 @@ class PaymentController extends Controller
     }
 
  
-    public function paymentSuccess(Request $request)
-    {
-        //run all required session checks
-        $this->runAllChecks();
+    // public function paymentSuccess(Request $request)
+    // {
+    //     //run all required session checks
+    //     $this->runAllChecks();
 
-        // Set Stripe secret key
-        Stripe::setApiKey(config('services.stripe.secret'));
+    //     // Set Stripe secret key
+    //     Stripe::setApiKey(config('services.stripe.secret'));
     
-        // Retrieve the session ID from the request
-        $session_id = $request->query('session_id');
+    //     // Retrieve the session ID from the request
+    //     $session_id = $request->query('session_id');
 
  
 
-        if ($session_id) {
-            try {
+    //     if ($session_id) {
+    //         try {
 
-                    // Retrieve the checkout session
-                    $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
+    //                 // Retrieve the checkout session
+    //                 $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
 
-                    $order_no = $checkout_session->metadata->order_no;
+    //                 $order_no = $checkout_session->metadata->order_no;
 
-                    $order = Order::with(['orderItems', 'customer'])->where('order_no', $order_no)->first();
-                    $order->session_id = $session_id;
-                    $order->save();
+    //                 $order = Order::with(['orderItems', 'customer'])->where('order_no', $order_no)->first();
+    //                 $order->session_id = $session_id;
+    //                 $order->save();
                     
-                    if (!$order) {
-                        throw new NotFoundHttpException();
-                        // return redirect()->route('menu')->withErrors('Order verification failed');
+    //                 if (!$order) {
+    //                     throw new NotFoundHttpException();
+    //                     // return redirect()->route('menu')->withErrors('Order verification failed');
 
-                    }
+    //                 }
                    
 
-                    if ($order->status_online_pay === 'unpaid') {
-                        $order->status_online_pay = 'paid';
-                        $order->save();
+    //                 if ($order->status_online_pay === 'unpaid') {
+    //                     $order->status_online_pay = 'paid';
+    //                     $order->save();
 
-                        // Send the email
-                        try {
-                            Mail::to($order->customer->email)->send(new OrderEmail(
-                                $order->orderItems,
-                                $order->customer->first_name,
-                                $order->customer->email,
-                                $order->order_no,
-                                $order->delivery_fee,
-                                $order->total_price,
-                                config('site.email'),
-                                RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
-                            ));
-                        } catch (Exception $e) {
-                            Log::error('Order email failed to send: ' . $e->getMessage());
-                        }
+    //                     // Send the email
+    //                     try {
+    //                         Mail::to($order->customer->email)->send(new OrderEmail(
+    //                             $order->orderItems,
+    //                             $order->customer->first_name,
+    //                             $order->customer->email,
+    //                             $order->order_no,
+    //                             $order->delivery_fee,
+    //                             $order->total_price,
+    //                             config('site.email'),
+    //                             RestaurantPhoneNumber::first() ? RestaurantPhoneNumber::first()->phone_number : null
+    //                         ));
+    //                     } catch (Exception $e) {
+    //                         Log::error('Order email failed to send: ' . $e->getMessage());
+    //                     }
                         
-                        // send whatsapp message
-                        $this->sendWhatsAppNotification($order);    
+    //                     // send whatsapp message
+    //                     $this->sendWhatsAppNotification($order);    
 
-                        // Clear the session
-                        $this->clearOrderSession();
+    //                     // Clear the session
+    //                     $this->clearOrderSession();
                         
-                        return view('main-site.payment-success', compact('order'));                       
-                    }
-                    elseif ($order->status_online_pay === 'paid') { 
+    //                     return view('main-site.payment-success', compact('order'));                       
+    //                 }
+    //                 elseif ($order->status_online_pay === 'paid') { 
 
-                        // Clear the session
-                        $this->clearOrderSession();
-                        return view('main-site.payment-success', compact('order'));                       
+    //                     // Clear the session
+    //                     $this->clearOrderSession();
+    //                     return view('main-site.payment-success', compact('order'));                       
 
-                    }
+    //                 }
  
                     
-                    return redirect()->route('menu')->withErrors("There was an issue processing your payment. Please try again.");
+    //                 return redirect()->route('menu')->withErrors("There was an issue processing your payment. Please try again.");
 
 
 
-            } catch (Exception $e) {
-                $error_msg  =  $e->getMessage();
-                return redirect()->route('menu')->withErrors($error_msg);
-            }
-        } else {
-            return redirect()->route('menu')->withErrors('Session ID not found!');
-        }
+    //         } catch (Exception $e) {
+    //             $error_msg  =  $e->getMessage();
+    //             return redirect()->route('menu')->withErrors($error_msg);
+    //         }
+    //     } else {
+    //         return redirect()->route('menu')->withErrors('Session ID not found!');
+    //     }
+    // }
+    
+
+    public function paymentSuccess(Request $request)
+    {
+        // still run your “wizard” checks if you want
+        $this->runAllChecks();
+
+        return match ($this->provider) {
+            'stripe'  => $this->handleStripeSuccess($request),
+            'paystack'=> $this->handlePaystackSuccess($request),
+            default   => redirect()->route('menu')->withErrors('Unsupported payment provider.'),
+        };
     }
     
 
 
-    
+
+
+
+
+    private function handleStripeSuccess(Request $request)
+    {
+        Stripe::setApiKey($this->stripeSecret);
+
+        $session_id = $request->query('session_id');
+
+        if (!$session_id) {
+            return redirect()->route('menu')->withErrors('Session ID not found!');
+        }
+
+        try {
+            $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
+
+            $order_no = $checkout_session->metadata->order_no ?? null;
+            if (!$order_no) {
+                return redirect()->route('menu')->withErrors('No order reference found.');
+            }
+
+            $order = Order::with(['orderItems', 'customer'])
+                ->where('order_no', $order_no)
+                ->first();
+
+            if (!$order) {
+                throw new NotFoundHttpException();
+            }
+
+            // Save Stripe session id on the order
+            $order->session_id = $session_id;
+
+            if ($order->status_online_pay === 'unpaid') {
+                $order->status_online_pay = 'paid';
+            }
+            $order->save();
+
+            // Send email
+            try {
+                Mail::to($order->customer->email)->send(new OrderEmail(
+                    $order->orderItems,
+                    $order->customer->first_name,
+                    $order->customer->email,
+                    $order->order_no,
+                    $order->delivery_fee,
+                    $order->total_price,
+                    config('site.email'),
+                    RestaurantPhoneNumber::first()?->phone_number
+                ));
+            } catch (\Exception $e) {
+                Log::error('Order email failed to send: '.$e->getMessage());
+            }
+
+            // WhatsApp
+            $this->sendWhatsAppNotification($order);
+
+            // Clear session
+            $this->clearOrderSession();
+
+            return view('main-site.payment-success', compact('order'));
+
+        } catch (\Exception $e) {
+            $error_msg = $e->getMessage();
+            return redirect()->route('menu')->withErrors($error_msg);
+        }
+    }
+
+
+
+    private function handlePaystackSuccess(Request $request)
+    {
+        $reference = $request->query('reference');
+
+        if (!$reference) {
+            return redirect()->route('menu')
+                ->withErrors('Missing Paystack reference.');
+        }
+
+ 
+        $response = Http::withToken($this->paystackSecret)
+            ->get("https://api.paystack.co/transaction/verify/{$reference}");
+
+        if (! $response->successful()) {
+            return redirect()->route('menu')
+                ->withErrors('Unable to verify payment with Paystack. Please try again.');
+        }
+
+        $data = $response->json();
+
+        // Paystack returns: status => true/false, data.status => 'success'|'failed' etc.
+        if (empty($data['status']) || empty($data['data'])) {
+            return redirect()->route('menu')
+                ->withErrors($data['message'] ?? 'Payment verification failed.');
+        }
+
+        $tx = $data['data'];
+
+        if ($tx['status'] !== 'success') {
+            return redirect()->route('menu')
+                ->withErrors('Payment was not successful. Current status: '.$tx['status']);
+        }
+
+        // Get order_no from metadata (we set it when initializing)
+        $order_no = $tx['metadata']['order_no'] ?? null;
+        if (!$order_no) {
+            return redirect()->route('menu')
+                ->withErrors('Order reference missing from Paystack metadata.');
+        }
+
+        $order = Order::with(['orderItems', 'customer'])
+            ->where('order_no', $order_no)
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('menu')
+                ->withErrors('Order not found for this transaction.');
+        }
+
+        // Mark order as paid if still unpaid
+        if ($order->status_online_pay === 'unpaid') {
+            $order->status_online_pay = 'paid';
+            $order->session_id        = $reference; // store Paystack ref in session_id if you like
+            $order->payment_method    = 'PAYSTACK';
+            $order->save();
+
+            // Send email
+            try {
+                Mail::to($order->customer->email)->send(new OrderEmail(
+                    $order->orderItems,
+                    $order->customer->first_name,
+                    $order->customer->email,
+                    $order->order_no,
+                    $order->delivery_fee,
+                    $order->total_price,
+                    config('site.email'),
+                    RestaurantPhoneNumber::first()?->phone_number
+                ));
+            } catch (\Exception $e) {
+                Log::error('Order email failed to send (paystack): '.$e->getMessage());
+            }
+
+            // WhatsApp
+            $this->sendWhatsAppNotification($order);
+
+            // Clear session
+            $this->clearOrderSession();
+        }
+
+        return view('main-site.payment-success', compact('order'));
+    }
+
+
+
+
     // Check if a session key exists and the cart is not empty, otherwise redirect with an error message
     // protected function checkCart()
     // {

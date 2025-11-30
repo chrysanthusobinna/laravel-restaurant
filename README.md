@@ -48,7 +48,8 @@ This project utilizes the following libraries for enhanced functionality:
 - **[intervention/image-laravel (1.3.0)](https://github.com/Intervention/image)**: Laravel integration of Intervention Image for image manipulation.  
 - **[yajra/laravel-datatables-oracle (11.1.5)](https://yajrabox.com/docs/laravel-datatables/master)**: jQuery DataTables API for Laravel, simplifying server-side processing.  
 - **[stripe/stripe-php (16.4.0)](https://github.com/stripe/stripe-php)**: Stripe PHP library for payment processing and integration.  
-- **[getcountrycurrency/country-currency-api (1.0.0)](https://github.com/getcountrycurrency/country-currency-api)**: A PHP library for fetching country currency details.  
+ 
+  
 
 --- 
 ## How to Deploy On Shared Host Cpanel

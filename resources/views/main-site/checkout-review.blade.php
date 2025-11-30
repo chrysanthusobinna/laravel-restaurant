@@ -111,6 +111,7 @@
                         <div class="heading_s1">
                             <h4>Your Orders</h4>
                         </div>
+                        @include('partials.message-bag')
 
                         <div class="table-responsive order_table">
                             <table class="table">
@@ -145,20 +146,8 @@
                             </table>
                         </div>
 
-                        <div class="payment_method">
-                            <div class="heading_s1">
-                                <h4>Payment</h4>
-                            </div>
-                            <div class="payment_option">
-                                <div class="custome-radio">
-                                    <input class="form-check-input" type="radio" name="payment_option" id="exampleRadios5" value="option5" checked="">
-                                    <label class="form-check-label" for="exampleRadios5">Stripe Payment</label>
-                                </div>
-                            </div>
-                        </div>
+           
                     <div class="row mb-3">
- 
-
                         <!-- Additional Information -->
                         <div class="form-group mb-0 mt-2 col-md-12">
                             <div class="heading_s1">
