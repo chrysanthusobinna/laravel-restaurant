@@ -43,4 +43,9 @@ return [
     'google_maps' => [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
+
+    'table_booking' => [
+        'allow' => env('ALLOW_TABLE_BOOKING', false),
+    ],
+
 ];

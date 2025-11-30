@@ -261,7 +261,7 @@
         </div>
     </div>
     <!-- START SECTION OUR MENU -->
-
+@if(config('services.table_booking.allow'))
 <!-- START SECTION CTA -->
 <div class="section background_bg" data-img-src="/assets/images/cta_bg.jpg">
     <div class="container">
@@ -377,8 +377,9 @@
         </div>
     </div>
     <!-- END SECTION BOOK TABLE -->
+@endif
 
- 
+ @if(!$testimonies->isEmpty())
 <!-- START SECTION TESTIMONIAL -->
 <div class="section bg_linen pb_70">
     <div class="container">
@@ -415,9 +416,9 @@
     </div>
 </div>
 <!-- END SECTION TESTIMONIAL -->
+@endif
 
-
-
+@if(!$blogs->isEmpty())
 <!-- START SECTION BLOG -->
 <div class="section">
     <div class="container">
@@ -465,6 +466,8 @@
     </div>
 </div>
 <!-- END SECTION BLOG -->
+
+@endif
 
  
 @endsection
