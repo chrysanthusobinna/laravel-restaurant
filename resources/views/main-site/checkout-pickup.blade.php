@@ -206,7 +206,7 @@
                        tabindex="0" role="button" aria-pressed="false">
                     <div class="checkmark"></div>
                     <h6 class="option-title">Pickup Point</h6>
-                    <p class="option-sub mb-0">{{ $location->address }}</p>
+                    <p class="option-sub mb-0">{{ $location->full_address }}</p>
                   </div>
                 @endforeach
               </div>

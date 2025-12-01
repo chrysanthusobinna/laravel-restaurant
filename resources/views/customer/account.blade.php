@@ -228,7 +228,7 @@
                     <a href="{{ route('customer.edit.profile') }}" class="btn btn-sm"><i class="fas fa-user-edit me-2"></i>Edit Account</a>
                     <a href="{{ route('customer.change.password') }}" class="btn btn-sm"><i class="fas fa-key me-2"></i>Change Password</a>
                     <a href="{{ route('home') }}" class="btn btn-sm"><i class="fas fa-shopping-bag me-2"></i>Return to Shopping</a>
-                    <a href="" class="btn btn-sm"><i class="fas fa-file-invoice-dollar me-2"></i>My Orders</a>
+                    <a href="{{ route('customer.orders') }}" class="btn btn-sm"><i class="fas fa-file-invoice-dollar me-2"></i>My Orders</a>
                     <a href="{{ route('auth.logout') }}" class="btn btn-sm"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </div>
             </div>

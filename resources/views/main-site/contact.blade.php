@@ -121,7 +121,7 @@
                         <div class="contact_text">
                             <span>Address</span>
                             @forelse($addresses as $address)
-                                <p>{{ $address->address }}</p>
+                                <p>{{ $address->full_address }}</p>
                             @empty
                                 <p>No addresses available.</p>
                             @endforelse
@@ -188,9 +188,9 @@
                 
                 <div class="col-lg-6 animation mt-4 mt-lg-0" data-animation="fadeInUp" data-animation-delay="0.3s">
                     <div class="map">
-                        @if($firstRestaurantAddress)
+                        @if($firstCompanyAddress)
                         <iframe 
-                            src="https://maps.google.com/maps?q={{ urlencode($firstRestaurantAddress->address) }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                            src="https://maps.google.com/maps?q={{ urlencode($firstCompanyAddress->address) }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                             width="600" 
                             style="border:0; height:200px;" 
                             allowfullscreen="" 

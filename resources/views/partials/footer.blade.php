@@ -48,7 +48,7 @@
                 	<div class="widget">
                         <h6 class="widget_title">Contact Info</h6>
                         <ul class="contact_info contact_info_light">
-                            @if($firstRestaurantAddress) <li> <i class="ti-location-pin"></i> <p>{{ $firstRestaurantAddress->address }}</p></li> @endif
+                            @if($firstCompanyAddress) <li> <i class="ti-location-pin"></i> <p>{{ $firstCompanyAddress->full_address }}</p></li> @endif
 
                             <li> <i class="ti-email"></i>  <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a> </li>
                         

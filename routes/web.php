@@ -96,6 +96,8 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('customer')->middleware(CheckRoleCustomer::class)->group(function () {
     
     Route::get('/', [CustomerController::class, 'account'])->name('customer.account');
+    Route::get('/orders/{filter?}', [CustomerController::class, 'orders'])->name('customer.orders');
+    Route::get('/order-details/{id}', [CustomerController::class, 'orderDetails'])->name('customer.order.details');
 
     // Profile edit and update
     Route::get('/edit-profile', [CustomerController::class, 'editAccount'])->name('customer.edit.profile');

@@ -8,9 +8,9 @@ use App\Models\Address;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
+use App\Models\CompanyAddress;
 use App\Helpers\DistanceHelper;
 use Illuminate\Validation\Rule;
-use App\Models\RestaurantAddress;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -30,6 +30,10 @@ class CheckoutController extends Controller
     protected $paystackSecret;
     protected $currencyCode;
 
+    protected $distance_limit_in_miles;
+    protected $price_per_mile;
+    protected $companyAddress;
+
 
     public function __construct()
     {
@@ -42,7 +46,13 @@ class CheckoutController extends Controller
         // Get Site Settings
         $site_settings  = SiteSetting::latest()->first();
         $this->currencyCode  = strtolower($site_settings->currency_code);
-        
+        $this->companyAddress = CompanyAddress::first();
+
+        //Order Settings
+        $order_settings = OrderSettings::first();
+        $this->price_per_mile = $order_settings->price_per_mile;
+        $this->distance_limit_in_miles = $order_settings->distance_limit_in_miles;
+ 
     }
 
     // Session key for wizard data
@@ -99,7 +109,7 @@ class CheckoutController extends Controller
         $this->guardStep('fulfilment', 'pickup');
 
         // Fetch pickup locations  
-        $pickupLocations = RestaurantAddress::all(['id', 'address']);
+        $pickupLocations = CompanyAddress::all();
 
         // Send them to the view
         return view('main-site.checkout-pickup', compact('pickupLocations'));
@@ -117,6 +127,7 @@ class CheckoutController extends Controller
 
         // Save pickup location
         $data['pickup_location_id'] = $request->pickup_location_id;
+        // $data['order_type'] = 'pickup';
 
         session([self::SESSION_KEY => $data]);
 
@@ -133,26 +144,53 @@ class CheckoutController extends Controller
         return view('main-site.checkout-delivery', compact('addresses'));
     }
 
+
     public function deliveryPost(Request $request)
     {
         $user = Auth::user();
 
         // ---- Base validation ----
-        $v = Validator::make($request->all(), [
-            'mode' => ['required', Rule::in(['saved','new'])],
+        $v = Validator::make(
+            $request->all(),
+            [
+                'mode' => ['required', Rule::in(['saved','new'])],
 
-            'saved_address_id' => [
-                'nullable','integer',
-                Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
+                'saved_address_id' => [
+                    'nullable','integer',
+                    Rule::exists('addresses','id')->where(fn($q) => $q->where('user_id', $user->id)),
+                ],
+
+                // Delivery "new" fields
+                'new.line1'       => ['nullable','string','max:255'],
+                'new.line2'       => ['nullable','string','max:255'],
+                'new.city'        => ['nullable','string','max:150'],
+                'new.state'       => ['nullable','string','max:150'],
+                'new.postal_code' => ['nullable','string','max:30'],
+                'new.country'     => ['nullable','string','max:150'],
+                'new.latitude'    => ['nullable','numeric'],
+                'new.longitude'   => ['nullable','numeric'],
             ],
+            [
+                // Custom friendly messages
+                'saved_address_id.required' => 'Please select one of your saved addresses, or choose “Add a new address”.',
+                'new.line1.required'        => 'Please enter the first line of your new address.',
+                'new.city.required'         => 'Please enter the city for your new address.',
+                'new.postal_code.required'  => 'Please enter the postal code for your new address.',
+                'new.country.required'      => 'Please select the country for your new address.',
+                'new.latitude.required'     => 'Please provide the latitude for your new address.',
+                'new.longitude.required'    => 'Please provide the longitude for your new address.',        
+            ]
+        );
 
-            // Delivery "new" fields
-            'new.line1'       => ['nullable','string','max:255'],
-            'new.line2'       => ['nullable','string','max:255'],
-            'new.city'        => ['nullable','string','max:150'],
-            'new.state'       => ['nullable','string','max:150'],
-            'new.postal_code' => ['nullable','string','max:30'],
-            'new.country'     => ['nullable','string','max:150'],
+        // Optional: make field labels nicer if they appear in other messages
+        $v->setAttributeNames([
+            'saved_address_id'   => 'saved address',
+            'new.line1'          => 'address line 1',
+            'new.city'           => 'city',
+            'new.postal_code'    => 'postal code',
+            'new.country'        => 'country',
+            'new.latitude'       => 'latitude',
+            'new.longitude'      => 'longitude',
         ]);
 
         // ---- Conditional validation ----
@@ -169,19 +207,48 @@ class CheckoutController extends Controller
         if ($request->mode === 'saved') {
             $deliveryAddressId = (int) $request->saved_address_id;
         } else {
-            $delivery = $user->addresses()->create([
-                'label'       => 'delivery',
-                'street'      => trim(($request->input('new.line1') ?? '') . ($request->filled('new.line2') ? ', '.$request->input('new.line2') : '')),
-                'city'        => $request->input('new.city'),
-                'state'       => $request->input('new.state'),
-                'postal_code' => $request->input('new.postal_code'),
-                'country'     => $request->input('new.country'),
-                'is_default'  => false,
-            ]);
-            $deliveryAddressId = $delivery->id;
+
+
+ 
+                $origin_latitude = $this->companyAddress->latitude;
+                $origin_longitude = $this->companyAddress->longitude;
+                $destination_latitude = (float) $request->input('new.latitude');
+                $destination_longitude = (float) $request->input('new.longitude');
+
+ 
+                // Distance
+                $distanceData = DistanceHelper::getDistance($origin_latitude, $origin_longitude, $destination_latitude, $destination_longitude);
+
+                if (isset($distanceData['error'])) {
+                    return back()->withErrors("Unfortunately, we are unable to deliver to the provided address. Please check the address details or contact support for assistance.");
+                 }
+
+                $distance_in_miles = $distanceData['value_in_miles'];
+
+ 
+ 
+                if ($distance_in_miles > $this->distance_limit_in_miles) {
+                    $error_message = "We're sorry! We can only deliver within {$this->distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$this->companyAddress->full_address}. We look forward to serving you!";
+                    return back()->withErrors($error_message)->withInput();
+                }
+
+
+                // Create new address
+                $delivery = $user->addresses()->create([
+                    'label'       => 'delivery',
+                    'street'      => trim(($request->input('new.line1') ?? '') . ($request->filled('new.line2') ? ', '.$request->input('new.line2') : '')),
+                    'city'        => $request->input('new.city'),
+                    'state'       => $request->input('new.state'),
+                    'postal_code' => $request->input('new.postal_code'),
+                    'country'     => $request->input('new.country'),
+                    'latitude'    => $request->input('new.latitude'),
+                    'longitude'   => $request->input('new.longitude'),
+                    'is_default'  => false,
+                ]);
+                $deliveryAddressId = $delivery->id;
         }
 
-        // ---- Store only delivery ID in session ----
+        // Store only delivery ID in session ----
         $data = session(self::SESSION_KEY, []);
         $data['addresses'] = [
             'delivery_address_id' => $deliveryAddressId,
@@ -190,6 +257,14 @@ class CheckoutController extends Controller
 
         return redirect()->route('customer.checkout.review');
     }
+
+
+
+
+
+
+
+
 
     /** Step 4: Review */
     public function review()
@@ -208,23 +283,14 @@ class CheckoutController extends Controller
             return redirect()->route('menu')->withErrors('Your cart is empty. Please add items to your cart before checking out.');
         }
         
-        $order_settings = OrderSettings::first();
+        
         $delivery_fee = 0;
 
-        if (!$order_settings) {
-            return redirect()->route('home')->withErrors('No order settings found.');
-        }
-
+ 
         $sessionData = session(self::SESSION_KEY, []);
 
         if (isset($sessionData['addresses']['delivery_address_id'])) {
-           
-
-            $price_per_mile          = $order_settings->price_per_mile;
-            $distance_limit_in_miles = $order_settings->distance_limit_in_miles;
-
-            $restaurant_address = $this->firstRestaurantAddress ?? config('site.address');
-
+ 
             
             $delivery_address_id = $sessionData['addresses']['delivery_address_id'] ?? null;
 
@@ -235,36 +301,48 @@ class CheckoutController extends Controller
 
             $delivery_address = $user->addresses()->find($delivery_address_id);
 
+
+ 
             if (!$delivery_address) {
                 return redirect()->route('customer.checkout.delivery')
                     ->withErrors('Selected delivery address was not found.');
             }
 
-            $single_line_address = $delivery_address->full_address;
+
+
+
+            $origin_latitude = $this->companyAddress->latitude;
+            $origin_longitude = $this->companyAddress->longitude;
+            $destination_latitude =  $delivery_address->latitude;
+            $destination_longitude = $delivery_address->longitude;
+
+
 
             // Distance
-            $distanceData = DistanceHelper::getDistance($restaurant_address, $single_line_address);
+            $distanceData = DistanceHelper::getDistance($origin_latitude, $origin_longitude, $destination_latitude, $destination_longitude);
 
             if (isset($distanceData['error'])) {
-                return back()->withErrors($distanceData['error']);
+                return back()->withErrors("Unfortunately, we are unable to deliver to the provided address. Please check the address details or contact support for assistance.");
             }
 
             $distance_in_miles = $distanceData['value_in_miles'];
 
-            if ($distance_in_miles > $distance_limit_in_miles) {
-                $error_message = "We're sorry! We can only deliver within {$distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$restaurant_address}. We look forward to serving you!";
+
+            if ($distance_in_miles > $this->distance_limit_in_miles) {
+                $error_message = "We're sorry! We can only deliver within {$this->distance_limit_in_miles} miles. You can still place your order as a walk-in at our restaurant located at {$this->companyAddress->full_address}. We look forward to serving you!";
                 return back()->withErrors($error_message)->withInput();
             }
 
-            // Delivery fee
-            $delivery_fee = ceil($price_per_mile * $distance_in_miles * 100) / 100;
 
-            // 🔹 Save delivery pricing into the same checkout session
+
+            // Delivery fee
+            $delivery_fee = ceil($this->price_per_mile * $distance_in_miles * 100) / 100;
+
+            //  save delivery pricing into the same checkout session
             $sessionData['delivery'] = [
                 'distance_miles' => $distance_in_miles,
                 'delivery_fee'   => $delivery_fee,
-                'price_per_mile' => $price_per_mile,
-            ];
+             ];
             session([self::SESSION_KEY => $sessionData]);
 
         }
@@ -275,6 +353,14 @@ class CheckoutController extends Controller
 
         return view('main-site.checkout-review', compact('user', 'cart_items', 'delivery_fee', 'subtotal'));
     }
+
+
+
+
+
+
+
+
 
     public function proccessCheckout(Request $request)
     {
@@ -296,7 +382,8 @@ class CheckoutController extends Controller
         // 2) Pull checkout session data
         $checkout = session(self::SESSION_KEY, []);
 
-        $fulfilment       = $checkout['fulfilment']      ?? 'delivery'; // 'pickup' or 'delivery'
+ 
+        $fulfilment       = $checkout['fulfilment']; // 'pickup' or 'delivery'
         $addresses        = $checkout['addresses']       ?? [];
         $deliverySession  = $checkout['delivery']        ?? [];
         $order_no         = $checkout['order_no']        ?? null;
@@ -304,10 +391,10 @@ class CheckoutController extends Controller
         $deliveryAddressId = $addresses['delivery_address_id'] ?? null;
         $pickupLocationId =  $checkout['pickup_location_id'] ?? null;
 
+ 
         $delivery_fee    = $deliverySession['delivery_fee']    ?? 0;
         $distance_miles  = $deliverySession['distance_miles']  ?? null;
-        $price_per_mile  = $deliverySession['price_per_mile']  ?? null;
-
+ 
         // 3) Recalculate subtotal
         $subtotal = array_reduce($cart_items, function ($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
@@ -319,7 +406,7 @@ class CheckoutController extends Controller
             ['order_no' => $order_no],
             [
                 'user_id'            => $user->id,
-                'order_type'         => 'online',
+                'order_type'         => $fulfilment,
                 'created_by_user_id' => null,
                 'updated_by_user_id' => null,
                 'total_price'        => $total,
@@ -330,20 +417,25 @@ class CheckoutController extends Controller
                 'additional_info'    => $request->input('additional_info'),
                 'delivery_fee'       => $delivery_fee,
                 'delivery_distance'  => $distance_miles,
-                'price_per_mile'     => $price_per_mile,
+                'price_per_mile'     => $this->price_per_mile,
                 'delivery_address_id'=> $deliveryAddressId,
                 'pickup_address_id'  => $pickupLocationId,
-                
-                
             ]
         );
 
-        // 6) Attach cart items to the order
+        // If the order already existed, clear old items first
+        if (! $order->wasRecentlyCreated) {
+            $order->orderItems()->delete();
+        }
+
+        // Re-create items from current cart state
         foreach ($cart_items as $item) {
+            $qty = (int) ($item['quantity'] ?? 1);
+
             $order->orderItems()->create([
                 'menu_name' => $item['name'],
-                'quantity'  => $item['quantity'] ?? '',
-                'subtotal'  => $item['price'] * ($item['quantity'] ?? 1),
+                'quantity'  => $qty,
+                'subtotal'  => $item['price'] * $qty,
             ]);
         }
 

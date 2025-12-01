@@ -1,0 +1,2 @@
+[30-Nov-2025 16:48:32 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::deliveryAddress() in C:\Users\user\Desktop\laravel-restaurant\app\Models\Order.php on line 44
+[30-Nov-2025 19:06:54 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::pickupAddress() in C:\Users\user\Desktop\laravel-restaurant\app\Models\Order.php on line 56

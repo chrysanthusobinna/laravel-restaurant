@@ -13,7 +13,7 @@ use App\Models\OrderSettings;
 use App\Models\PrivacyPolicy;
 use App\Models\LiveChatScript;
 use App\Helpers\DistanceHelper;
-use App\Models\RestaurantAddress;
+use App\Models\CompanyAddress;
 use App\Models\SocialMediaHandle;
 use App\Models\TermsAndCondition;
 use App\Models\RestaurantPhoneNumber;
@@ -57,7 +57,7 @@ class MainSiteController extends Controller
     }
     public function contact()
     {
-        $addresses = RestaurantAddress::all();
+        $addresses = CompanyAddress::all();
         $phoneNumbers = RestaurantPhoneNumber::all();
         $workingHours = RestaurantWorkingHour::all();
     

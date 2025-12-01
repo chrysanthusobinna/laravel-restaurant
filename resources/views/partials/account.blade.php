@@ -22,8 +22,8 @@
                     <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                 @elseif (Auth::user()->role === 'customer')
                     <li><a href="{{ route('customer.account') }}">My Account</a></li>
-                    <li><a href="">My Orders</a></li>
-                    <li><a href=" ">Change Password</a></li>
+                    <li><a href="{{ route('customer.orders') }}">My Orders</a></li>
+                    <li><a href="{{ route('customer.change.password') }}">Change Password</a></li>
 
                 @endif
                 <li><a href="{{ route('auth.logout') }}">Logout</a></li>

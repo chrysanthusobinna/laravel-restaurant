@@ -28,6 +28,43 @@ class CustomerController extends Controller
         $this->shareMainSiteViewData();
     }
 
+    public function orders($filter = 'all')
+    {
+        $user = Auth::user();
+
+        // Allowed status filters
+        $allowedFilters = ['all', 'pending', 'completed', 'cancelled'];
+
+        // Validate filter
+        if (!in_array($filter, $allowedFilters)) {
+            $filter = 'all';
+        }
+
+        // Base query — only orders the customer owns AND must be paid
+        $ordersQuery = $user->customerOrders()
+                            ->where('status_online_pay', 'paid')
+                            ->with('orderItems');
+
+        // Apply status filter
+        if ($filter !== 'all') {
+            $ordersQuery->where('status', $filter);
+        }
+
+        $orders = $ordersQuery->orderBy('created_at', 'desc')->get();
+
+        return view('customer.orders', compact('user', 'orders', 'filter'));
+    }
+
+
+
+    public function orderDetails($id)
+    {
+        $user = Auth::User();  
+        $order = $user->customerOrders()->with(['orderItems', 'deliveryAddressWithTrashed', 'pickupAddress'])->findOrFail($id);
+
+        return view('customer.order-details', compact('user', 'order'));
+    }
+
     // Show the customer account
     public function account()
     {

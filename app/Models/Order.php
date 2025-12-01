@@ -40,11 +40,21 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'delivery_address_id');
     }
 
+    // Delivery address
+    public function deliveryAddressWithTrashed()
+    {
+        return $this->belongsTo(Address::class, 'delivery_address_id')->withTrashed();
+    }
+
+ 
     // Pickup address
     public function pickupAddress()
     {
-        return $this->belongsTo(RestaurantAddress::class, 'pickup_address_id');
+        return $this->belongsTo(CompanyAddress::class, 'pickup_address_id')->withTrashed();
     }
+
+
+
 
     // User who created the order
     public function createdByUser()

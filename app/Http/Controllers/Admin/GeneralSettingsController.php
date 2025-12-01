@@ -7,7 +7,7 @@ use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
 use App\Models\LiveChatScript;
-use App\Models\RestaurantAddress;
+use App\Models\CompanyAddress;
 use App\Models\SocialMediaHandle;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressRequest;
@@ -34,7 +34,7 @@ class GeneralSettingsController extends Controller
     
     public function index()
     {
-        $addresses = RestaurantAddress::all();
+        $addresses = CompanyAddress::all();
         $phoneNumbers = RestaurantPhoneNumber::all();
         $workingHours = RestaurantWorkingHour::all();
         $socialMediaHandles = SocialMediaHandle::all();
@@ -103,21 +103,43 @@ class GeneralSettingsController extends Controller
     // Restaurant Address CRUD
     public function storeAddress(AddressRequest $request)
     {
-        RestaurantAddress::create(['address' => $request->address]);
+        CompanyAddress::create([
+            'street'      => $request->line1,
+            'city'        => $request->city,
+            'state'       => $request->state,
+            'postal_code' => $request->postal_code,
+            'country'     => $request->country,
+            'latitude'    => $request->latitude,
+            'longitude'   => $request->longitude,
+        ]);
+
         return back()->with('success', 'Address added successfully.');
     }
 
     public function updateAddress(AddressRequest $request, $id)
     {
-        $address = RestaurantAddress::findOrFail($id);
-        $address->update(['address' => $request->address]);
+        $address = CompanyAddress::findOrFail($id);
+
+        $address->update([
+            'street'      => $request->line1,
+            'city'        => $request->city,
+            'state'       => $request->state,
+            'postal_code' => $request->postal_code,
+            'country'     => $request->country,
+            'latitude'    => $request->latitude,
+            'longitude'   => $request->longitude,
+        ]);
+
         return back()->with('success', 'Address updated successfully.');
     }
+
     public function deleteAddress($id)
     {
-        RestaurantAddress::findOrFail($id)->delete();
+        CompanyAddress::findOrFail($id)->delete();
+
         return back()->with('success', 'Address deleted successfully.');
-    }    
+    }
+
 
 
     // social media handles CRUD

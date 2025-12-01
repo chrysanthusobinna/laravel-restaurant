@@ -165,6 +165,8 @@
           document.getElementById(mappingPrefix + '_state').value  = get('administrative_area_level_1');
           document.getElementById(mappingPrefix + '_postal').value = get('postal_code');
           document.getElementById(mappingPrefix + '_country').value= get('country');
+          document.getElementById(mappingPrefix + '_latitude').value = place.geometry.location.lat();
+          document.getElementById(mappingPrefix + '_longitude').value = place.geometry.location.lng();
         });
       }
 
@@ -314,8 +316,7 @@
                           </div>
                           <small class="muted">
                             {{ $addr->state ?? '' }}{{ ($addr->state && $addr->country) ? ', ' : '' }}{{ $addr->country ?? '' }}
-                            @if(!empty($addr->label)) <span class="addr-badge ms-2">{{ ucfirst($addr->label) }}</span> @endif
-                          </small>
+                           </small>
                         </div>
                       </div>
                       <div class="d-flex gap-2">
@@ -337,8 +338,7 @@
             {{-- ===== New delivery address (inline) ===== --}}
             <div id="delivery_new_block" class="mt-3 {{ $hasSaved ? 'd-none' : '' }}">
               <div id="delivery_new_inline" class="fieldset">
-                <legend>New Delivery Address</legend>
-
+ 
                 <label class="form-label">Search address</label>
                 <input type="text"
                        id="del_autocomplete"
@@ -347,34 +347,49 @@
                        data-places-search
                        autocomplete="off" spellcheck="false">
 
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Street</label>
-                    <input id="del_line1" name="new[line1]" class="form-control" value="{{ old('new.line1') }}">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Apt / Suite</label>
-                    <input id="del_line2" name="new[line2]" class="form-control" value="{{ old('new.line2') }}">
+
+                  <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Street</label>
+                        <input id="del_line1" name="new[line1]" class="form-control" 
+                              value="{{ old('new.line1') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Apt / Suite</label>
+                        <input id="del_line2" name="new[line2]" class="form-control" 
+                              value="{{ old('new.line2') }}" readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">City</label>
+                        <input id="del_city" name="new[city]" class="form-control" 
+                              value="{{ old('new.city') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">State / Province</label>
+                        <input id="del_state" name="new[state]" class="form-control" 
+                              value="{{ old('new.state') }}" readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">Postal Code</label>
+                        <input id="del_postal" name="new[postal_code]" class="form-control" 
+                              value="{{ old('new.postal_code') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Country</label>
+                        <input id="del_country" name="new[country]" class="form-control" 
+                              value="{{ old('new.country') }}" readonly>
+                      </div>
+
+                 
+                      <input type="hidden" id="del_latitude" name="new[latitude]" value="{{ old('new.latitude') }}">
+                      <input type="hidden" id="del_longitude" name="new[longitude]" value="{{ old('new.longitude') }}">
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">City</label>
-                    <input id="del_city" name="new[city]" class="form-control" value="{{ old('new.city') }}">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">State / Province</label>
-                    <input id="del_state" name="new[state]" class="form-control" value="{{ old('new.state') }}">
-                  </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">Postal Code</label>
-                    <input id="del_postal" name="new[postal_code]" class="form-control" value="{{ old('new.postal_code') }}">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Country</label>
-                    <input id="del_country" name="new[country]" class="form-control" value="{{ old('new.country') }}">
-                  </div>
                 </div>
+      
 
               </div>
             </div>

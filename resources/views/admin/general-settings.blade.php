@@ -6,6 +6,19 @@
     <link rel="stylesheet" href="/admin_resources/vendors/typicons.font/font/typicons.css">
     <link rel="stylesheet" href="/admin_resources/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="/admin_resources/css/vertical-layout-light/style.css">
+
+    <style>
+
+        /* Make Google Places suggestions appear above Bootstrap modals */
+ 
+.pac-container {
+    z-index: 20000 !important;
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+
+    </style>
     
 @endpush
 
@@ -51,10 +64,14 @@
         };
 
         // Address Modal
-        function resetAddressModal() {
+         function resetAddressModal() {
             $('#addressForm')[0].reset();
+
+            // Default to store route for "Add"
             $('#addressForm').attr('action', "{{ route('admin.address.store') }}");
             $('#addressFormMethod').val('');
+
+            $('#addressModalLabel').text('Add Address');
         }
 
         window.createAddress = function () {
@@ -62,14 +79,37 @@
             $('#addressModalLabel').text('Add Address');
         };
 
-        window.editAddress = function (id, address) {
-            resetAddressModal();
-            $('#address').val(address);
-            let actionUrl = "{{ route('admin.address.update', ':id') }}".replace(':id', id);
-            $('#addressForm').attr('action', actionUrl);
-            $('#addressFormMethod').val('PUT');
-            $('#addressModalLabel').text('Edit Address');
-        };
+window.editAddress = function (button) {
+    resetAddressModal();
+
+    var $btn = $(button);
+
+    var id          = $btn.data('id');
+    var street      = $btn.data('street') || '';
+    var city        = $btn.data('city') || '';
+    var state       = $btn.data('state') || '';
+    var postalCode  = $btn.data('postal_code') || '';
+    var country     = $btn.data('country') || '';
+    var latitude    = $btn.data('latitude') || '';
+    var longitude   = $btn.data('longitude') || '';
+    var fullAddress = $btn.data('full_address') || '';
+
+    // Fill the modal fields
+    $('#address').val(fullAddress);     // search box
+    $('#street').val(street);
+    $('#city').val(city);
+    $('#state').val(state);
+    $('#postal_code').val(postalCode);
+    $('#country').val(country);
+    $('#latitude').val(latitude);
+    $('#longitude').val(longitude);
+
+    // Change form to use update route
+    let actionUrl = "{{ route('admin.address.update', ':id') }}".replace(':id', id);
+    $('#addressForm').attr('action', actionUrl);
+    $('#addressFormMethod').val('PUT');
+    $('#addressModalLabel').text('Edit Address');
+};
 
         // Working Hour Modal
         function resetWorkingHourModal() {
@@ -145,7 +185,88 @@
     });
 </script>
 
- 
+
+
+<script>
+    /**
+     * Initialise Google Places Autocomplete on the modal's #address input
+     * and populate the other fields when a place is selected.
+     */
+    function initAddressModalPlaces() {
+        var input = document.getElementById('address');
+        if (!input || !window.google || !google.maps || !google.maps.places) {
+            return;
+        }
+
+        // Prevent Enter from submitting the form while searching
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+
+        var autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['geocode'],
+            fields: ['address_components', 'geometry', 'formatted_address']
+        });
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (!place || !place.address_components) {
+                return;
+            }
+
+            var components = place.address_components;
+
+            // Helper to pull a component by its type
+            function findComponent(type) {
+                var comp = components.find(function (c) {
+                    return c.types.indexOf(type) !== -1;
+                });
+                return comp ? comp.long_name : '';
+            }
+
+            var streetNumber = findComponent('street_number');
+            var route        = findComponent('route');
+            var line1        = [streetNumber, route].filter(Boolean).join(' ');
+
+            // Fill the fields
+            document.getElementById('line1').value        = line1;
+            // line2 left for user to fill manually
+            document.getElementById('city').value         = findComponent('locality')
+                                                          || findComponent('postal_town')
+                                                          || findComponent('sublocality')
+                                                          || '';
+            document.getElementById('state').value        = findComponent('administrative_area_level_1');
+            document.getElementById('postal_code').value  = findComponent('postal_code');
+            document.getElementById('country').value      = findComponent('country');
+
+            if (place.geometry && place.geometry.location) {
+                document.getElementById('latitude').value  = place.geometry.location.lat();
+                document.getElementById('longitude').value = place.geometry.location.lng();
+            }
+        });
+    }
+
+    // If you want to ensure it rebinds when the modal opens (optional but safe)
+    document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('addressModal');
+        if (!modalEl) return;
+
+        modalEl.addEventListener('shown.bs.modal', function () {
+            // Re-initialise when the modal opens
+            if (window.google && google.maps && google.maps.places) {
+                initAddressModalPlaces();
+            }
+        });
+    });
+</script>
+
+
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
+
 
 @endpush
 
@@ -237,26 +358,49 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($addresses as $address)
-                                <tr>
-                                    <td>
-                                        <i class="fa fa-map-marker" aria-hidden="true"></i> 
-                                        {{ $address->address }}
-                                    </td>
-                                    <td class="text-end">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal" onclick="editAddress({{ $address->id }}, '{{ $address->address }}')">
-                                            <i class="fa fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteAddress({{ $address->id }})">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="text-center">No addresses available. Please add a new address.</td>
-                                </tr>
-                            @endforelse
+                        @forelse($addresses as $address)
+                            <tr>
+                                <td>
+                                    <i class="fa fa-map-marker" aria-hidden="true"></i> 
+                                    {{ $address->full_address }}
+                                </td>
+                                <td class="text-end">
+                                    <button
+                                        class="btn btn-warning btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addressModal"
+
+                                        {{-- ID for update route --}}
+                                        data-id="{{ $address->id }}"
+
+                                        {{-- Individual fields --}}
+                                        data-street="{{ e($address->street) }}"
+                                        data-city="{{ e($address->city) }}"
+                                        data-state="{{ e($address->state) }}"
+                                        data-postal_code="{{ e($address->postal_code) }}"
+                                        data-country="{{ e($address->country) }}"
+                                        data-latitude="{{ $address->latitude }}"
+                                        data-longitude="{{ $address->longitude }}"
+
+                                        {{-- What we want to show in the search box when editing --}}
+                                        data-full_address="{{ e($address->full_address) }}"
+
+                                        onclick="editAddress(this)"
+                                    >
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+
+                                    <button class="btn btn-danger btn-sm" onclick="deleteAddress({{ $address->id }})">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="text-center">No addresses available. Please add a new address.</td>
+                            </tr>
+                        @endforelse
+
                         </tbody>
                     </table>
                     
@@ -637,31 +781,74 @@
 
 
 
-    <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="addressForm" method="POST">
-                    @csrf
-                    <input type="hidden" id="addressFormMethod" name="_method" value="">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addressModalLabel">Address</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addressForm" method="POST">
+                @csrf
+                <input type="hidden" id="addressFormMethod" name="_method" value="">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addressModalLabel">Address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                     <div class="mb-3">
+                        <label for="address" class="form-label">Search Address</label>
+                        <input type="text"
+                               class="form-control"
+                               id="address"
+                               name="address"
+                               placeholder="Start typing your address..."
+                               autocomplete="off"
+                               required>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <input type="text" class="form-control" id="address" name="address" required>
-                        </div>
+
+                     <div class="mb-2">
+                        <label for="line1" class="form-label">Street</label>
+                        <input type="text" class="form-control" id="line1" name="line1" readonly>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <div class="mb-2">
+                        <label for="line2" class="form-label">Apt / Suite</label>
+                        <input type="text" class="form-control" id="line2" name="line2" readonly>
                     </div>
-                </form>
-            </div>
+
+                    <div class="mb-2">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city" readonly>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="state" class="form-label">State / Province</label>
+                        <input type="text" class="form-control" id="state" name="state" readonly>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="postal_code" class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" id="postal_code" name="postal_code" readonly>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" id="country" name="country" readonly>
+                    </div>
+
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
-    
+</div>
 
 
     <div class="modal fade" id="workingHourModal" tabindex="-1" aria-labelledby="workingHourModalLabel" aria-hidden="true">
