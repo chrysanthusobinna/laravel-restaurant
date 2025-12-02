@@ -79,43 +79,45 @@
             $('#addressModalLabel').text('Add Address');
         };
 
-window.editAddress = function (button) {
-    resetAddressModal();
+        window.editAddress = function (button) {
+            resetAddressModal();
 
-    var $btn = $(button);
+            var $btn = $(button);
 
-    var id          = $btn.data('id');
-    var street      = $btn.data('street') || '';
-    var city        = $btn.data('city') || '';
-    var state       = $btn.data('state') || '';
-    var postalCode  = $btn.data('postal_code') || '';
-    var country     = $btn.data('country') || '';
-    var latitude    = $btn.data('latitude') || '';
-    var longitude   = $btn.data('longitude') || '';
-    var fullAddress = $btn.data('full_address') || '';
+            var id          = $btn.data('id');
+            var street      = $btn.data('street') || '';
+            var city        = $btn.data('city') || '';
+            var state       = $btn.data('state') || '';
+            var postalCode  = $btn.data('postal_code') || '';
+            var country     = $btn.data('country') || '';
+            var latitude    = $btn.data('latitude') || '';
+            var longitude   = $btn.data('longitude') || '';
+            var fullAddress = $btn.data('full_address') || '';
 
-    // Fill the modal fields
-    $('#address').val(fullAddress);     // search box
-    $('#street').val(street);
-    $('#city').val(city);
-    $('#state').val(state);
-    $('#postal_code').val(postalCode);
-    $('#country').val(country);
-    $('#latitude').val(latitude);
-    $('#longitude').val(longitude);
+            // Fill the modal fields
+            $('#address').val(fullAddress);     // search box
+            $('#street').val(street);
+            $('#city').val(city);
+            $('#state').val(state);
+            $('#postal_code').val(postalCode);
+            $('#country').val(country);
+            $('#latitude').val(latitude);
+            $('#longitude').val(longitude);
 
-    // Change form to use update route
-    let actionUrl = "{{ route('admin.address.update', ':id') }}".replace(':id', id);
-    $('#addressForm').attr('action', actionUrl);
-    $('#addressFormMethod').val('PUT');
-    $('#addressModalLabel').text('Edit Address');
-};
+            // Change form to use update route
+            let actionUrl = "{{ route('admin.address.update', ':id') }}".replace(':id', id);
+            $('#addressForm').attr('action', actionUrl);
+            $('#addressFormMethod').val('PUT');
+            $('#addressModalLabel').text('Edit Address');
+        };
 
         // Working Hour Modal
         function resetWorkingHourModal() {
             $('#workingHourForm')[0].reset();
             $('#workingHourForm').attr('action', "{{ route('admin.working-hour.store') }}");
-            $('#workingHourId').val('');
+            $('#workingHourFormMethod').val(''); // clear _method
+            $('#is_closed').prop('checked', false);
+            toggleWorkingHourTimeInputs(false);
         }
 
         window.createWorkingHour = function () {
@@ -123,14 +125,38 @@ window.editAddress = function (button) {
             $('#workingHourModalLabel').text('Add Working Hour');
         };
 
-        window.editWorkingHour = function (id, workingHour) {
+        window.editWorkingHour = function (button) {
             resetWorkingHourModal();
-            $('#working_hours').val(workingHour);
+
+            var $btn      = $(button);
+            var id        = $btn.data('id');
+            var day       = $btn.data('day');
+            var opens     = $btn.data('opens');
+            var closes    = $btn.data('closes');
+            var isClosed  = $btn.data('is_closed') == 1;
+
+            $('#day_of_week').val(day);
+            $('#opens_at').val(opens || '');
+            $('#closes_at').val(closes || '');
+            $('#is_closed').prop('checked', isClosed);
+
+            toggleWorkingHourTimeInputs(isClosed);
+
             let actionUrl = "{{ route('admin.working-hour.update', ':id') }}".replace(':id', id);
             $('#workingHourForm').attr('action', actionUrl);
-            $('#workingHourId').val('PUT');
+            $('#workingHourFormMethod').val('PUT');
             $('#workingHourModalLabel').text('Edit Working Hour');
         };
+
+        function toggleWorkingHourTimeInputs(isClosed) {
+            const disabled = !!isClosed;
+            $('#opens_at').prop('disabled', disabled);
+            $('#closes_at').prop('disabled', disabled);
+        }
+
+        $('#is_closed').on('change', function () {
+            toggleWorkingHourTimeInputs(this.checked);
+        });
 
         // Social Media Handle Modal
         function resetSocialMediaModal() {
@@ -188,18 +214,14 @@ window.editAddress = function (button) {
 
 
 <script>
-    /**
-     * Initialise Google Places Autocomplete on the modal's #address input
-     * and populate the other fields when a place is selected.
-     */
+ 
     function initAddressModalPlaces() {
         var input = document.getElementById('address');
         if (!input || !window.google || !google.maps || !google.maps.places) {
             return;
         }
 
-        // Prevent Enter from submitting the form while searching
-        input.addEventListener('keydown', function (e) {
+         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
             }
@@ -230,10 +252,8 @@ window.editAddress = function (button) {
             var route        = findComponent('route');
             var line1        = [streetNumber, route].filter(Boolean).join(' ');
 
-            // Fill the fields
-            document.getElementById('line1').value        = line1;
-            // line2 left for user to fill manually
-            document.getElementById('city').value         = findComponent('locality')
+             document.getElementById('line1').value        = line1;
+             document.getElementById('city').value         = findComponent('locality')
                                                           || findComponent('postal_town')
                                                           || findComponent('sublocality')
                                                           || '';
@@ -248,14 +268,12 @@ window.editAddress = function (button) {
         });
     }
 
-    // If you want to ensure it rebinds when the modal opens (optional but safe)
-    document.addEventListener('DOMContentLoaded', function () {
+     document.addEventListener('DOMContentLoaded', function () {
         var modalEl = document.getElementById('addressModal');
         if (!modalEl) return;
 
         modalEl.addEventListener('shown.bs.modal', function () {
-            // Re-initialise when the modal opens
-            if (window.google && google.maps && google.maps.places) {
+             if (window.google && google.maps && google.maps.places) {
                 initAddressModalPlaces();
             }
         });
@@ -267,6 +285,34 @@ window.editAddress = function (button) {
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
 
+<script>
+    (function() {
+        function updateCurrencyFields() {
+            const select = document.getElementById('country_id');
+            const option = select.options[select.selectedIndex];
+
+            if (!option) return;
+
+            const symbol = option.getAttribute('data-currency-symbol') || '';
+            const code   = option.getAttribute('data-currency-code') || '';
+
+            document.getElementById('decoded_symbol').value = symbol;
+            document.getElementById('currency_code').value  = code;
+
+             const hiddenSymbol = document.getElementById('currency_symbol');
+            if (hiddenSymbol) hiddenSymbol.value = symbol;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('country_id');
+            if (!select) return;
+
+            select.addEventListener('change', updateCurrencyFields);
+
+             updateCurrencyFields();
+        });
+    })();
+</script>
 
 @endpush
 
@@ -476,19 +522,52 @@ window.editAddress = function (button) {
                     <table class="table">
                         <thead>
                             <tr>
-                                <th class="col-8">Working Hour</th>
-                                <th class="col-4">Actions</th>
+                                <th>Day</th>
+                                <th>Opens At</th>
+                                <th>Closes At</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($workingHours as $workingHour)
                                 <tr>
+                                    <td>{{ $workingHour->day_of_week }}</td>
                                     <td>
-                                        <i class="fa fa-clock" aria-hidden="true"></i> 
-                                        {{ $workingHour->working_hours }}
+                                        @if(!$workingHour->is_closed && $workingHour->opens_at)
+                                            {{ \Carbon\Carbon::parse($workingHour->opens_at)->format('H:i') }}
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(!$workingHour->is_closed && $workingHour->closes_at)
+                                            {{ \Carbon\Carbon::parse($workingHour->closes_at)->format('H:i') }}
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($workingHour->is_closed)
+                                            <span class="badge bg-danger">Closed</span>
+                                        @else
+                                            <span class="badge bg-success">Open</span>
+                                        @endif
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#workingHourModal" onclick="editWorkingHour({{ $workingHour->id }}, '{{ $workingHour->working_hours }}')">
+                                        <button
+                                            class="btn btn-warning btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#workingHourModal"
+
+                                            data-id="{{ $workingHour->id }}"
+                                            data-day="{{ $workingHour->day_of_week }}"
+                                            data-opens="{{ $workingHour->opens_at ? \Carbon\Carbon::parse($workingHour->opens_at)->format('H:i') : '' }}"
+                                            data-closes="{{ $workingHour->closes_at ? \Carbon\Carbon::parse($workingHour->closes_at)->format('H:i') : '' }}"
+                                            data-is_closed="{{ $workingHour->is_closed ? 1 : 0 }}"
+
+                                            onclick="editWorkingHour(this)"
+                                        >
                                             <i class="fa fa-edit"></i>
                                         </button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteWorkingHour({{ $workingHour->id }})">
@@ -498,18 +577,18 @@ window.editAddress = function (button) {
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="2" class="text-center">No working hours available. Please add new working hours.</td>
+                                    <td colspan="5" class="text-center">
+                                        No working hours available. Please add new working hours.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
-                    
                 </div>
+
             </div>
         </div>
     </div>
-    
-
 
 
 
@@ -559,113 +638,81 @@ window.editAddress = function (button) {
         </div>
         <div class="col-lg-6 d-flex grid-margin stretch-card">
  
-<div class="card">
-    <div class="card-header">
-        Other Settings
-    </div>
+        <div class="card">
+            <div class="card-header">
+                Other Settings
+            </div>
 
-    <form action="{{ route('site-settings.save') }}" method="POST" style="display: contents;">
-        @csrf
+            <form action="{{ route('site-settings.save') }}" method="POST" style="display: contents;">
+                @csrf
 
-        {{-- Hidden actual symbol that will be saved (set from selected country server-side anyway) --}}
-        <input type="hidden" id="currency_symbol" name="currency_symbol">
+                {{-- Hidden actual symbol that will be saved (set from selected country server-side anyway) --}}
+                <input type="hidden" id="currency_symbol" name="currency_symbol">
 
-        <div class="card-body">
-            <table class="table table-bordered">
-                <tbody>
-                    {{-- Country Selection --}}
-                    <tr>
-                        <td><strong>Country</strong></td>
-                        <td>
-                            <select required class="form-control" id="country_id" name="country_id">
-                                <option value="" disabled {{ empty($site_settings?->country) ? 'selected' : '' }}>
-                                    Select a country
-                                </option>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            {{-- Country Selection --}}
+                            <tr>
+                                <td><strong>Country</strong></td>
+                                <td>
+                                    <select required class="form-control" id="country_id" name="country_id">
+                                        <option value="" disabled {{ empty($site_settings?->country) ? 'selected' : '' }}>
+                                            Select a country
+                                        </option>
 
-                                @foreach ($countries as $country)
-                                    <option
-                                        value="{{ $country->id }}"
-                                        data-currency-symbol="{{ $country->currency_symbol }}"
-                                        data-currency-code="{{ $country->currency_code }}"
-                                        {{ $site_settings?->country === $country->name ? 'selected' : '' }}
+                                        @foreach ($countries as $country)
+                                            <option
+                                                value="{{ $country->id }}"
+                                                data-currency-symbol="{{ $country->currency_symbol }}"
+                                                data-currency-code="{{ $country->currency_code }}"
+                                                {{ $site_settings?->country === $country->name ? 'selected' : '' }}
+                                            >
+                                                {{ $country->name }} ({{ $country->currency_code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                            </tr>
+
+                            {{-- Currency Details (display only) --}}
+                            <tr>
+                                <td><strong>Currency Symbol</strong></td>
+                                <td>
+                                    <input
+                                        value="{!! $site_settings->currency_symbol ?? '' !!}"
+                                        type="text"
+                                        id="decoded_symbol"
+                                        class="form-control"
+                                        placeholder="Currency Symbol"
+                                        readonly
                                     >
-                                        {{ $country->name }} ({{ $country->currency_code }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </td>
-                    </tr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Currency Code</strong></td>
+                                <td>
+                                    <input
+                                        value="{{ $site_settings->currency_code ?? '' }}"
+                                        type="text"
+                                        id="currency_code"
+                                        class="form-control"
+                                        placeholder="Currency Code"
+                                        readonly
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                    {{-- Currency Details (display only) --}}
-                    <tr>
-                        <td><strong>Currency Symbol</strong></td>
-                        <td>
-                            <input
-                                value="{!! $site_settings->currency_symbol ?? '' !!}"
-                                type="text"
-                                id="decoded_symbol"
-                                class="form-control"
-                                placeholder="Currency Symbol"
-                                readonly
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Currency Code</strong></td>
-                        <td>
-                            <input
-                                value="{{ $site_settings->currency_code ?? '' }}"
-                                type="text"
-                                id="currency_code"
-                                class="form-control"
-                                placeholder="Currency Code"
-                                readonly
-                            >
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
 
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-    </form>
-</div>
-
-@push('scripts')
-<script>
-    (function() {
-        function updateCurrencyFields() {
-            const select = document.getElementById('country_id');
-            const option = select.options[select.selectedIndex];
-
-            if (!option) return;
-
-            const symbol = option.getAttribute('data-currency-symbol') || '';
-            const code   = option.getAttribute('data-currency-code') || '';
-
-            document.getElementById('decoded_symbol').value = symbol;
-            document.getElementById('currency_code').value  = code;
-
-            // keep hidden symbol in sync (if you still want it in request)
-            const hiddenSymbol = document.getElementById('currency_symbol');
-            if (hiddenSymbol) hiddenSymbol.value = symbol;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const select = document.getElementById('country_id');
-            if (!select) return;
-
-            select.addEventListener('change', updateCurrencyFields);
-
-            // initialize on load
-            updateCurrencyFields();
-        });
-    })();
-</script>
-@endpush
-
+        
    
         </div>
       </div>
@@ -851,30 +898,65 @@ window.editAddress = function (button) {
 </div>
 
 
-    <div class="modal fade" id="workingHourModal" tabindex="-1" aria-labelledby="workingHourModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="workingHourForm" method="POST">
-                    @csrf
-                    <input type="hidden" id="workingHourId" name="_method" value="">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="workingHourModalLabel">Working Hour</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <i class="fas fa-times"></i></button>
+<div class="modal fade" id="workingHourModal" tabindex="-1" aria-labelledby="workingHourModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="workingHourForm" method="POST">
+                @csrf
+                <input type="hidden" id="workingHourFormMethod" name="_method" value="">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="workingHourModalLabel">Working Hour</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    {{-- Day of Week --}}
+                    <div class="mb-3">
+                        <label for="day_of_week" class="form-label">Day of Week</label>
+                        <select class="form-control" id="day_of_week" name="day_of_week" required>
+                            <option value="" disabled selected>Select day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="working_hours" class="form-label">Working Hour</label>
-                            <input type="text" class="form-control" id="working_hours" name="working_hours" placeholder="e.g Mon to Sat - 9 AM to 10 PM" required>
-                        </div>
+
+                    {{-- Opens At --}}
+                    <div class="mb-3">
+                        <label for="opens_at" class="form-label">Opens At</label>
+                        <input type="time" class="form-control" id="opens_at" name="opens_at">
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    {{-- Closes At --}}
+                    <div class="mb-3">
+                        <label for="closes_at" class="form-label">Closes At</label>
+                        <input type="time" class="form-control" id="closes_at" name="closes_at">
                     </div>
-                </form>
-            </div>
+
+                    {{-- Closed Checkbox --}}
+                    <div class="form-check form-check-flat form-check-primary">
+                        <label class="form-check-label" for="is_closed">
+                            <input type="checkbox" class="form-check-input" id="is_closed" name="is_closed" value="1">
+                            Closed all day <i class="input-helper"></i>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
  
     

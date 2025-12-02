@@ -6,13 +6,13 @@ use App\Models\Country;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use App\Models\OrderSettings;
-use App\Models\LiveChatScript;
 use App\Models\CompanyAddress;
+use App\Models\LiveChatScript;
 use App\Models\SocialMediaHandle;
+use App\Models\CompanyWorkingHour;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressRequest;
 use App\Models\RestaurantPhoneNumber;
-use App\Models\RestaurantWorkingHour;
 use App\Http\Requests\PhoneNumberRequest;
 use App\Http\Requests\WorkingHourRequest;
 use App\Http\Requests\LiveChatScriptRequest;
@@ -36,7 +36,7 @@ class GeneralSettingsController extends Controller
     {
         $addresses = CompanyAddress::all();
         $phoneNumbers = RestaurantPhoneNumber::all();
-        $workingHours = RestaurantWorkingHour::all();
+        $workingHours = CompanyWorkingHour ::all();
         $socialMediaHandles = SocialMediaHandle::all();
         $script = LiveChatScript::latest()->first();
         $order_settings = OrderSettings::latest()->first();
@@ -100,7 +100,7 @@ class GeneralSettingsController extends Controller
     }
     
 
-    // Restaurant Address CRUD
+    // Company Address CRUD
     public function storeAddress(AddressRequest $request)
     {
         CompanyAddress::create([
@@ -173,24 +173,59 @@ class GeneralSettingsController extends Controller
     // Restaurant Working Hour CRUD
     public function storeWorkingHour(WorkingHourRequest $request)
     {
-        RestaurantWorkingHour::create(['working_hours' => $request->working_hours]);
+        // If you're using a FormRequest, this already validated:
+        $data = $request->validated();
+
+        // Convert checkbox → boolean
+        $data['is_closed'] = $request->boolean('is_closed');
+
+        // If closed all day, null out times
+        if ($data['is_closed']) {
+            $data['opens_at']  = null;
+            $data['closes_at'] = null;
+        }
+
+        CompanyWorkingHour::create([
+            'day_of_week' => $data['day_of_week'],
+            'opens_at'    => $data['opens_at'] ?? null,
+            'closes_at'   => $data['closes_at'] ?? null,
+            'is_closed'   => $data['is_closed'],
+        ]);
+
         return back()->with('success', 'Working hour added successfully.');
     }
-    
 
-    public function updateWorkingHour(WorkingHourRequest $request, $id)
-    {
-        $workingHour = RestaurantWorkingHour::findOrFail($id);
-        $workingHour->update(['working_hours' => $request->working_hours]);
-        return back()->with('success', 'Working hour updated successfully.');
+
+
+public function updateWorkingHour(WorkingHourRequest $request, $id)
+{
+    $workingHour = CompanyWorkingHour::findOrFail($id);
+
+    $data = $request->validated();
+    $data['is_closed'] = $request->boolean('is_closed');
+
+    if ($data['is_closed']) {
+        $data['opens_at']  = null;
+        $data['closes_at'] = null;
     }
-    
-    public function deleteWorkingHour($id)
-    {
-        RestaurantWorkingHour::findOrFail($id)->delete();
-        return back()->with('success', 'Working hour deleted successfully.');
-    }
-    
+
+    $workingHour->update([
+        'day_of_week' => $data['day_of_week'],
+        'opens_at'    => $data['opens_at'] ?? null,
+        'closes_at'   => $data['closes_at'] ?? null,
+        'is_closed'   => $data['is_closed'],
+    ]);
+
+    return back()->with('success', 'Working hour updated successfully.');
+}
+
+
+public function deleteWorkingHour($id)
+{
+    CompanyWorkingHour::findOrFail($id)->delete();
+
+    return back()->with('success', 'Working hour deleted successfully.');
+}
 
 
 

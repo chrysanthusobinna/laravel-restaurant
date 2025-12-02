@@ -156,16 +156,7 @@ $(document).ready(function () {
 });
 
  
-document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
-    const icon = this.querySelector('.toggle-icon');
-    if (icon.classList.contains('fa-plus')) {
-        icon.classList.remove('fa-plus');
-        icon.classList.add('fa-minus');
-    } else {
-        icon.classList.remove('fa-minus');
-        icon.classList.add('fa-plus');
-    }
-});
+ 
 
 $('#payment_method').on('change', function() {
     if ($(this).val() !== "" && $('#total').val() > 0) {
@@ -297,38 +288,7 @@ $('#payment_method').on('change', function() {
             <input type="hidden"   id="total" value="0">
             <input type="hidden"   name="cartkey" value="admin">
             @csrf
-              <div class="mt-4">
-                  <!-- Toggle Button -->
-                  <button class="btn btn-outline-secondary btn-fw mb-2 btn-block" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleTable" aria-expanded="false" aria-controls="collapsibleTable">
-                    <i class="fa fa-plus toggle-icon"></i> Customer Details
-                </button>
-                
-
-                  <!-- Collapsible Table -->
-                  <div class="collapse" id="collapsibleTable">
-                      <table class="table table-bordered">
-                          <tbody>
-                              <tr>
-                                  <td><strong>Name</strong></td>
-                                  <td><input type="text" class="form-control" id="name" name="name"></td>
-                              </tr>
-                              <tr>
-                                  <td><strong>Email</strong></td>
-                                  <td><input type="email" class="form-control" id="email" name="email"></td>
-                              </tr>
-                              <tr>
-                                  <td><strong>Phone Number</strong></td>
-                                  <td><input type="text" class="form-control" id="phone_number" name="phone_number"></td>
-                              </tr>
-                              <tr>
-                                  <td><strong>Address</strong></td>
-                                  <td><input type="text" class="form-control" id="address" name="address"></td>
-                              </tr>
-             
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
+ 
 
               <hr>
               <table class="table table-bordered"> 
@@ -336,7 +296,7 @@ $('#payment_method').on('change', function() {
                     <tr>
                         <td><strong>Additional Info</strong></td>
                         <td>
-                            <textarea class="form-control" id="additional_info" name="additional_info" rows="2" placeholder="e.g., allergies or any other information "></textarea>
+                            <textarea class="form-control" id="additional_info" name="additional_info" rows="2" placeholder=""></textarea>
                         </td>
                     </tr>
                     <tr>

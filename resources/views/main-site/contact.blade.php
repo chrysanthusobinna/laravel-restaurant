@@ -35,6 +35,31 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/responsive.css">
     <link id="layoutstyle" rel="stylesheet" href="/assets/color/theme-red.css">
+
+
+    <style>
+        .opening-hours-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .opening-hours-table td {
+            padding: 4px 0;
+            border: none !important;
+        }
+
+        .opening-hours-table .day {
+            font-weight: 600;
+            width: 120px;
+            color: #333;
+        }
+
+        .opening-hours-table .time {
+            color: #666;
+        }
+
+
+    </style>
 @endpush
 
 @push('scripts')
@@ -172,27 +197,46 @@
             </div>
             <div class="row">
                 <div class="col-lg-6 animation" data-animation="fadeInUp" data-animation-delay="0.2s">
+                    <div class="contact_wrap contact_style3 flex-fill">
+                        <div class="contact_text">
+                            <span class="d-block mb-2">Opening Hours</span>
+                            <hr>
 
-                         <div class="contact_wrap contact_style3 flex-fill">
-                                 
-                            <div class="contact_text">
-                                <span>Opening Hours</span>
-                                @forelse($workingHours as $workingHour)
-                                    <p>{{ $workingHour->working_hours }}</p>
-                                @empty
-                                    <p>No working hours available.</p>
-                                @endforelse
-                            </div>
+                            <table class="table table-sm opening-hours-table">
+                                <tbody>
+                                    @forelse($workingHours->sortBy('id') as $hour)
+                                        <tr>
+                                            <td class="day">{{ $hour->day_of_week }}</td>
+                                            <td class="time">
+                                                @if($hour->is_closed)
+                                                    Closed
+                                                @else
+                                                    {{ \Carbon\Carbon::parse($hour->opens_at)->format('H:i') }}
+                                                    –
+                                                    {{ \Carbon\Carbon::parse($hour->closes_at)->format('H:i') }}
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2">No working hours available.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+
                         </div>
-                 </div>
+                    </div>
+                </div>
+
                 
                 <div class="col-lg-6 animation mt-4 mt-lg-0" data-animation="fadeInUp" data-animation-delay="0.3s">
                     <div class="map">
                         @if($firstCompanyAddress)
                         <iframe 
-                            src="https://maps.google.com/maps?q={{ urlencode($firstCompanyAddress->address) }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                            src="https://maps.google.com/maps?q={{ urlencode($firstCompanyAddress->full_address) }}&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                             width="600" 
-                            style="border:0; height:200px;" 
+                            style="border:0; height:380px;" 
                             allowfullscreen="" 
                             loading="lazy">
                         </iframe>

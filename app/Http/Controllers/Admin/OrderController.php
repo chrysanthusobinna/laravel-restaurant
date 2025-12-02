@@ -109,7 +109,7 @@ class OrderController extends Controller
     
     public function show($id)
     {
-        $order = Order::with(['orderItems', 'createdByUser', 'updatedByUser', 'customer'])->findOrFail($id);
+        $order = Order::with(['orderItems', 'createdByUser', 'updatedByUser', 'customer', 'pickupAddress', 'deliveryAddressWithTrashed'])->findOrFail($id);
         
         return view('admin.orders-show', compact('order'));
     }
@@ -130,36 +130,17 @@ class OrderController extends Controller
 
         // Validate request data
         $validatedData = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255|unique:customers,email',
-            'phone_number' => 'nullable|string|max:15',
-            'address' => 'nullable|string|max:500',
             'payment_method' => 'required|max:255',  
             'additional_info' => 'nullable|string|max:255',           
         ]);
 
-        // Check if at least one of the fields is provided then Create a new customer
-        if ($request->filled(['name', 'email', 'phone_number', 'address'])) {
-            // Create the customer
-            $customer = Customer::create([
-                'name' => $validatedData['name'] ?? null,
-                'email' => $validatedData['email'] ?? null,
-                'phone_number' => $validatedData['phone_number'] ?? null,
-                'address' => $validatedData['address'] ?? null,
-            ]);
-
-            $customer_id = $customer->id;
-
-        } else {
-            $customer_id = null;
-        }
 
         // Generate a unique 7-digit order number
         $order_no = $this->generateOrderNumber();
 
         // Create a new order
         $order = Order::create([
-            'customer_id' => $customer_id,
+            'customer_id' => null,
             'order_no' => $order_no,
             'order_type' => 'instore',
             'created_by_user_id' => Auth::id(),

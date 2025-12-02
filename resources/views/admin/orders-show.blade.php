@@ -275,7 +275,7 @@
                                 <tbody>
                                     <tr>
                                         <td><strong>Name:</strong></td>
-                                        <td>{{ $order->customer->name }}</td>
+                                        <td>{{ $order->customer->first_name . " " . $order->customer->last_name }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Email:</strong></td>
@@ -285,15 +285,50 @@
                                         <td><strong>Phone Number:</strong></td>
                                         <td>{{ $order->customer->phone_number }}</td>
                                     </tr>
-                                    <tr>
-                                        <td><strong>Address:</strong></td>
-                                        <td>{{ $order->customer->address }}</td>
-                                    </tr>
                                 </tbody>
                             </table>
                         @else
                             <p><strong>N/A</strong> </p>
                         @endif
+
+
+                        @if($order->customer)
+
+                            @if($order->order_type === 'pickup' && $order->pickupAddress)
+                                <table class="table table-bordered mt-3">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Pickup Location</strong></td>
+                                            <td>{{ $order->pickupAddress->full_address ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            @elseif($order->deliveryAddressWithTrashed)
+                                <table class="table table-bordered mt-3">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Delivery Address</strong></td>
+                                            <td>{{ $order->deliveryAddressWithTrashed->full_address ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            @else
+                                <table class="table table-bordered mt-3">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Address</strong></td>
+                                            <td class="text-muted">No address information for this order.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            @endif
+
+                        @endif
+                                                    
+                            
+                            
                     </div>
                 </div>
                 

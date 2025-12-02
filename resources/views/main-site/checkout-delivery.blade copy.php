@@ -64,11 +64,6 @@
       .muted { color:#6c757d; }
       .fieldset { border:1px dashed #e9ecef; border-radius:12px; padding:14px; background:#fff; }
       .fieldset legend { font-size:.95rem; font-weight:700; padding:0 6px; width:auto; }
-
-      /* Make Places dropdown always visible above everything */
-      .pac-container {
-          z-index: 20000 !important;
-      }
     </style>
 @endpush
 
@@ -137,67 +132,81 @@
         });
       });
 
-      // ---- Simple Google Places hookup for delivery address ----
-      function initCheckoutDeliveryLookups() {
-          var input = document.getElementById('del_autocomplete');
-          if (!input || !window.google || !google.maps || !google.maps.places) {
-              return;
-          }
+      // ---- Google Places helpers ----
+      function setupAutocomplete(inputId, mappingPrefix) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
 
-          // Prevent Enter from submitting the form while searching
-          input.addEventListener('keydown', function (e) {
-              if (e.key === 'Enter') {
-                  e.preventDefault();
-              }
-          });
+        // Prevent Enter from submitting the page while typing address
+        input.addEventListener('keydown', function(e){ if (e.key === 'Enter') e.preventDefault(); });
 
-          var ac = new google.maps.places.Autocomplete(input, {
-              types: ['geocode'],
-              fields: ['address_components', 'geometry', 'formatted_address']
-          });
+        const ac = new google.maps.places.Autocomplete(input, {
+          types: ['geocode'],
+          fields: ['address_components', 'geometry', 'formatted_address']
+        });
 
-          ac.addListener('place_changed', function () {
-              var place = ac.getPlace();
-              if (!place || !place.address_components) {
-                  return;
-              }
+        ac.addListener('place_changed', function () {
+          const place = ac.getPlace();
+          if (!place || !place.address_components) return;
 
-              var components = place.address_components;
+          const comps = place.address_components;
+          const get = type => {
+            const c = comps.find(x => x.types.includes(type));
+            return c ? c.long_name : '';
+          };
 
-              function getComponent(type) {
-                  var comp = components.find(function (c) {
-                      return c.types.indexOf(type) !== -1;
-                  });
-                  return comp ? comp.long_name : '';
-              }
+          const streetNumber = get('street_number');
+          const route = get('route');
+          const line1 = [streetNumber, route].filter(Boolean).join(' ');
 
-              var streetNumber = getComponent('street_number');
-              var route        = getComponent('route');
-              var street       = [streetNumber, route].filter(Boolean).join(' ');
-
-              document.getElementById('del_line1').value      = street; // street
-              // del_line2 (Apt/Suite) left manual / readonly as you choose
-
-              document.getElementById('del_city').value       = getComponent('locality')
-                                                              || getComponent('postal_town')
-                                                              || getComponent('sublocality')
-                                                              || '';
-              document.getElementById('del_state').value      = getComponent('administrative_area_level_1');
-              document.getElementById('del_postal').value     = getComponent('postal_code');
-              document.getElementById('del_country').value    = getComponent('country');
-
-              if (place.geometry && place.geometry.location) {
-                  document.getElementById('del_latitude').value  = place.geometry.location.lat();
-                  document.getElementById('del_longitude').value = place.geometry.location.lng();
-              }
-          });
+          document.getElementById(mappingPrefix + '_line1').value = line1;
+          // line2 left for Apt/Suite manual entry
+          document.getElementById(mappingPrefix + '_city').value   = get('locality') || get('postal_town') || get('sublocality') || '';
+          document.getElementById(mappingPrefix + '_state').value  = get('administrative_area_level_1');
+          document.getElementById(mappingPrefix + '_postal').value = get('postal_code');
+          document.getElementById(mappingPrefix + '_country').value= get('country');
+          document.getElementById(mappingPrefix + '_latitude').value = place.geometry.location.lat();
+          document.getElementById(mappingPrefix + '_longitude').value = place.geometry.location.lng();
+        });
       }
 
-      // Expose init function globally so Google Maps callback can call it
+      // Safe guard to avoid inputs being forced disabled by other scripts
+      function protectPlacesInput(id){
+        const el = document.getElementById(id);
+        if (!el) return;
+        function unlockOnce(){
+          let changed = false;
+          if (el.disabled) { el.disabled = false; changed = true; }
+          if (el.readOnly) { el.readOnly = false; changed = true; }
+          if (el.classList.contains('disabled')) { el.classList.remove('disabled'); changed = true; }
+          if (el.hasAttribute('aria-disabled')) { el.removeAttribute('aria-disabled'); changed = true; }
+          return changed;
+        }
+        let debounceTimer=null;
+        const obs = new MutationObserver(muts=>{
+          let needs=false;
+          for(const m of muts){
+            if(['disabled','readonly','aria-disabled','class'].includes(m.attributeName)){
+              if (el.disabled || el.readOnly || el.classList.contains('disabled') || el.hasAttribute('aria-disabled')) { needs = true; break; }
+            }
+          }
+          if(!needs) return;
+          obs.disconnect(); unlockOnce();
+          clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']}),120);
+        });
+        obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']});
+        ['focus','input','click'].forEach(evt=> el.addEventListener(evt, ()=>{ if(unlockOnce()){ obs.disconnect(); clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>obs.observe(el,{attributes:true,attributeFilter:['disabled','readonly','class','aria-disabled']}),120);} }, true));
+      }
+
+      function initCheckoutDeliveryLookups() {
+        // delivery new
+        setupAutocomplete('del_autocomplete', 'del');
+        protectPlacesInput('del_autocomplete');
+      }
       window.initCheckoutDeliveryLookups = initCheckoutDeliveryLookups;
     </script>
 
-    {{-- Google Maps (Places) --}}
+    {{-- Google Maps (Places) – replace with your key --}}
     <script src="https://maps.googleapis.com/maps/api/js?key={{  config('services.google_maps.api_key') }}&libraries=places&callback=initCheckoutDeliveryLookups" async defer></script>
 
     <script>
@@ -329,6 +338,7 @@
             {{-- ===== New delivery address (inline) ===== --}}
             <div id="delivery_new_block" class="mt-3 {{ $hasSaved ? 'd-none' : '' }}">
               <div id="delivery_new_inline" class="fieldset">
+ 
                 <label class="form-label">Search address</label>
                 <input type="text"
                        id="del_autocomplete"
@@ -337,43 +347,50 @@
                        data-places-search
                        autocomplete="off" spellcheck="false">
 
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Street</label>
-                    <input id="del_line1" name="new[line1]" class="form-control"
-                           value="{{ old('new.line1') }}" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Apt / Suite</label>
-                    <input id="del_line2" name="new[line2]" class="form-control"
-                           value="{{ old('new.line2') }}" readonly>
+
+                  <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Street</label>
+                        <input id="del_line1" name="new[line1]" class="form-control" 
+                              value="{{ old('new.line1') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Apt / Suite</label>
+                        <input id="del_line2" name="new[line2]" class="form-control" 
+                              value="{{ old('new.line2') }}" readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">City</label>
+                        <input id="del_city" name="new[city]" class="form-control" 
+                              value="{{ old('new.city') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">State / Province</label>
+                        <input id="del_state" name="new[state]" class="form-control" 
+                              value="{{ old('new.state') }}" readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">Postal Code</label>
+                        <input id="del_postal" name="new[postal_code]" class="form-control" 
+                              value="{{ old('new.postal_code') }}" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Country</label>
+                        <input id="del_country" name="new[country]" class="form-control" 
+                              value="{{ old('new.country') }}" readonly>
+                      </div>
+
+                 
+                      <input type="hidden" id="del_latitude" name="new[latitude]" value="{{ old('new.latitude') }}">
+                      <input type="hidden" id="del_longitude" name="new[longitude]" value="{{ old('new.longitude') }}">
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">City</label>
-                    <input id="del_city" name="new[city]" class="form-control"
-                           value="{{ old('new.city') }}" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">State / Province</label>
-                    <input id="del_state" name="new[state]" class="form-control"
-                           value="{{ old('new.state') }}" readonly>
-                  </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">Postal Code</label>
-                    <input id="del_postal" name="new[postal_code]" class="form-control"
-                           value="{{ old('new.postal_code') }}" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Country</label>
-                    <input id="del_country" name="new[country]" class="form-control"
-                           value="{{ old('new.country') }}" readonly>
-                  </div>
-
-                  <input type="hidden" id="del_latitude" name="new[latitude]" value="{{ old('new.latitude') }}">
-                  <input type="hidden" id="del_longitude" name="new[longitude]" value="{{ old('new.longitude') }}">
                 </div>
+      
+
               </div>
             </div>
 
