@@ -10,6 +10,7 @@ class UpdateSiteSettingsTable extends Migration
     public function up()
     {
         Schema::table('site_settings', function (Blueprint $table) {
+            $table->dropUnique(['key']);
             // Drop existing columns
             $table->dropColumn(['key', 'value', 'created_at','updated_at']);
 

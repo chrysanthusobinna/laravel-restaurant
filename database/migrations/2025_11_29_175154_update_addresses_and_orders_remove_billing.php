@@ -22,10 +22,16 @@ return new class extends Migration
         });
 
  
-        DB::statement("
-            ALTER TABLE `addresses`
-            MODIFY `label` VARCHAR(255) NOT NULL DEFAULT 'delivery'
-        ");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("
+                ALTER TABLE `addresses`
+                MODIFY `label` VARCHAR(255) NOT NULL DEFAULT 'delivery'
+            ");
+        } else {
+            Schema::table('addresses', function (Blueprint $table) {
+                $table->string('label')->default('delivery')->change();
+            });
+        }
     }
 
     /**
@@ -44,9 +50,15 @@ return new class extends Migration
             }
         });
 
-         DB::statement("
-            ALTER TABLE `addresses`
-            MODIFY `label` ENUM('delivery','billing') NOT NULL DEFAULT 'delivery'
-        ");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("
+                ALTER TABLE `addresses`
+                MODIFY `label` ENUM('delivery','billing') NOT NULL DEFAULT 'delivery'
+            ");
+        } else {
+            Schema::table('addresses', function (Blueprint $table) {
+                $table->enum('label', ['delivery', 'billing'])->default('delivery')->change();
+            });
+        }
     }
 };

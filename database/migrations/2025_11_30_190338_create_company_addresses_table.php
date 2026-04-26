@@ -29,6 +29,21 @@ return new class extends Migration
         Schema::dropIfExists('restaurant_addresses');
 
         /**
+         * STEP 2b — CREATE company_addresses TABLE
+         */
+        Schema::create('company_addresses', function (Blueprint $table) {
+            $table->id();
+            $table->string('street')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('country')->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->timestamps();
+        });
+
+        /**
          * STEP 3 — ADD pickup_address_id AGAIN (for new company_addresses table)
          */
         Schema::table('orders', function (Blueprint $table) {
@@ -59,6 +74,9 @@ return new class extends Migration
             } catch (\Exception $e) {}
             $table->dropColumn('pickup_address_id');
         });
+
+        // Drop company_addresses
+        Schema::dropIfExists('company_addresses');
 
         // Restore restaurant_addresses
         Schema::create('restaurant_addresses', function (Blueprint $table) {
